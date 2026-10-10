@@ -305,6 +305,14 @@ struct StackPopoverView: View {
     @State private var selectedIndex: Int? = nil
     @State private var keyboardNavigationEnabled = false
     @State private var draggedItem: AppItem? = nil
+    /// The cell whose context menu is open — shown with the selection highlight (D10).
+    @State private var menuTargetID: AppItem.ID? = nil
+
+    /// Item menu only in the shipped popover: never in the editor or the Settings preview.
+    private var itemMenuHooks: PopoverItemMenuHooks? {
+        actionsDisabled ? nil : PopoverItemMenuHooks(onOpen: { menuTargetID = $0.id },
+                                                      onClose: { menuTargetID = nil })
+    }
 
     // Observe IconStyleManager for icon style changes
     // Used to force view recreation via .id() modifier
@@ -465,12 +473,13 @@ struct StackPopoverView: View {
             ForEach(Array(apps.enumerated()), id: \.element.id) { index, app in
                 StackAppItem(
                     app: app,
-                    isSelected: selectedIndex == index,
+                    isSelected: selectedIndex == index || menuTargetID == app.id,
                     iconSize: metrics.iconSize,
                     cellWidth: metrics.cellWidth,
                     showLabel: settings.showLabels,
                     highlightOnHover: settings.highlightOnHover,
                     editing: editing,
+                    itemMenu: itemMenuHooks,
                     onLaunch: onLaunch
                 )
                 // Composite ID forces SwiftUI to destroy/recreate the view when icon style
@@ -593,7 +602,10 @@ struct StackAppItem: View {
     let highlightOnHover: Bool
     /// Editing handlers from Tile Detail; nil (helpers, Settings preview) means no edit affordances.
     var editing: PopoverEditing? = nil
+    /// Shipped-popover context menu hooks; nil in the editor and the Settings preview.
+    var itemMenu: PopoverItemMenuHooks? = nil
     let onLaunch: () -> Void
+    @State private var menuAnchor = PopoverItemMenuAnchor()
 
     @State private var isHovered = false
     /// Hover over the remove badge itself. Tracked separately because the badge sits on top of the
@@ -684,6 +696,7 @@ struct StackAppItem: View {
         )
         .contentShape(Rectangle())
         .onHover { isHovered = $0 }
+        .itemContextMenu(itemMenu, app: app, anchor: menuAnchor)
         .editingOnly(editing) { cell in
             // Remove badge in the cell's TOP-RIGHT corner — the same side the list layout removes
             // from. Inset rather than overhanging, for the tracking-area reason on
@@ -772,6 +785,14 @@ struct ListPopoverView: View {
     @State private var selectedIndex: Int? = nil
     @State private var keyboardNavigationEnabled = false
     @State private var draggedItem: AppItem? = nil
+    /// The cell whose context menu is open — shown with the selection highlight (D10).
+    @State private var menuTargetID: AppItem.ID? = nil
+
+    /// Item menu only in the shipped popover: never in the editor or the Settings preview.
+    private var itemMenuHooks: PopoverItemMenuHooks? {
+        actionsDisabled ? nil : PopoverItemMenuHooks(onOpen: { menuTargetID = $0.id },
+                                                      onClose: { menuTargetID = nil })
+    }
 
     // Observe IconStyleManager for icon style changes
     // Used to force view recreation via .id() modifier
@@ -835,10 +856,11 @@ struct ListPopoverView: View {
                     ForEach(Array(apps.enumerated()), id: \.element.id) { index, app in
                         ListAppRow(
                             app: app,
-                            isSelected: selectedIndex == index,
+                            isSelected: selectedIndex == index || menuTargetID == app.id,
                             metrics: metrics,
                             highlightOnHover: settings.highlightOnHover,
                             editing: editing,
+                            itemMenu: itemMenuHooks,
                             onLaunch: onLaunch
                         )
                         // Force view recreation when icon style changes
@@ -973,7 +995,10 @@ struct ListAppRow: View {
     let highlightOnHover: Bool
     /// Editing handlers from Tile Detail; nil (helpers, Settings preview) means no edit affordances.
     var editing: PopoverEditing? = nil
+    /// Shipped-popover context menu hooks; nil in the editor and the Settings preview.
+    var itemMenu: PopoverItemMenuHooks? = nil
     let onLaunch: () -> Void
+    @State private var menuAnchor = PopoverItemMenuAnchor()
 
     @State private var isHovered = false
 
@@ -1043,6 +1068,7 @@ struct ListAppRow: View {
         .onHover { hovering in
             isHovered = hovering
         }
+        .itemContextMenu(itemMenu, app: app, anchor: menuAnchor)
         .removeAffordances(editing, for: app)
     }
 
