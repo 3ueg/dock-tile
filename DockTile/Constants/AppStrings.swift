@@ -853,6 +853,25 @@ enum AppStrings {
         )
     }
 
+    // MARK: - Popover Item Menu (right-click on an app/folder in a tile's popover)
+
+    enum ItemMenu {
+        static let open = NSLocalizedString("itemMenu.open", value: "Open",
+            comment: "Popover item context menu: open the app or folder")
+        static let showInFinder = NSLocalizedString("itemMenu.showInFinder", value: "Show in Finder",
+            comment: "Popover item context menu: reveal the item in Finder")
+        static let getInfo = NSLocalizedString("itemMenu.getInfo", value: "Get Info",
+            comment: "Popover item context menu: open Finder's Get Info window")
+        static let quickLook = NSLocalizedString("itemMenu.quickLook", value: "Quick Look",
+            comment: "Popover item context menu: preview the item with Quick Look")
+        static let hide = NSLocalizedString("itemMenu.hide", value: "Hide",
+            comment: "Popover item context menu: hide the running app")
+        static let quit = NSLocalizedString("itemMenu.quit", value: "Quit",
+            comment: "Popover item context menu: quit the running app")
+        static let forceQuit = NSLocalizedString("itemMenu.forceQuit", value: "Force Quit",
+            comment: "Popover item context menu: force quit (shown while Option is held)")
+    }
+
     // MARK: - Navigation
 
     enum Navigation {
