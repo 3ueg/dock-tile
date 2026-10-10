@@ -21,6 +21,7 @@
 //
 
 import AppKit
+import Quartz
 import SwiftUI
 
 @MainActor
@@ -618,5 +619,21 @@ final class HelperAppDelegate: NSObject, NSApplicationDelegate {
     private func cleanupIconStyleObservation() {
         NotificationCenter.default.removeObserver(self, name: .iconStyleDidChange, object: nil)
         IconStyleManager.shared.cleanup()
+    }
+
+    // MARK: - Quick Look panel control (popover item menu, issue #17)
+
+    /// QLPreviewPanel takes its data source from a controller up the chain of responding objects;
+    /// in an accessory helper that is this delegate.
+    nonisolated override func acceptsPreviewPanelControl(_ panel: QLPreviewPanel!) -> Bool { true }
+
+    // `panel` is deliberately not captured: sending a nonisolated parameter into a main-actor
+    // closure fails Swift 6 strict concurrency. The panel is a singleton, so re-fetch it.
+    nonisolated override func beginPreviewPanelControl(_ panel: QLPreviewPanel!) {
+        MainActor.assumeIsolated { QLPreviewPanel.shared()?.dataSource = QuickLookPresenter.shared }
+    }
+
+    nonisolated override func endPreviewPanelControl(_ panel: QLPreviewPanel!) {
+        MainActor.assumeIsolated { QLPreviewPanel.shared()?.dataSource = nil }
     }
 }
