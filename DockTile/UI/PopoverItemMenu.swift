@@ -149,10 +149,12 @@ final class PopoverItemMenuController: NSObject, NSMenuDelegate, NSSharingServic
     private let runningApp: NSRunningApplication?
     private let onOpen: () -> Void
     private let onClose: () -> Void
+    /// The cell's overlay view: the share picker is shown relative to it.
+    private weak var anchorView: NSView?
     private var sharePicker: NSSharingServicePicker?
-    private var shareItem: NSMenuItem?
-    /// Share outlives the menu: the picker's service runs after `menuDidClose`, and its delegate is
-    /// weak. Held here until sharing finishes, fails or is cancelled.
+    /// Share outlives the menu: the picker and its service run after `menuDidClose`, and their
+    /// delegates are weak. Held here from the picker's appearance until sharing finishes, fails or
+    /// is cancelled.
     private static var sharing: PopoverItemMenuController?
 
     /// Get Info relies on Finder's undocumented "Show Info" service. Offered on macOS 26+ only, by
@@ -162,7 +164,8 @@ final class PopoverItemMenuController: NSObject, NSMenuDelegate, NSSharingServic
     }
 
     /// nil for a missing item: no menu (D7). Resolved at click time.
-    static func make(for app: AppItem, onOpen: @escaping () -> Void, onClose: @escaping () -> Void) -> PopoverItemMenuController? {
+    static func make(for app: AppItem, anchorView: NSView,
+                     onOpen: @escaping () -> Void, onClose: @escaping () -> Void) -> PopoverItemMenuController? {
         let resolution = AppInstallChecker.resolve(app)
         guard resolution.status == .installed, let path = resolution.resolvedPath else { return nil }
         var runningApp: NSRunningApplication?
@@ -174,13 +177,13 @@ final class PopoverItemMenuController: NSObject, NSMenuDelegate, NSSharingServic
                 runningApp = candidates[i]
             }
         }
-        return PopoverItemMenuController(app: app, url: URL(fileURLWithPath: path),
-                                         runningApp: runningApp, onOpen: onOpen, onClose: onClose)
+        return PopoverItemMenuController(app: app, url: URL(fileURLWithPath: path), runningApp: runningApp,
+                                         anchorView: anchorView, onOpen: onOpen, onClose: onClose)
     }
 
-    private init(app: AppItem, url: URL, runningApp: NSRunningApplication?,
+    private init(app: AppItem, url: URL, runningApp: NSRunningApplication?, anchorView: NSView,
                  onOpen: @escaping () -> Void, onClose: @escaping () -> Void) {
-        self.app = app; self.url = url; self.runningApp = runningApp
+        self.app = app; self.url = url; self.runningApp = runningApp; self.anchorView = anchorView
         self.onOpen = onOpen; self.onClose = onClose
     }
 
@@ -194,13 +197,6 @@ final class PopoverItemMenuController: NSObject, NSMenuDelegate, NSSharingServic
             switch entry {
             case .separator:
                 menu.addItem(.separator())
-            case .action(.share):
-                let picker = NSSharingServicePicker(items: [url as NSURL])
-                picker.delegate = self
-                sharePicker = picker
-                let share = picker.standardShareMenuItem
-                shareItem = share
-                menu.addItem(share)
             case .action(let action):
                 menu.addItem(item(for: action))
             case .alternate(let action):
@@ -226,7 +222,7 @@ final class PopoverItemMenuController: NSObject, NSMenuDelegate, NSSharingServic
         case .reveal: AppStrings.ItemMenu.showInFinder
         case .getInfo: AppStrings.ItemMenu.getInfo
         case .quickLook: AppStrings.ItemMenu.quickLook
-        case .share: "" // never built as a plain item: the system share item carries its own title
+        case .share: AppStrings.ItemMenu.share
         case .hide: AppStrings.ItemMenu.hide
         case .quit: AppStrings.ItemMenu.quit
         case .forceQuit: AppStrings.ItemMenu.forceQuit
@@ -241,7 +237,7 @@ final class PopoverItemMenuController: NSObject, NSMenuDelegate, NSSharingServic
         case .reveal: NSWorkspace.shared.activateFileViewerSelecting([url])
         case .getInfo: Self.showFinderInfo(for: url)
         case .quickLook: QuickLookPresenter.shared.preview(url)
-        case .share: break
+        case .share: showSharePicker()
         case .hide: runningApp?.hide()
         case .quit: runningApp?.terminate()
         case .forceQuit: runningApp?.forceTerminate()
@@ -270,25 +266,31 @@ final class PopoverItemMenuController: NSObject, NSMenuDelegate, NSSharingServic
 
     // MARK: NSMenuDelegate — drives the target highlight (D10)
 
-    func menuWillOpen(_ menu: NSMenu) {
-        // No icon on Share (Karthik). AppKit re-applies the share glyph after the item is created,
-        // so clearing it in buildMenu() doesn't stick; here the menu is final (spike S7).
-        shareItem?.image = nil
-        onOpen()
-    }
+    func menuWillOpen(_ menu: NSMenu) { onOpen() }
     func menuDidClose(_ menu: NSMenu) { onClose() }
 
-    // MARK: Share completion (D4: we close the popover only when sharing ends)
+    // MARK: Share (D4: we close the popover only when sharing ends)
+
+    /// Shows the system share picker relative to the clicked cell. Not `standardShareMenuItem`
+    /// (critical): on macOS 27 that item is no submenu but a button that presents the picker
+    /// against a window AppKit chooses, and a helper whose only window is the transient popover
+    /// gives it none, so choosing Share did nothing (Task 5 gate, 2026-10-11).
+    private func showSharePicker() {
+        guard let anchorView, anchorView.window != nil else {
+            DiagnosticsLog.shared.log("popover", "Share: no anchor view for '\(app.name)'")
+            return
+        }
+        let picker = NSSharingServicePicker(items: [url as NSURL])
+        picker.delegate = self
+        sharePicker = picker
+        Self.sharing = self
+        picker.show(relativeTo: anchorView.bounds, of: anchorView, preferredEdge: .minY)
+    }
 
     func sharingService(_ sharingService: NSSharingService, didShareItems items: [Any]) { finishSharing() }
     func sharingService(_ sharingService: NSSharingService, didFailToShareItems items: [Any], error: Error) { finishSharing() }
 
-    fileprivate func beginSharing() {
-        record(.share)
-        Self.sharing = self
-    }
-
-    fileprivate func cancelSharing() { Self.sharing = nil }   // popover stays open
+    fileprivate func cancelSharing() { Self.sharing = nil }   // picker dismissed: popover stays open
 
     private func finishSharing() {
         Self.sharing = nil
@@ -302,7 +304,7 @@ extension PopoverItemMenuController: @preconcurrency NSSharingServicePickerDeleg
     func sharingServicePicker(_ picker: NSSharingServicePicker, delegateFor sharingService: NSSharingService) -> NSSharingServiceDelegate? { self }
 
     func sharingServicePicker(_ picker: NSSharingServicePicker, didChoose service: NSSharingService?) {
-        if service == nil { cancelSharing() } else { beginSharing() }
+        if service == nil { cancelSharing() }
     }
 }
 
@@ -348,8 +350,10 @@ struct PopoverItemMenuBridge: NSViewRepresentable {
     private func configure(_ view: PopoverItemMenuView) -> PopoverItemMenuView {
         anchor.view = view
         let app = app, hooks = hooks
-        view.makeController = {
-            PopoverItemMenuController.make(for: app, onOpen: { hooks.onOpen(app) }, onClose: hooks.onClose)
+        view.makeController = { [weak view] in
+            guard let view else { return nil }
+            return PopoverItemMenuController.make(for: app, anchorView: view,
+                                                  onOpen: { hooks.onOpen(app) }, onClose: hooks.onClose)
         }
         return view
     }

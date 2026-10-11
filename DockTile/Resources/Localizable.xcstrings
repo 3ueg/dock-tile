@@ -1633,6 +1633,30 @@
         }
       }
     },
+    "itemMenu.share": {
+      "comment": "Popover item context menu: open the share sheet for a folder",
+      "extractionState": "manual",
+      "localizations": {
+        "en-AU": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Share…"
+          }
+        },
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Share…"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Share…"
+          }
+        }
+      }
+    },
     "itemMenu.showInFinder": {
       "comment": "Popover item context menu: reveal the item in Finder",
       "extractionState": "manual",

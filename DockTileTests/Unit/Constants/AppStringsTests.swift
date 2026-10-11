@@ -106,6 +106,7 @@ struct AppStringsTests {
         #expect(AppStrings.ItemMenu.showInFinder == "Show in Finder")
         #expect(AppStrings.ItemMenu.getInfo == "Get Info")
         #expect(AppStrings.ItemMenu.quickLook == "Quick Look")
+        #expect(AppStrings.ItemMenu.share == "Share…")
         #expect(AppStrings.ItemMenu.hide == "Hide")
         #expect(AppStrings.ItemMenu.quit == "Quit")
         #expect(AppStrings.ItemMenu.forceQuit == "Force Quit")

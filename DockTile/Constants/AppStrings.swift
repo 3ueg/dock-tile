@@ -864,6 +864,8 @@ enum AppStrings {
             comment: "Popover item context menu: open Finder's Get Info window")
         static let quickLook = NSLocalizedString("itemMenu.quickLook", value: "Quick Look",
             comment: "Popover item context menu: preview the item with Quick Look")
+        static let share = NSLocalizedString("itemMenu.share", value: "Share…",
+            comment: "Popover item context menu: open the share sheet for a folder")
         static let hide = NSLocalizedString("itemMenu.hide", value: "Hide",
             comment: "Popover item context menu: hide the running app")
         static let quit = NSLocalizedString("itemMenu.quit", value: "Quit",
