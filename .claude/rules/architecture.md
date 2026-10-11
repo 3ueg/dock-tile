@@ -255,6 +255,50 @@ Both `StackPopoverView` (grid) and `ListPopoverView` (list) have a gear icon tha
 
 Helper bundles have `CFBundleURLTypes` stripped from Info.plist (prevents helpers from claiming the URL scheme).
 
+## Popover Item Context Menu (issue #17)
+
+Right-click / Control-click on an app or folder in the SHIPPED popover shows a native context menu
+([PopoverItemMenu.swift](../../DockTile/UI/PopoverItemMenu.swift)). Finder's own context menu cannot be
+obtained through any public API (Spotlight, Raycast and Alfred all build curated menus), so this is
+built from public AppKit pieces.
+
+- **Apps never get Show in Finder / Get Info / Quick Look / Share (critical, App Management)**: handing
+  a third-party app bundle (`/Applications`) to Finder, Quick Look, a share service or even
+  `/usr/bin/open -R` from a helper makes macOS check `kTCCServiceSystemPolicyAppBundles` for the helper,
+  refuse ("does not allow prompting for unentitled binaries"), and show "*<tile>* was prevented from
+  modifying apps on your Mac", once per tile identity. Verified 2026-10-05; re-signing a helper with
+  Developer ID did not help. Launching (`openApplication`) never triggers it, nor do folders or apps on
+  the read-only system volume. Enforced by `entries` + `appsNeverHandOffTheBundle`. Prove a change
+  against tccd's log (an enforced check is `preflight=no` plus "unentitled binaries"; `preflight=yes`
+  queries are harmless), never by watching for the alert, which shows only once per identity.
+- **Built at click time, AppKit `NSMenu`, not SwiftUI `.contextMenu` (critical)**: a transparent overlay
+  `NSView` claims only secondary clicks (`PopoverItemMenu.claimsEvent`); left-click, hover, drag and
+  scroll fall through to SwiftUI. Building per click keeps install status and running state live and
+  enables the ⌥ Force Quit alternate. Cost: one overlay view per cell, measured ~+9 ms per open and
+  +18 MB on a 100-app tile (Debug, 2026-10-10), flat across opens.
+- **Composition** = pure seam `PopoverItemMenu.entries`. Folder: Open · Show in Finder · Get Info
+  (macOS 26+ only) · Quick Look · Share…. App: Open, then Hide (omitted when hidden) · Quit/⌥Force Quit
+  when running. Missing items get **no menu**. No tile-level items.
+- **Share… shows `NSSharingServicePicker` relative to the cell, never `standardShareMenuItem`
+  (critical)**: on macOS 27 that item is no submenu but a button that presents the picker against a
+  window AppKit chooses; a helper whose only window is the transient popover gives it none, so Share
+  silently did nothing (services were computed, nothing appeared). The plain item also carries no icon.
+- **Running app = matched by bundle PATH, never bundle id alone** (`runningMatchIndex`): PWAs and
+  side-by-side installs share an id.
+- **Get Info = Finder's "Show Info" service via `NSPerformService`, never AppleScript (critical)**: each
+  helper is separately ad-hoc signed, so Automation consent would prompt per tile and re-prompt after
+  every rebuild.
+- **Dismissal** (`dismissesPopover`): every action closes the popover except Share and Get Info, which
+  we never close mid-action. macOS or the click-outside monitor may still close it when Finder or the share UI
+  takes focus, which is accepted. Do not add `FloatingPanel` dismissal special cases for this.
+- **Quick Look uses the supported controller path**: `HelperAppDelegate` implements
+  `acceptsPreviewPanelControl` / `begin…` / `end…` (nonisolated + `MainActor.assumeIsolated`) and
+  hands the panel the process-lifetime `QuickLookPresenter`. Never set `QLPreviewPanel.dataSource`
+  without controlling the panel.
+- **Shipped popover only**: hooks are nil when `editing != nil` or `isPreview`; the editor keeps its own
+  Remove menu. VoiceOver: `.accessibilityAction(.showMenu)` (not yet verified hands-on). Analytics:
+  `popover_item_action`.
+
 ## Helper Migration Pipeline
 
 `HelperMigrationManager` detects stale helper bundles on main app launch and batch-regenerates them with a single Dock restart.
