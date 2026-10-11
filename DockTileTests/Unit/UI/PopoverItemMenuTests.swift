@@ -9,14 +9,14 @@ struct PopoverItemMenuTests {
 
     @Test("Not-running app: Open only")
     func appNotRunning() {
-        #expect(PopoverItemMenu.entries(isFolder: false, isMissing: false, runState: .notRunning, includesGetInfo: true) == [
+        #expect(PopoverItemMenu.entries(isFolder: false, runState: .notRunning, includesGetInfo: true) == [
             .action(.open),
         ])
     }
 
     @Test("Running, visible app: Open, then Hide and Quit with a Force Quit alternate")
     func appRunningVisible() {
-        #expect(PopoverItemMenu.entries(isFolder: false, isMissing: false, runState: .running(isHidden: false), includesGetInfo: true) == [
+        #expect(PopoverItemMenu.entries(isFolder: false, runState: .running(isHidden: false), includesGetInfo: true) == [
             .action(.open), .separator,
             .action(.hide), .action(.quit), .alternate(.forceQuit),
         ])
@@ -24,7 +24,7 @@ struct PopoverItemMenuTests {
 
     @Test("Running but hidden app: no Hide row (Review Focus 2)")
     func appRunningHidden() {
-        #expect(PopoverItemMenu.entries(isFolder: false, isMissing: false, runState: .running(isHidden: true), includesGetInfo: true) == [
+        #expect(PopoverItemMenu.entries(isFolder: false, runState: .running(isHidden: true), includesGetInfo: true) == [
             .action(.open), .separator,
             .action(.quit), .alternate(.forceQuit),
         ])
@@ -35,7 +35,7 @@ struct PopoverItemMenuTests {
         let handOffs: Set<PopoverItemMenuEntry> = [.action(.reveal), .action(.getInfo), .action(.quickLook), .action(.share)]
         for state in [PopoverItemRunState.notRunning, .running(isHidden: false), .running(isHidden: true)] {
             for info in [false, true] {
-                let entries = PopoverItemMenu.entries(isFolder: false, isMissing: false, runState: state, includesGetInfo: info)
+                let entries = PopoverItemMenu.entries(isFolder: false, runState: state, includesGetInfo: info)
                 #expect(handOffs.isDisjoint(with: entries), "app menu for \(state), getInfo=\(info): \(entries)")
             }
         }
@@ -43,22 +43,52 @@ struct PopoverItemMenuTests {
 
     @Test("Folder: the full set, and never running rows even if a run state is passed")
     func folder() {
-        #expect(PopoverItemMenu.entries(isFolder: true, isMissing: false, runState: .running(isHidden: false), includesGetInfo: true) == [
+        #expect(PopoverItemMenu.entries(isFolder: true, runState: .running(isHidden: false), includesGetInfo: true) == [
             .action(.open), .separator,
             .action(.reveal), .action(.getInfo), .action(.quickLook), .separator,
             .action(.share),
         ])
     }
 
-    @Test("Missing item: no menu at all (D7, Review Focus 4)")
-    func missing() {
-        #expect(PopoverItemMenu.entries(isFolder: false, isMissing: true, runState: .running(isHidden: false), includesGetInfo: true).isEmpty)
-        #expect(PopoverItemMenu.entries(isFolder: true, isMissing: true, runState: .notRunning, includesGetInfo: true).isEmpty)
+    // MARK: target path — which on-disk item the menu acts on (D7, Review Focus 1 + 4)
+
+    @Test("Missing item: no target, so no menu at all — even when stale paths are known")
+    func targetPathMissing() {
+        #expect(PopoverItemMenu.targetPath(isFolder: false, isInstalled: false, resolvedPath: "/Applications/Foo.app",
+                                           lastKnownPath: "/Applications/Foo.app", lastKnownPathExists: true) == nil)
+        #expect(PopoverItemMenu.targetPath(isFolder: true, isInstalled: false, resolvedPath: nil,
+                                           lastKnownPath: nil, lastKnownPathExists: false) == nil)
+    }
+
+    @Test("Installed but unresolved: no target")
+    func targetPathUnresolved() {
+        #expect(PopoverItemMenu.targetPath(isFolder: false, isInstalled: true, resolvedPath: nil,
+                                           lastKnownPath: nil, lastKnownPathExists: false) == nil)
+    }
+
+    @Test("App: the copy at lastKnownPath wins over Launch Services, as AppLauncher.launch does")
+    func targetPathPrefersLastKnownPath() {
+        #expect(PopoverItemMenu.targetPath(isFolder: false, isInstalled: true, resolvedPath: "/Applications/Foo.app",
+                                           lastKnownPath: "/Users/k/Applications/Foo.app", lastKnownPathExists: true)
+                == "/Users/k/Applications/Foo.app")
+    }
+
+    @Test("App: a stale lastKnownPath falls back to the Launch Services copy")
+    func targetPathFallsBackToLaunchServices() {
+        #expect(PopoverItemMenu.targetPath(isFolder: false, isInstalled: true, resolvedPath: "/Applications/Foo.app",
+                                           lastKnownPath: "/Users/k/Applications/Foo.app", lastKnownPathExists: false)
+                == "/Applications/Foo.app")
+    }
+
+    @Test("Folder: its resolved path; lastKnownPath (an app field) is ignored")
+    func targetPathFolder() {
+        #expect(PopoverItemMenu.targetPath(isFolder: true, isInstalled: true, resolvedPath: "/Users/k/Media",
+                                           lastKnownPath: "/Users/k/Other", lastKnownPathExists: true) == "/Users/k/Media")
     }
 
     @Test("Folder Get Info is omitted when not available (macOS 15, D2)")
     func noGetInfo() {
-        #expect(PopoverItemMenu.entries(isFolder: true, isMissing: false, runState: .notRunning, includesGetInfo: false) == [
+        #expect(PopoverItemMenu.entries(isFolder: true, runState: .notRunning, includesGetInfo: false) == [
             .action(.open), .separator,
             .action(.reveal), .action(.quickLook), .separator,
             .action(.share),
@@ -70,7 +100,7 @@ struct PopoverItemMenuTests {
         for folder in [false, true] {
             for state in [PopoverItemRunState.notRunning, .running(isHidden: false), .running(isHidden: true)] {
                 for info in [false, true] {
-                    let e = PopoverItemMenu.entries(isFolder: folder, isMissing: false, runState: state, includesGetInfo: info)
+                    let e = PopoverItemMenu.entries(isFolder: folder, runState: state, includesGetInfo: info)
                     #expect(e.first != .separator)
                     #expect(e.last != .separator)
                     #expect(!zip(e, e.dropFirst()).contains { $0 == .separator && $1 == .separator })

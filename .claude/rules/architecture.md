@@ -284,7 +284,9 @@ built from public AppKit pieces.
   window AppKit chooses; a helper whose only window is the transient popover gives it none, so Share
   silently did nothing (services were computed, nothing appeared). The plain item also carries no icon.
 - **Running app = matched by bundle PATH, never bundle id alone** (`runningMatchIndex`): PWAs and
-  side-by-side installs share an id.
+  side-by-side installs share an id. The path comes from `targetPath`, which resolves an app by the
+  same rule `AppLauncher.launch` uses (`AppItem.resolvedAppURL`, lastKnownPath first), so Hide/Quit hit
+  the copy Open launches; `targetPath` is also the missing-item → no-menu check.
 - **Get Info = Finder's "Show Info" service via `NSPerformService`, never AppleScript (critical)**: each
   helper is separately ad-hoc signed, so Automation consent would prompt per tile and re-prompt after
   every rebuild.

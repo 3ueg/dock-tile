@@ -40,8 +40,22 @@ enum PopoverItemMenuEntry: Hashable, Sendable {
 
 enum PopoverItemMenu {
 
-    /// The menu for one item. Missing items get none (nothing on disk to act on). Unavailable
-    /// items are omitted, not dimmed (HIG).
+    /// The on-disk item the menu acts on, or nil when there is none — then there is no menu at all
+    /// (D7). Apps resolve by the same rule `AppLauncher.launch` uses (`AppItem.resolvedAppURL`:
+    /// `lastKnownPath` first), so Hide/Quit target the copy Open launches when two installs share a
+    /// bundle id.
+    nonisolated static func targetPath(
+        isFolder: Bool, isInstalled: Bool, resolvedPath: String?,
+        lastKnownPath: String?, lastKnownPathExists: Bool
+    ) -> String? {
+        guard isInstalled, let resolvedPath else { return nil }
+        if isFolder { return resolvedPath }
+        return AppItem.resolvedAppURL(lastKnownPath: lastKnownPath, pathExists: lastKnownPathExists,
+                                      bundleResolvedURL: URL(fileURLWithPath: resolvedPath))?.path
+    }
+
+    /// The menu for an item that exists on disk (see `targetPath`). Unavailable items are
+    /// omitted, not dimmed (HIG).
     ///
     /// Apps never get Show in Finder / Get Info / Quick Look / Share (critical): handing a
     /// third-party app bundle to another process from a helper makes macOS show "<tile> was
@@ -49,9 +63,8 @@ enum PopoverItemMenu {
     /// permission. Folders aren't app bundles, so they keep the full set and never get
     /// running-app rows.
     nonisolated static func entries(
-        isFolder: Bool, isMissing: Bool, runState: PopoverItemRunState, includesGetInfo: Bool
+        isFolder: Bool, runState: PopoverItemRunState, includesGetInfo: Bool
     ) -> [PopoverItemMenuEntry] {
-        guard !isMissing else { return [] }
         var entries: [PopoverItemMenuEntry] = [.action(.open)]
         if isFolder {
             entries += [.separator, .action(.reveal)]
@@ -167,7 +180,11 @@ final class PopoverItemMenuController: NSObject, NSMenuDelegate, NSSharingServic
     static func make(for app: AppItem, anchorView: NSView,
                      onOpen: @escaping () -> Void, onClose: @escaping () -> Void) -> PopoverItemMenuController? {
         let resolution = AppInstallChecker.resolve(app)
-        guard resolution.status == .installed, let path = resolution.resolvedPath else { return nil }
+        guard let path = PopoverItemMenu.targetPath(
+            isFolder: app.isFolder, isInstalled: resolution.status == .installed,
+            resolvedPath: resolution.resolvedPath, lastKnownPath: app.lastKnownPath,
+            lastKnownPathExists: app.lastKnownPath.map { FileManager.default.fileExists(atPath: $0) } ?? false
+        ) else { return nil }
         var runningApp: NSRunningApplication?
         if !app.isFolder {
             let candidates = NSRunningApplication.runningApplications(withBundleIdentifier: app.bundleIdentifier)
@@ -192,8 +209,8 @@ final class PopoverItemMenuController: NSObject, NSMenuDelegate, NSSharingServic
         menu.autoenablesItems = false
         menu.delegate = self
         let runState: PopoverItemRunState = runningApp.map { .running(isHidden: $0.isHidden) } ?? .notRunning
-        for entry in PopoverItemMenu.entries(isFolder: app.isFolder, isMissing: false,
-                                             runState: runState, includesGetInfo: Self.includesGetInfo) {
+        for entry in PopoverItemMenu.entries(isFolder: app.isFolder, runState: runState,
+                                             includesGetInfo: Self.includesGetInfo) {
             switch entry {
             case .separator:
                 menu.addItem(.separator())
