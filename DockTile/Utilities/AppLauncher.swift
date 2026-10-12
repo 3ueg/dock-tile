@@ -11,9 +11,10 @@ import AppKit
 @MainActor
 enum AppLauncher {
 
-    /// Launch an app or open a folder for the given AppItem
-    static func launch(_ app: AppItem) {
-        AnalyticsService.shared.log(.appLaunchedFromTile, ["source": "popover", "is_folder": app.isFolder])
+    /// Launch an app or open a folder for the given AppItem. `source` attributes the launch in
+    /// analytics: "popover" for a left-click / Return, "item_menu" for the context menu's Open.
+    static func launch(_ app: AppItem, source: String = "popover") {
+        AnalyticsService.shared.log(.appLaunchedFromTile, ["source": source, "is_folder": app.isFolder])
 
         let workspace = NSWorkspace.shared
 

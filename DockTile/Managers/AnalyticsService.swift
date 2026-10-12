@@ -38,6 +38,7 @@ enum AnalyticsEvent: String, CaseIterable {
     case layoutModeChanged = "layout_mode_changed"
     case popoverOpened = "popover_opened"
     case appLaunchedFromTile = "app_launched_from_tile"
+    case popoverItemAction = "popover_item_action"
     case configureGearTapped = "configure_gear_tapped"
     case settingChanged = "setting_changed"
     case helperMigrationRun = "helper_migration_run"
