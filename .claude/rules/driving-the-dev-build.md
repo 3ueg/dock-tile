@@ -72,3 +72,20 @@ a dev helper bundle by copying only the executable silently runs the OLD code �
 issue-#12 live verification "failed" exactly this way until both files were copied (then
 `codesign --force --sign -` to re-seal). Copy stub + dylib together, and verify with
 `md5 -q` against the built product, not by assuming `cp` sufficed.
+
+## A rebuild does not reach existing dev tiles
+
+Launch migration regenerates a helper only when `CFBundleShortVersionString` changes
+(`HelperBundleManager.currentAppVersion`), so a code-only rebuild leaves every dev tile on old code.
+Use the tile's **Update**, or swap stub + dylib as above, then confirm with `nm … | grep <new symbol>`
+(rebuilds are not byte-identical, so `md5` against an older copy proves nothing). Look the helper up
+with `ls` first: renaming a tile renames its folder (`Dev Tile.app` → `Dev.app`), and a hard-coded
+path silently misses it.
+
+## Read hands-on evidence before relaunching the main app
+
+The main app trims `diagnostics.log` to the last hour on every launch (`prepareOnLaunch`), so a
+gate run's `ui` lines vanish once the dev app is relaunched or a day passes — the #17 G6/G7 evidence
+was lost this way. Tail the log (a Monitor on `tail -F`) while the user tests, or read it right
+after. TCC behaviour is the exception: tccd's history stays in `/usr/bin/log show` (`log` alone is
+a zsh builtin and fails).

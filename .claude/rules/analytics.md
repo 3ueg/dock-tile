@@ -60,7 +60,12 @@ default-only key events, site in a separate property). Compare against it after 
   identity); the marketing site's `G-PP04F8Z0EP` is a different stream entirely.
 - **Unregistered event parameters are DISCARDED from all GA4 reports** — every param we send
   (`source`, `app_count`, `layout`, `setting`, `style`, …) and the `app_role` user property are
-  invisible until registered as custom definitions in the GA4 console. Registering is forward-only.
+  invisible until registered as custom definitions in the GA4 console. Registering is forward-only,
+  so a release that adds a param must register it the same day. No console needed: the same
+  `ga4-fetch` service account can write with `--scopes=https://www.googleapis.com/auth/analytics.edit`
+  — list with `GET analyticsadmin.googleapis.com/v1beta/properties/542196919/customDimensions`, add
+  with `POST` (`parameterName`, `displayName`, `description`, `scope: "EVENT"`). Done this way for
+  2.1.0's `action` / `is_folder` (2026-10-13).
 - API reads need the `ga4-fetch@dock-tile.iam.gserviceaccount.com` service account
   (`gcloud auth print-access-token --account=… --scopes=…analytics.readonly`); user-credential ADC
   is blocked by Google for the analytics scope. Property ID is recoverable without analytics scope

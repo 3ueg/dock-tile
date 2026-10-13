@@ -18,6 +18,9 @@ selected. So the macOS 15 leg — the only place the frozen legacy icon path
 zip: `upload-artifact` drops the symlinks inside embedded frameworks), and the macos-15 job runs
 `xcodebuild test-without-building -xctestrun …`. Keep that leg green before merging anything that
 ships to macOS 15; a Tahoe-only test must `#available`-gate itself rather than drop the leg.
+Its evidence is the "Prove the suite" step's `macOS 15: N passed, M failed` line (the job fails
+below 600). `xcpretty` hides the per-test lines from the job log, so grepping it for test cases
+finds ~2 and reads as a broken leg when it is not.
 
 **The floor is one number, and four places must agree with it (`MacOSFloorGuardTests`).**
 `MACOSX_DEPLOYMENT_TARGET` in `Base.xcconfig` is the source of truth; the guard fails on any
