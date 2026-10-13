@@ -166,4 +166,12 @@ struct DockActionResolutionTests {
         #expect(HelperBundleManager.shouldPerformDockRemoval(isInDock: false, isHelperRunning: true))
         #expect(HelperBundleManager.shouldPerformDockRemoval(isInDock: true, isHelperRunning: true))
     }
+
+    @Test("Changing the background dirties the tile (contentSignature)")
+    func backgroundChangesSignature() {
+        let colour = DockTileConfiguration(name: "Media", background: .colour)
+        var mono = colour
+        mono.background = .mono
+        #expect(DockTileDetailView.contentSignature(of: colour) != DockTileDetailView.contentSignature(of: mono))
+    }
 }

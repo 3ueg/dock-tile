@@ -84,6 +84,7 @@ struct DockTileDetailView: View {
         hasher.combine(config.iconValue)
         hasher.combine(config.iconScale)
         hasher.combine(config.iconWeight)
+        hasher.combine(config.background)
         hasher.combine(config.layoutMode)
         hasher.combine(config.showInAppSwitcher)
         for item in config.appItems {
