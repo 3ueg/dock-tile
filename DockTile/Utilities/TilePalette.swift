@@ -203,3 +203,102 @@ private struct OKLCH {
         return SRGB(r: enc(r), g: enc(g), b: enc(b))
     }
 }
+
+// MARK: - Tint inputs
+
+extension TintColor {
+    /// The saturated base (preset bottom stop / custom hex). A malformed custom hex falls back to
+    /// the grey preset — never black (an old hand-edited config must not bake a black tile).
+    nonisolated var baseRGB: SRGB {
+        switch self {
+        case .preset(let p): return SRGB(hex: p.baseHex)!
+        case .custom(let hex): return SRGB(hex: hex) ?? SRGB(hex: PresetColor.gray.baseHex)!
+        }
+    }
+
+    /// The lighter stop, used only by the Colour + Dark + emoji darkened-own-tint background.
+    nonisolated var lightRGB: SRGB {
+        switch self {
+        case .preset(let p): return SRGB(hex: p.lightHex)!
+        case .custom: return baseRGB.lighterShade(by: 0.15)
+        }
+    }
+}
+
+// MARK: - TilePalette
+
+/// Every tile colour, per background × style × icon type. See the spec's role table:
+/// docs/superpowers/specs/2026-10-13-mono-tile-background-design.md
+enum TilePalette {
+    struct Roles: Equatable, Sendable {
+        let top: SRGB
+        let bottom: SRGB
+        let glyph: SRGB
+    }
+
+    nonisolated static let lightTop = SRGB(hex: "#FFFFFF")!
+    nonisolated static let lightBottom = SRGB(hex: "#EFEFF1")!
+    nonisolated static let darkTop = SRGB(hex: TintColor.darkNeutralTopHex)!
+    nonisolated static let darkBottom = SRGB(hex: TintColor.darkNeutralBottomHex)!
+    private nonisolated static let clear = Roles(top: SRGB(hex: "#F0F0F2")!, bottom: SRGB(hex: "#E0E0E4")!, glyph: SRGB(hex: "#6E6E73")!)
+    private nonisolated static let tinted = Roles(top: SRGB(hex: "#8E8E93")!, bottom: SRGB(hex: "#636366")!, glyph: .white)
+    /// OKLCH lightness step from a Colour fill's top stop to its bottom stop.
+    nonisolated static let colourFillBottomStep = -0.06
+
+    nonisolated static func resolve(
+        tint: TintColor, background: TileBackground, style: IconStyle, iconType: IconType
+    ) -> Roles {
+        resolve(base: tint.baseRGB, light: tint.lightRGB, background: background, style: style, iconType: iconType)
+    }
+
+    /// Raw-colour form (sidebar Settings badges carry a `Color`, not a `TintColor`).
+    nonisolated static func resolve(
+        base: SRGB, light: SRGB, background: TileBackground, style: IconStyle, iconType: IconType
+    ) -> Roles {
+        switch style {
+        case .clear:
+            return clear
+        case .tinted:
+            return tinted
+        case .defaultStyle:
+            switch background {
+            case .colour:
+                let top = colourFill(base)
+                return Roles(top: top, bottom: ToneMap.shiftingLightness(top, by: colourFillBottomStep), glyph: .white)
+            case .mono:
+                return Roles(top: lightTop, bottom: lightBottom, glyph: monoLightGlyph(base))
+            }
+        case .dark:
+            if background == .colour && iconType == .emoji {
+                // An emoji can't be recoloured, so a Colour emoji tile keeps its own hue, darkened.
+                return Roles(top: light.cappingBrightness(0.22), bottom: base.cappingBrightness(0.13), glyph: .white)
+            }
+            return Roles(top: darkTop, bottom: darkBottom, glyph: darkGlyph(base))
+        }
+    }
+
+    /// Whether a Colour tile's fill had to move to clear the floor (drives the "Deepened" hint).
+    nonisolated static func fillWasDeepened(tint: TintColor) -> Bool {
+        colourFill(tint.baseRGB) != tint.baseRGB
+    }
+
+    // MARK: Fits — each tests the weakest pair the renderer actually draws
+
+    /// White symbol against the fill's LIGHTER (top) stop.
+    private nonisolated static func colourFill(_ base: SRGB) -> SRGB {
+        ToneMap.fit(base, direction: .darker) { ToneMap.contrastRatio(.white, $0) >= ToneMap.searchTarget }
+    }
+
+    /// Unshaded symbol top against the tile's DARKER (bottom) stop.
+    private nonisolated static func monoLightGlyph(_ base: SRGB) -> SRGB {
+        ToneMap.fit(base, direction: .darker) { ToneMap.contrastRatio($0, lightBottom) >= ToneMap.searchTarget }
+    }
+
+    /// The symbol's SHADED bottom against the tile's LIGHTER (top) stop.
+    private nonisolated static func darkGlyph(_ base: SRGB) -> SRGB {
+        let shade = Double(IconDepthMetrics.glyphBottomDarken(style: .dark, iconType: .sfSymbol, nominalSize: 1024) ?? 0)
+        return ToneMap.fit(base, direction: .lighter) {
+            ToneMap.contrastRatio($0.darkened(by: shade), darkTop) >= ToneMap.searchTarget
+        }
+    }
+}
