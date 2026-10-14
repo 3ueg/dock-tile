@@ -23,4 +23,15 @@ struct CustomiseColourRowStateTests {
     func onlyEmojiLockedDisables() {
         for s in [CustomiseTileView.ColourRowState.fillsTile, .deepened, .toned] { #expect(!s.isDisabled) }
     }
+
+    @Test("Colour tiles keep the plain 'Colour' label")
+    func colourTilesUsePlainLabel() {
+        for s in [CustomiseTileView.ColourRowState.fillsTile, .deepened] { #expect(!s.usesSymbolLabel, "\(s)") }
+    }
+
+    @Test("Deepening is ignored under Mono")
+    func deepeningIgnoredUnderMono() {
+        #expect(CustomiseTileView.colourRowState(background: .mono, iconType: .emoji, fillDeepened: true) == .emojiLocked)
+        #expect(CustomiseTileView.colourRowState(background: .mono, iconType: .sfSymbol, fillDeepened: true) == .toned)
+    }
 }

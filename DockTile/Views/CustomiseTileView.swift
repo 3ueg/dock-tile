@@ -222,7 +222,7 @@ struct CustomiseTileView: View {
         .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
     }
 
-    // MARK: - Colour Section
+    // MARK: - Background Section
 
     private var backgroundSection: some View {
         HStack(alignment: .center, spacing: 16) {
@@ -245,6 +245,8 @@ struct CustomiseTileView: View {
         }
         .frame(height: 76)
     }
+
+    // MARK: - Colour Section
 
     private var colourSection: some View {
         let state = colourRow
