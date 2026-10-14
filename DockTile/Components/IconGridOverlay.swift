@@ -182,19 +182,6 @@ struct IconGridOverlay: View {
     }
 }
 
-// MARK: - Color Luminance Extension
-
-extension Color {
-    /// Calculate perceived luminance using standard formula
-    /// Returns 0.0 (dark) to 1.0 (light)
-    var luminance: CGFloat {
-        let nsColor = NSColor(self)
-        guard let rgb = nsColor.usingColorSpace(.deviceRGB) else { return 0.5 }
-        // Standard luminance formula: 0.299R + 0.587G + 0.114B
-        return 0.299 * rgb.redComponent + 0.587 * rgb.greenComponent + 0.114 * rgb.blueComponent
-    }
-}
-
 // MARK: - Preview
 
 #Preview {

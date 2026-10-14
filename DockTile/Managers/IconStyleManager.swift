@@ -566,8 +566,12 @@ extension TintColor {
     /// About badges — `SettingsBadgeIcon`). Thin adapter over `TilePalette.resolve` (Colour
     /// background, SF Symbol branch — badges are always coloured symbols).
     static func badgeColors(for style: IconStyle, tint: Color) -> (top: Color, bottom: Color, foreground: Color) {
-        let ns = NSColor(tint).usingColorSpace(.sRGB) ?? NSColor(srgbRed: 0.557, green: 0.557, blue: 0.576, alpha: 1)
-        let base = SRGB(r: ns.redComponent, g: ns.greenComponent, b: ns.blueComponent)
+        let base: SRGB
+        if let ns = NSColor(tint).usingColorSpace(.sRGB) {
+            base = SRGB(r: ns.redComponent, g: ns.greenComponent, b: ns.blueComponent)
+        } else {
+            base = TintColor.gray.baseRGB
+        }
         let r = TilePalette.resolve(base: base, light: base, background: .colour, style: style, iconType: .sfSymbol)
         return (r.top.color, r.bottom.color, r.glyph.color)
     }
