@@ -21,6 +21,7 @@ Decisions taken with Karthik (2026-10-13):
 | Customise header | **In scope:** title band shows the tile name with a "Customise Tile" subtitle. |
 | Mono glyph layers (plan gate) | **Spike first:** bake a Mono symbol `.icon` with 2 layers and with a 3rd white tinted-only layer, view both under Tinted/Clear; keep the 3rd only if 2 fails (the compiler builds the Tintable rendition on the light — white — gradient). |
 | Sheen vs 3:1 (plan gate) | **3:1 is measured on the chosen colours, before decorative sheens.** macOS 26 Dock icons carry none; the macOS 15 bake and preview sheens are decoration. |
+| macOS 15 presentation (post-review) | Mono follows Light/Dark on macOS 26+ only; on macOS 15 Customise shows one white preview and static copy. |
 | Previews under a fixed icon style (plan gate) | **Always canonical:** the Background chips and the Mono Light/Dark hero force Default/Dark whatever the system icon style. |
 
 ## Research findings that shape the design

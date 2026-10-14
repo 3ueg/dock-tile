@@ -1105,6 +1105,30 @@
         }
       }
     },
+    "label.background.hint.mono.static": {
+      "comment": "Customise Tile: hint under Background when Mono on macOS 15 (static white tile)",
+      "extractionState": "manual",
+      "localizations": {
+        "en-AU": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "White tile with a coloured symbol"
+          }
+        },
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "White tile with a coloured symbol"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "White tile with a colored symbol"
+          }
+        }
+      }
+    },
     "label.background.mono": {
       "comment": "Customise Tile: Mono background chip",
       "extractionState": "manual",
@@ -1149,6 +1173,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "Mono, white in Light Mode and black in Dark Mode"
+          }
+        }
+      }
+    },
+    "label.background.mono.static.accessibility": {
+      "comment": "VoiceOver label for the Mono chip on macOS 15",
+      "extractionState": "manual",
+      "localizations": {
+        "en-AU": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mono, a white tile with a coloured symbol"
+          }
+        },
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mono, a white tile with a coloured symbol"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mono, a white tile with a colored symbol"
           }
         }
       }
@@ -1269,6 +1317,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "Toned for Light and Dark"
+          }
+        }
+      }
+    },
+    "label.colour.hint.toned.static": {
+      "comment": "Customise Tile: colour hint, Mono tile on macOS 15",
+      "extractionState": "manual",
+      "localizations": {
+        "en-AU": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Toned to stay clear on white"
+          }
+        },
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Toned to stay clear on white"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Toned to stay clear on white"
           }
         }
       }

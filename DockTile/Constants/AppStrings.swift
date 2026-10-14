@@ -348,6 +348,11 @@ enum AppStrings {
             value: "White in Light Mode, black in Dark Mode",
             comment: "Customise Tile: hint under Background when Mono"
         )
+        static let backgroundHintMonoStatic = NSLocalizedString(
+            "label.background.hint.mono.static",
+            value: "White tile with a coloured symbol",
+            comment: "Customise Tile: hint under Background when Mono on macOS 15 (static white tile)"
+        )
         static let backgroundColourAccessibility = NSLocalizedString(
             "label.background.colour.accessibility",
             value: "Colour, filled with your colour",
@@ -357,6 +362,11 @@ enum AppStrings {
             "label.background.mono.accessibility",
             value: "Mono, white in Light Mode and black in Dark Mode",
             comment: "VoiceOver label for the Mono chip"
+        )
+        static let backgroundMonoStaticAccessibility = NSLocalizedString(
+            "label.background.mono.static.accessibility",
+            value: "Mono, a white tile with a coloured symbol",
+            comment: "VoiceOver label for the Mono chip on macOS 15"
         )
         static let symbolColour = NSLocalizedString(
             "label.symbolColour",
@@ -377,6 +387,11 @@ enum AppStrings {
             "label.colour.hint.toned",
             value: "Toned for Light and Dark",
             comment: "Customise Tile: colour hint, Mono tile"
+        )
+        static let colourHintTonedStatic = NSLocalizedString(
+            "label.colour.hint.toned.static",
+            value: "Toned to stay clear on white",
+            comment: "Customise Tile: colour hint, Mono tile on macOS 15"
         )
         static let colourHintEmoji = NSLocalizedString(
             "label.colour.hint.emoji",

@@ -88,6 +88,9 @@ Every role (fill top/bottom, glyph) per background x style x icon type is derive
 
 - **Mono** = `#FFFFFF -> #EFEFF1` (Default) / `#2C2C2E -> #1C1C1E` (Dark) with the tint as the
   glyph. **Colour** = the tint as the fill, white glyph.
+- **Mono follows Light/Dark on macOS 26+ only.** On macOS 15 the legacy path always shows the light
+  variant (no icon-style setting exists there), so Customise presents Mono as a white tile with a
+  coloured symbol (one preview, static hint) via `CustomiseTileView.heroStyles`.
 - **The promise: every drawn symbol/fill pair >= 3:1** (`ToneMap.floor` 3.0, searched at
   `searchTarget` 3.1 for 8-bit/gamut headroom) via `ToneMap.fit` (OKLCH lightness search,
   hue-preserving). Each fit tests the pairs the renderer actually draws: Colour clears TWO (white
