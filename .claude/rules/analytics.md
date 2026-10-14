@@ -65,7 +65,9 @@ default-only key events, site in a separate property). Compare against it after 
   `ga4-fetch` service account can write with `--scopes=https://www.googleapis.com/auth/analytics.edit`
   — list with `GET analyticsadmin.googleapis.com/v1beta/properties/542196919/customDimensions`, add
   with `POST` (`parameterName`, `displayName`, `description`, `scope: "EVENT"`). Done this way for
-  2.1.0's `action` / `is_folder` (2026-10-13).
+  2.1.0's `action` / `is_folder` (2026-10-13). The `background` parameter (`colour`/`mono`) on
+  `tile_added_to_dock` / `tile_updated` (added 2026-10-14, Mono tile background) must be registered
+  as a GA4 custom definition before the release that ships it — registration is forward-only.
 - API reads need the `ga4-fetch@dock-tile.iam.gserviceaccount.com` service account
   (`gcloud auth print-access-token --account=… --scopes=…analytics.readonly`); user-credential ADC
   is blocked by Google for the analytics scope. Property ID is recoverable without analytics scope

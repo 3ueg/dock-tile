@@ -24,9 +24,9 @@ was reached.
 1. `IconGenerator.generateGlyphLayerPNG` renders one 1024×1024 transparent-background layer PNG
    per authorable appearance — glyph + shading gradient + contact shadow **only**; no squircle,
    stroke, or sheen, because the system draws the shape and the glass. SF Symbols and the brand
-   glyph get three appearance renders (`light` = white on Colour / the fitted tint on Mono, `dark` =
-   the `TilePalette` Dark glyph, `tinted` = plain white/mono — carried by two glyph layers, see
-   "Tile background (Mono) and tone map"); emoji get one full-colour layer shared by
+   glyph author two layers, `light` (white on Colour / the fitted tone on Mono) and `dark` (the
+   `TilePalette` Dark glyph); the tinted appearance reuses the light layer and macOS derives the
+   tinted/clear relief from its alpha — see "Tile background (Mono) and tone map"; emoji get one full-colour layer shared by
    every appearance (emoji cannot be recoloured — V1 below).
 2. `IconDocumentBuilder` (pure seam) assembles the `.icon` document: the tile's tint gradient as
    the icon-level JSON `fill` (+ a `dark` background override — near-black for symbol/brand tiles,
@@ -295,7 +295,7 @@ macOS Tahoe has an independent "Icon and widget style" setting (separate from Li
 - All 4 variants generated upfront during `installHelper()` (~200-400ms) — legacy branch only; the declarative branch compiles one car instead (see Declarative Pipeline above).
 - Style switching is a file copy + immediate ad-hoc re-seal (the swap breaks the bundle signature otherwise) — legacy only; nothing ever swaps a file in a declarative helper.
 - For view re-renders, key off `IconStyle.forDisplay(raw: iconStyleManager.rawStyle, colorScheme:)` — live on every macOS version (observer-fed on Tahoe, detection-fed pre-26). Do NOT reference `currentStyle` in view bodies: it is legacy-detection state, frozen after init on Tahoe.
-- **Dark variant rationale + HIG sources**: [docs/dark-mode-icon-rendering.md](../../docs/dark-mode-icon-rendering.md) (darkened-own-tint background + white symbol, and why) — the same colour choices are reused by the declarative path's `dark` background/glyph layers.
+- **Dark variant rationale + HIG sources**: [docs/dark-mode-icon-rendering.md](../../docs/dark-mode-icon-rendering.md) (darkened-own-tint background + white symbol, and why) — the same colour choices are reused by the declarative path's `dark` background/glyph layers. The colour roles now come from `TilePalette` (Colour emoji keeps the darkened own tint; symbols use the 3:1-fitted glyph on near-black; Mono uses near-black for every icon type).
 
 ## App Icon Loading
 

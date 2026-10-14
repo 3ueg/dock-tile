@@ -1009,7 +1009,7 @@ final class HelperBundleManager {
     /// colour is converted rather than reinterpreted.
     ///
     /// THROWS rather than substituting a fallback colour. Every colour reaching here comes from
-    /// `nsColors(for:iconType:)` and is component-backed, so the conversion should not fail — which
+    /// `nsColors(for:iconType:background:)` and is component-backed, so the conversion should not fail — which
     /// is exactly why a silent `(0, 0, 0)` would be so damaging: it would bake a black-gradient
     /// tile, with no error in the diagnostics log and nothing for the user to report.
     nonisolated private static func p3Components(_ color: NSColor) throws -> (r: Double, g: Double, b: Double) {

@@ -58,14 +58,15 @@ struct IconGridOverlay: View {
             return Color(hex: "#5DB3F9").opacity(0.6)  // Default blue
         }
 
-        let luminance = bgColor.colorBottom.luminance
-        // Light backgrounds (yellow, etc.): darker overlay
-        // Dark backgrounds (blue, purple): lighter overlay
-        if luminance > 0.5 {
-            return Color.black.opacity(0.25)
-        } else {
-            return Color.white.opacity(0.35)
-        }
+        // Key on the fill the palette actually draws for a Colour tile (the 3:1-fitted top stop),
+        // not the raw tint: a pale tint is deepened, so its raw luminance misjudges the fill.
+        let top = TilePalette.resolve(tint: bgColor, background: .colour, style: .defaultStyle, iconType: .sfSymbol).top
+        return Self.usesDarkLines(forFillTop: top) ? Color.black.opacity(0.25) : Color.white.opacity(0.35)
+    }
+
+    /// Light fills get dark grid lines, dark fills light ones (WCAG relative luminance > 0.5).
+    nonisolated static func usesDarkLines(forFillTop top: SRGB) -> Bool {
+        ToneMap.relativeLuminance(top) > 0.5
     }
 
     /// Warning color for outer circle when icon is at safe area limit

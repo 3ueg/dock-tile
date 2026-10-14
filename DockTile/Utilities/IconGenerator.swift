@@ -110,8 +110,8 @@ struct IconGenerator {
         // Create squircle path (continuous corners matching Tahoe guidelines)
         let squirclePath = createSquirclePath(in: shapeRect, cornerRadius: cornerRadius)
 
-        // Get appearance-aware colors. Dark style diverges by icon type (SF Symbol → tinted
-        // glyph on neutral near-black; emoji → darkened-own-tint), so thread the type through.
+        // Get appearance-aware colors. Colours come from `TilePalette` by background × style × icon
+        // type (Colour emoji keeps its darkened own tint in Dark; Mono uses the neutral near-black).
         let colors = tintColor.nsColors(for: iconStyle, iconType: iconType, background: background)
 
         // Draw gradient background (appearance-aware)
