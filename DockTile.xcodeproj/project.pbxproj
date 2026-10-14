@@ -64,6 +64,7 @@
 		AASTR001 /* AppStrings.swift in Sources */ = {isa = PBXBuildFile; fileRef = AASTR002 /* AppStrings.swift */; };
 		AAU00001 /* IconGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAU00002 /* IconGenerator.swift */; };
 		AAIDM001 /* IconDepthMetrics.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAIDM002 /* IconDepthMetrics.swift */; };
+		AATPL001 /* TilePalette.swift in Sources */ = {isa = PBXBuildFile; fileRef = AATPL002 /* TilePalette.swift */; };
 		AADIP001 /* DeclarativeIconPipeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = AADIP002 /* DeclarativeIconPipeline.swift */; };
 		AAUDK01 /* UserDefaultsKeys.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAUDK02 /* UserDefaultsKeys.swift */; };
 		AAUPC001 /* UpdateController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAUPC002 /* UpdateController.swift */; };
@@ -169,6 +170,7 @@
 		AASTR002 /* AppStrings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStrings.swift; sourceTree = "<group>"; };
 		AAU00002 /* IconGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IconGenerator.swift; sourceTree = "<group>"; };
 		AAIDM002 /* IconDepthMetrics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IconDepthMetrics.swift; sourceTree = "<group>"; };
+		AATPL002 /* TilePalette.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TilePalette.swift; sourceTree = "<group>"; };
 		AADIP002 /* DeclarativeIconPipeline.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeclarativeIconPipeline.swift; sourceTree = "<group>"; };
 		AAUDK02 /* UserDefaultsKeys.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefaultsKeys.swift; sourceTree = "<group>"; };
 		AAUPC002 /* UpdateController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateController.swift; sourceTree = "<group>"; };
@@ -402,6 +404,7 @@
 			children = (
 				AAU00002 /* IconGenerator.swift */,
 				AAIDM002 /* IconDepthMetrics.swift */,
+				AATPL002 /* TilePalette.swift */,
 				AADIP002 /* DeclarativeIconPipeline.swift */,
 				AAILB02 /* AppIconLoader.swift */,
 				AAALB02 /* AppLauncher.swift */,
@@ -620,6 +623,7 @@
 				AANPV01 /* NativePopoverViews.swift in Sources */,
 				AAU00001 /* IconGenerator.swift in Sources */,
 				AAIDM001 /* IconDepthMetrics.swift in Sources */,
+				AATPL001 /* TilePalette.swift in Sources */,
 				AADIP001 /* DeclarativeIconPipeline.swift in Sources */,
 				AAH00001 /* HelperBundleManager.swift in Sources */,
 				AAANS01 /* AnalyticsService.swift in Sources */,

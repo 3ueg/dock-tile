@@ -244,6 +244,48 @@ struct AppStringsTests {
         // fall back to en-GB since sourceLanguage="en-GB" in Localizable.xcstrings
     }
 
+    @Test("Mono tile strings: every key exists in all three locales")
+    func monoTileKeysExist() {
+        let keys = ["label.background", "label.background.colour", "label.background.mono",
+                    "label.background.hint.colour", "label.background.hint.mono",
+                    "label.background.colour.accessibility", "label.background.mono.accessibility",
+                    "label.symbolColour", "label.colour.hint.fills", "label.colour.hint.deepened",
+                    "label.colour.hint.toned", "label.colour.hint.emoji",
+                    "label.preview.light", "label.preview.dark",
+                    "label.background.hint.mono.static", "label.background.mono.static.accessibility",
+                    "label.colour.hint.toned.static"]
+        for key in keys {
+            for locale in ["en-GB", "en-US", "en-AU"] {
+                // The helper returns "Key '…' not found for locale '…'" on a miss — never "".
+                #expect(!localizedString(for: key, locale: locale).hasPrefix("Key '"), "\(key) missing in \(locale)")
+            }
+        }
+        // Exact copy for the strings the user reads first.
+        #expect(localizedString(for: "label.background", locale: "en-GB") == "Background")
+        #expect(localizedString(for: "label.background.hint.mono", locale: "en-GB") == "White in Light Mode, black in Dark Mode")
+        #expect(localizedString(for: "label.symbolColour", locale: "en-US") == "Symbol Color")
+        #expect(localizedString(for: "label.preview.dark", locale: "en-AU") == "Dark")
+        #expect(localizedString(for: "label.background.hint.mono.static", locale: "en-GB") == "White tile with a coloured symbol")
+        #expect(localizedString(for: "label.background.hint.mono.static", locale: "en-US") == "White tile with a colored symbol")
+        #expect(localizedString(for: "label.background.mono.static.accessibility", locale: "en-AU") == "Mono, a white tile with a coloured symbol")
+        #expect(localizedString(for: "label.background.mono.static.accessibility", locale: "en-US") == "Mono, a white tile with a colored symbol")
+        #expect(localizedString(for: "label.colour.hint.toned.static", locale: "en-GB") == "Toned to stay clear on white")
+        #expect(localizedString(for: "label.colour.hint.toned.static", locale: "en-US") == "Toned to stay clear on white")
+    }
+
+    @Test("Mono tile strings spell colour per locale")
+    func monoTileSpelling() {
+        for key in ["label.symbolColour", "label.background.hint.colour", "label.colour.hint.emoji",
+                    "label.background.colour", "label.background.colour.accessibility"] {
+            #expect(localizedString(for: key, locale: "en-US").localizedCaseInsensitiveContains("color"), "\(key) en-US")
+            #expect(!localizedString(for: key, locale: "en-US").localizedCaseInsensitiveContains("colour"), "\(key) en-US")
+            #expect(localizedString(for: key, locale: "en-GB").localizedCaseInsensitiveContains("colour"), "\(key) en-GB")
+            #expect(localizedString(for: key, locale: "en-AU").localizedCaseInsensitiveContains("colour"), "\(key) en-AU")
+        }
+        #expect(!AppStrings.Label.symbolColour.isEmpty)
+        #expect(!AppStrings.Label.previewDark.isEmpty)
+    }
+
     // MARK: - Helper Functions
 
     /// Load and parse the Localizable.xcstrings file to get localized string for a specific locale

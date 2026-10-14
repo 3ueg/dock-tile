@@ -37,7 +37,7 @@ struct GlyphLayerRenderTests {
     @Test("Layer canvas is exactly 1024x1024 with transparent corners (no baked squircle)")
     func canvasIsTransparentOutsideGlyph() throws {
         let data = try IconGenerator.generateGlyphLayerPNG(
-            appearance: .light, tintColor: .green, iconType: .sfSymbol,
+            appearance: .light, tintColor: .green, background: .colour, iconType: .sfSymbol,
             iconValue: "hammer.fill", iconScale: 14, iconWeight: .medium)
         let rep = try bitmap(data)
         #expect(rep.pixelsWide == Self.canvas)
@@ -48,16 +48,16 @@ struct GlyphLayerRenderTests {
         }
     }
 
-    @Test("Light layer glyph is white-family; dark layer carries the LIFTED tint")
+    @Test("Light layer glyph is white-family; dark layer carries the palette's 3:1 dark tone")
     func appearanceDrivesGlyphColour() throws {
-        // #5F00FF is the colour `liftedForDarkGlyph` exists for: maximum HSB brightness, perceived
-        // luminance (0.23) far under the 0.55 floor, so it vanishes on the dark background unless
+        // #5F00FF is the colour the tone map exists for: maximum HSB brightness, perceived
+        // luminance (0.23) far under what the tone map needs, so it vanishes on the dark background unless
         // lifted. A saturated tint like .green would satisfy a "saturation > 0.3" check straight
-        // from the raw tint, proving nothing about the lift.
+        // from the raw tint, proving nothing about the tone map.
         let violet = TintColor.custom("#5F00FF")
         func layer(_ appearance: IconAppearance) throws -> Data {
             try IconGenerator.generateGlyphLayerPNG(
-                appearance: appearance, tintColor: violet, iconType: .sfSymbol,
+                appearance: appearance, tintColor: violet, background: .colour, iconType: .sfSymbol,
                 iconValue: "square.fill", iconScale: 14, iconWeight: .medium)
         }
         func centreColour(_ data: Data) throws -> NSColor {
@@ -79,10 +79,13 @@ struct GlyphLayerRenderTests {
             .filter { $0.alphaComponent > 0.99 }
             .map(Self.perceivedLuminance)
         let rendered = try #require(glyphLuminances.max())
-        let expected = Self.perceivedLuminance(
-            violet.nsColors(for: .dark, iconType: .sfSymbol).foreground)
+        let foreground = violet.nsColors(for: .dark, iconType: .sfSymbol, background: .colour).foreground
+        let expected = Self.perceivedLuminance(foreground)
         let unlifted = Self.perceivedLuminance(try #require(NSColor(hex: "#5F00FF")))
-        #expect(expected >= TintColor.darkGlyphLuminanceFloor - 0.001)  // the seam lifted at all
+        let fg = try #require(foreground.usingColorSpace(.sRGB))
+        // The seam lifted at all: the shaded glyph bottom clears 3:1 on the near-black tile.
+        #expect(ToneMap.contrastRatio(SRGB(r: fg.redComponent, g: fg.greenComponent, b: fg.blueComponent).darkened(by: 0.10),
+                                      TilePalette.darkTop) >= ToneMap.floor)
         // …and the pixels carry it. The shading gradient costs the composited glyph ~15% of its
         // luminance, so the rendered maximum sits just under the seam's value — and, crucially,
         // far above the ~0.23 an unlifted #5F00FF would leave (which is the regression).
@@ -97,17 +100,56 @@ struct GlyphLayerRenderTests {
         #expect(tintedData == lightData)
     }
 
-    /// The same 0.299/0.587/0.114 weighting `liftedForDarkGlyph` lifts on — HSB brightness cannot
-    /// see the `#5F00FF` case at all (it is already 1.0 there).
+    /// Perceived luminance (0.299/0.587/0.114 weighting); HSB brightness cannot see the
+    /// `#5F00FF` case at all because it is already 1.0 there.
     private static func perceivedLuminance(_ color: NSColor) -> CGFloat {
         guard let rgb = color.usingColorSpace(.sRGB) else { return 0 }
         return 0.299 * rgb.redComponent + 0.587 * rgb.greenComponent + 0.114 * rgb.blueComponent
     }
 
+    @Test("Tinted layer stays byte-identical to light for BOTH backgrounds (the two-layer document reuses light for tinted)")
+    func tintedEqualsLightForEveryBackground() throws {
+        for background in TileBackground.allCases {
+            func layer(_ a: IconAppearance) throws -> Data {
+                try IconGenerator.generateGlyphLayerPNG(
+                    appearance: a, tintColor: .preset(.orange), background: background,
+                    iconType: .sfSymbol, iconValue: "star.fill", iconScale: 14, iconWeight: .medium, canvas: 256)
+            }
+            #expect(try layer(.light) == layer(.tinted), "\(background)")
+        }
+    }
+
+    /// Average colour of the pixels whose alpha is at least 0.9 (the glyph body).
+    private func glyphBodyColour(_ png: Data) throws -> (r: Double, g: Double, b: Double) {
+        let rep = try bitmap(png)
+        var sum = (r: 0.0, g: 0.0, b: 0.0), n = 0.0
+        for y in stride(from: 0, to: rep.pixelsHigh, by: 4) {
+            for x in stride(from: 0, to: rep.pixelsWide, by: 4) {
+                guard let c = rep.colorAt(x: x, y: y)?.usingColorSpace(.sRGB), c.alphaComponent >= 0.9 else { continue }
+                sum.r += c.redComponent; sum.g += c.greenComponent; sum.b += c.blueComponent; n += 1
+            }
+        }
+        try #require(n > 0, "no opaque glyph pixels")
+        return (sum.r / n, sum.g / n, sum.b / n)
+    }
+
+    @Test("Mono light layer is the coloured tone; Colour light layer is white")
+    func monoLightLayerIsColoured() throws {
+        func body(_ background: TileBackground) throws -> (r: Double, g: Double, b: Double) {
+            try glyphBodyColour(IconGenerator.generateGlyphLayerPNG(
+                appearance: .light, tintColor: .preset(.orange), background: background,
+                iconType: .sfSymbol, iconValue: "star.fill", iconScale: 14, iconWeight: .medium, canvas: 256))
+        }
+        let mono = try body(.mono)
+        #expect(mono.r > mono.b + 0.2, "Mono light glyph lost the orange: \(mono)")
+        let colour = try body(.colour)
+        #expect(colour.r > 0.8 && colour.g > 0.8 && colour.b > 0.8, "Colour light glyph not white: \(colour)")
+    }
+
     @Test("Glyph honours the seam ratio on the new canvas")
     func glyphSizeFollowsSeamRatio() throws {
         let rep = try bitmap(try IconGenerator.generateGlyphLayerPNG(
-            appearance: .light, tintColor: .green, iconType: .sfSymbol,
+            appearance: .light, tintColor: .green, background: .colour, iconType: .sfSymbol,
             iconValue: "square.fill", iconScale: 14, iconWeight: .medium))
         // Scan the horizontal extent of non-transparent pixels on the centre row.
         var minX = Self.canvas, maxX = 0
@@ -122,11 +164,11 @@ struct GlyphLayerRenderTests {
 
     @Test("Emoji layer renders identically for every appearance (single-layer model)")
     func emojiIgnoresAppearance() throws {
-        let a = try IconGenerator.generateGlyphLayerPNG(appearance: .light, tintColor: .green,
+        let a = try IconGenerator.generateGlyphLayerPNG(appearance: .light, tintColor: .green, background: .colour,
             iconType: .emoji, iconValue: "🔨", iconScale: 14, iconWeight: .medium)
-        let b = try IconGenerator.generateGlyphLayerPNG(appearance: .dark, tintColor: .green,
+        let b = try IconGenerator.generateGlyphLayerPNG(appearance: .dark, tintColor: .green, background: .colour,
             iconType: .emoji, iconValue: "🔨", iconScale: 14, iconWeight: .medium)
-        let c = try IconGenerator.generateGlyphLayerPNG(appearance: .tinted, tintColor: .green,
+        let c = try IconGenerator.generateGlyphLayerPNG(appearance: .tinted, tintColor: .green, background: .colour,
             iconType: .emoji, iconValue: "🔨", iconScale: 14, iconWeight: .medium)
         #expect(a == b)
         #expect(a == c)
@@ -139,7 +181,7 @@ struct GlyphLayerRenderTests {
         defer { try? FileManager.default.removeItem(at: out) }
 
         try IconGenerator.generateFallbackIcns(
-            tintColor: .green, iconType: .sfSymbol, iconValue: "square.fill",
+            tintColor: .green, background: .colour, iconType: .sfSymbol, iconValue: "square.fill",
             iconScale: 14, iconWeight: .medium, outputURL: out)
 
         let image = try #require(NSImage(contentsOf: out))
@@ -172,7 +214,7 @@ struct GlyphLayerRenderTests {
     func maxScaleLayerStaysInsideTheShape(_ type: IconType, _ value: String) throws {
         let scale = type == .emoji ? IconDepthMetrics.emojiScaleMax : 19
         let rep = try bitmap(try IconGenerator.generateGlyphLayerPNG(
-            appearance: .light, tintColor: .green, iconType: type,
+            appearance: .light, tintColor: .green, background: .colour, iconType: type,
             iconValue: value, iconScale: scale, iconWeight: .medium))
         let mask = try #require(IconPreviewGeometryTests.shapeMask(side: CGFloat(Self.canvas)))
         let escaped = IconPreviewGeometryTests.escapedPixels(rep, mask: mask)
@@ -184,7 +226,7 @@ struct GlyphLayerRenderTests {
         let brand = SFSymbolCatalog.brandSymbolName
         func layer(_ appearance: IconAppearance) throws -> Data {
             try IconGenerator.generateGlyphLayerPNG(
-                appearance: appearance, tintColor: .green, iconType: .sfSymbol,
+                appearance: appearance, tintColor: .green, background: .colour, iconType: .sfSymbol,
                 iconValue: brand, iconScale: 14, iconWeight: .medium)
         }
         // Unlike emoji, the brand raster IS recoloured per appearance — so its layers differ.

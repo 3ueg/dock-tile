@@ -24,12 +24,13 @@ was reached.
 1. `IconGenerator.generateGlyphLayerPNG` renders one 1024×1024 transparent-background layer PNG
    per authorable appearance — glyph + shading gradient + contact shadow **only**; no squircle,
    stroke, or sheen, because the system draws the shape and the glass. SF Symbols and the brand
-   glyph get three layers (`light` = white, `dark` = the tile's tint lifted via
-   `liftedForDarkGlyph`, `tinted` = plain white/mono); emoji get one full-colour layer shared by
+   glyph author two layers, `light` (white on Colour / the fitted tone on Mono) and `dark` (the
+   `TilePalette` Dark glyph); the tinted appearance reuses the light layer and macOS derives the
+   tinted/clear relief from its alpha — see "Tile background (Mono) and tone map"; emoji get one full-colour layer shared by
    every appearance (emoji cannot be recoloured — V1 below).
 2. `IconDocumentBuilder` (pure seam) assembles the `.icon` document: the tile's tint gradient as
    the icon-level JSON `fill` (+ a `dark` background override — near-black for symbol/brand tiles,
-   `darkenedForDarkMode(tint)` for emoji), and the glyph layers wired via `hidden-specializations`
+   `TilePalette` Dark emoji fill for emoji), and the glyph layers wired via `hidden-specializations`
    so the right layer shows per appearance (a layer's `fill` never recolours a glyph — the PNGs
    are pre-coloured).
 3. `IconCompiler` runs the bundled `docktile-actool` (vendored under `Vendor/actool/`, see its
@@ -76,6 +77,44 @@ the entry's icon *source* changes kind (`.icns` → `Assets.car`).
 correctly in every style — not a blocker — but the size discrepancy itself (likely extra
 pre-rendered sizes in Apple's output) was never root-caused. Anyone revisiting car size or trying
 to explain a rendering difference should treat this as open, not resolved.
+
+## Tile background (Mono) and tone map
+
+Each tile stores ONE colour plus a `background` (`TileBackground`: `.colour` default, `.mono`).
+Every role (fill top/bottom, glyph) per background x style x icon type is derived by the pure
+`TilePalette.resolve` ([TilePalette.swift](../../DockTile/Utilities/TilePalette.swift); `SRGB`,
+`ToneMap`, `TilePalette`); `TintColor`/`IconStyleManager` are thin adapters over it, so the baked
+`.icns`, the compiled `.icon` fills and the live preview cannot drift.
+
+- **Mono** = `#FFFFFF -> #EFEFF1` (Default) / `#2C2C2E -> #1C1C1E` (Dark) with the tint as the
+  glyph. **Colour** = the tint as the fill, white glyph.
+- **Mono follows Light/Dark on macOS 26+ only.** On macOS 15 the legacy path always shows the light
+  variant (no icon-style setting exists there), so Customise presents Mono as a white tile with a
+  coloured symbol (one preview, static hint) via `CustomiseTileView.heroStyles`.
+- **The promise: every drawn symbol/fill pair >= 3:1** (`ToneMap.floor` 3.0, searched at
+  `searchTarget` 3.1 for 8-bit/gamut headroom) via `ToneMap.fit` (OKLCH lightness search,
+  hue-preserving). Each fit tests the pairs the renderer actually draws: Colour clears TWO (white
+  vs the fill top, and the white glyph's Default-style SHADED bottom — `glyphBottomDarken` 0.12 —
+  vs the fill bottom); Dark symbol fits the dark-shaded glyph (0.10) against `#2C2C2E`; Mono Light
+  fits the glyph against `#EFEFF1`. `fillWasDeepened` drives the Customise "Deepened" hint.
+- **Measured on the chosen colours BEFORE decorative sheens** (decided 2026-10-13): macOS 26 Dock
+  icons carry no baked sheen (the system adds its glass); the macOS 15 bake and the in-app preview
+  add a glyph/surface sheen that is decoration, not part of the promise.
+- **The target is fixed**: a Dock icon is compiled once and cannot react to Increase Contrast (no
+  such icon appearance).
+- **Previews are canonical**: the Customise chips and Mono hero always render Default/Dark via
+  `DockTileIconPreview.forcing(_:)` (`displayStyle(forced:raw:colorScheme:)`), whatever the system
+  icon style is.
+- **Fills are P3 JSON fills** (`HelperBundleManager.declarativeFillsP3`), not pixels.
+- **Layer model (spike, 2026-10-14)**: a Mono symbol `.icon` keeps the SAME two glyph layers as a
+  Colour one; the tinted appearance reuses the (coloured) light layer, and macOS 27 derives a legible
+  Tinted/Clear relief from it (verified by eye in Finder). No third layer was needed.
+- **Verify icon styles by eye in Finder/Dock**: scripted renders (`NSWorkspace.icon(forFile:)`) do
+  NOT follow the system icon style on macOS 27, and `AppleIconAppearanceTheme` is absent from the
+  global domain there.
+- **Not adopted**: Apple's `system-light`/`system-dark` fills — their values are unpublished, so
+  contrast cannot be computed against them.
+- Existing Colour tiles change look on update (saturated gradient start; sub-3:1 colours deepen).
 
 ## Icon Generation — Legacy Path (`IconGenerator.swift`, macOS 15 fallback)
 
@@ -249,7 +288,7 @@ macOS Tahoe has an independent "Icon and widget style" setting (separate from Li
 |-------|-------------------|--------|
 | Default | `nil` | Colorful gradient, white symbol |
 | Automatic | `"RegularAutomatic"` | **Follows system appearance** — `.dark` in Dark mode, `.defaultStyle` in Light. This is the Tahoe default; `IconStyle.from()` MUST map it or dark icons never apply in Automatic mode |
-| Dark | `"RegularDark"` | **Splits by icon type.** SF Symbol → tile's own tint as the *glyph* (lifted on perceived luminance to a `0.55` floor via `liftedForDarkGlyph`, so deep violet stays visible) on a **neutral near-black** background — HIG-native, and calmer than a stark white glyph. Emoji → darkened shade of the tile's own tint (`darkenedForDarkMode`, hue preserved) with the full-colour emoji (can't be recoloured). See [dark-mode-icon-rendering.md](../../docs/dark-mode-icon-rendering.md) |
+| Dark | `"RegularDark"` | **Splits by icon type.** SF Symbol → tile's own tint as the *glyph* (fitted by `TilePalette` so its shaded bottom clears 3:1 against `#2C2C2E`, so deep violet stays visible) on a **neutral near-black** background — HIG-native, and calmer than a stark white glyph. Colour emoji → brightness-capped shade of the tile's own tint (`SRGB.cappingBrightness` 0.22 top / 0.13 bottom, hue preserved) with the full-colour emoji (can't be recoloured); Mono emoji take the neutral near-black. See [dark-mode-icon-rendering.md](../../docs/dark-mode-icon-rendering.md) |
 | Clear | `"ClearAutomatic"` | Light gray, dark gray symbol (grayscale only) |
 | Tinted | `"TintedAutomatic"` | Medium gray, white symbol (grayscale only) |
 
@@ -259,7 +298,7 @@ macOS Tahoe has an independent "Icon and widget style" setting (separate from Li
 - All 4 variants generated upfront during `installHelper()` (~200-400ms) — legacy branch only; the declarative branch compiles one car instead (see Declarative Pipeline above).
 - Style switching is a file copy + immediate ad-hoc re-seal (the swap breaks the bundle signature otherwise) — legacy only; nothing ever swaps a file in a declarative helper.
 - For view re-renders, key off `IconStyle.forDisplay(raw: iconStyleManager.rawStyle, colorScheme:)` — live on every macOS version (observer-fed on Tahoe, detection-fed pre-26). Do NOT reference `currentStyle` in view bodies: it is legacy-detection state, frozen after init on Tahoe.
-- **Dark variant rationale + HIG sources**: [docs/dark-mode-icon-rendering.md](../../docs/dark-mode-icon-rendering.md) (darkened-own-tint background + white symbol, and why) — the same colour choices are reused by the declarative path's `dark` background/glyph layers.
+- **Dark variant rationale + HIG sources**: [docs/dark-mode-icon-rendering.md](../../docs/dark-mode-icon-rendering.md) (darkened-own-tint background + white symbol, and why) — the same colour choices are reused by the declarative path's `dark` background/glyph layers. The colour roles now come from `TilePalette` (Colour emoji keeps the darkened own tint; symbols use the 3:1-fitted glyph on near-black; Mono uses near-black for every icon type).
 
 ## App Icon Loading
 

@@ -32,6 +32,9 @@ enum ConfigurationDefaults {
     // v7: SF Symbol stroke weight (ignored for emojis)
     static let iconWeight: IconWeight = .medium
 
+    // v9: Tile background — existing tiles stay Colour
+    static let background: TileBackground = .colour
+
     // Visibility
     static let isVisibleInDock = true  // Show in Dock by default
     static let showInAppSwitcher = false  // Hidden from Cmd+Tab by default

@@ -84,6 +84,7 @@ struct DockTileDetailView: View {
         hasher.combine(config.iconValue)
         hasher.combine(config.iconScale)
         hasher.combine(config.iconWeight)
+        hasher.combine(config.background)
         hasher.combine(config.layoutMode)
         hasher.combine(config.showInAppSwitcher)
         for item in config.appItems {
@@ -352,6 +353,7 @@ struct DockTileDetailView: View {
                     iconValue: editedConfig.iconValue,
                     iconScale: editedConfig.iconScale,
                     iconWeight: editedConfig.iconWeight,
+                    background: editedConfig.background,
                     size: 90
                 )
                 .contentShape(RoundedRectangle(cornerRadius: 90 * 0.225, style: .continuous))
@@ -594,7 +596,8 @@ struct DockTileDetailView: View {
                     AnalyticsService.shared.log(wasInDock ? .tileUpdated : .tileAddedToDock, [
                         "layout": configToSave.layoutMode.rawValue,
                         "app_count": configToSave.appItems.count,
-                        "show_in_app_switcher": configToSave.showInAppSwitcher
+                        "show_in_app_switcher": configToSave.showInAppSwitcher,
+                        "background": configToSave.background.rawValue
                     ])
                     print("✅ Helper installed: \(configToSave.name)")
                     print("   User can open it from: ~/Library/Application Support/DockTile/")

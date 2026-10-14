@@ -27,7 +27,7 @@ struct IconGeneratorContentTests {
         // separately by DarkGlyphTreatmentTests.
         IconGenerator.generateIcon(
             tintColor: tint, iconType: type, iconValue: value,
-            iconScale: 14, size: CGSize(width: px, height: px),
+            iconScale: 14, background: .colour, size: CGSize(width: px, height: px),
             iconStyle: .defaultStyle)
     }
 
@@ -52,6 +52,30 @@ struct IconGeneratorContentTests {
         guard count > 0 else { return nil }
         let n = Double(count)
         return (rs / n, gs / n, bs / n, n / Double(rep.pixelsWide * rep.pixelsHigh), peak)
+    }
+
+    @Test("macOS 15 bake: a Mono Default tile's background is white, its Dark variant the neutral near-black")
+    func legacyMonoBackgrounds() throws {
+        func centreEdge(_ background: TileBackground, _ iconType: IconType, _ value: String,
+                        _ style: IconStyle) throws -> NSColor {
+            let image = IconGenerator.generateIcon(
+                tintColor: .preset(.blue), iconType: iconType, iconValue: value,
+                iconScale: 10, iconWeight: .medium, background: background,
+                size: CGSize(width: 256, height: 256), iconStyle: style)
+            let rep = try #require(raster(image))
+            // Inside the inset shape, left of the (small, scale-10) glyph.
+            return try #require(rep.colorAt(x: 64, y: 128)?.usingColorSpace(.sRGB))
+        }
+        let light = try centreEdge(.mono, .sfSymbol, "star.fill", .defaultStyle)
+        #expect(light.redComponent > 0.9 && light.greenComponent > 0.9 && light.blueComponent > 0.9)
+        // Mid-height of the #2C2C2E -> #1C1C1E gradient is #242426 (measured 0.141, 0.141, 0.149).
+        let dark = try centreEdge(.mono, .sfSymbol, "star.fill", .dark)
+        #expect(abs(dark.redComponent - 0x24 / 255.0) < 0.02)
+        #expect(abs(dark.greenComponent - 0x24 / 255.0) < 0.02)
+        #expect(abs(dark.blueComponent - 0x26 / 255.0) < 0.02)
+        // A Colour emoji tile keeps its blue-tinted dark fill, so the same pin must reject it.
+        let colourEmoji = try centreEdge(.colour, .emoji, "🙂", .dark)
+        #expect(colourEmoji.blueComponent - colourEmoji.redComponent > 0.05)
     }
 
     @Test("Generated icon is not blank: the squircle covers the canvas and a bright glyph is present")
@@ -121,7 +145,7 @@ struct IconStrokeGeometryTests {
     private func rasterisedTile() throws -> NSBitmapImageRep {
         let image = IconGenerator.generateIcon(
             tintColor: .blue, iconType: .sfSymbol, iconValue: "star.fill",
-            iconScale: 14, size: CGSize(width: Self.px, height: Self.px),
+            iconScale: 14, background: .colour, size: CGSize(width: Self.px, height: Self.px),
             iconStyle: .defaultStyle)
         return try #require(image.representations.compactMap { $0 as? NSBitmapImageRep }.first)
     }

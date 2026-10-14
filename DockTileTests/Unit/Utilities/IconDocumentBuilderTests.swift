@@ -7,6 +7,7 @@
 //  only ground truth for this undocumented format.
 //
 
+import AppKit
 import Foundation
 import Testing
 @testable import Dock_Tile
@@ -66,6 +67,29 @@ struct IconDocumentBuilderTests {
         let layer = try #require((json["groups"] as? [[String: Any]])?[0]["layers"] as? [[String: Any]])?[0]
         let position = try #require(layer?["position"] as? [String: Any])
         #expect(position["scale"] as? Double == 1.0)
+    }
+
+    private func p3(_ hex: String) throws -> String {
+        let s = try #require(SRGB(hex: hex))
+        let c = try #require(NSColor(srgbRed: s.r, green: s.g, blue: s.b, alpha: 1).usingColorSpace(.displayP3))
+        return String(format: "display-p3:%.5f,%.5f,%.5f,1.00000", c.redComponent, c.greenComponent, c.blueComponent)
+    }
+
+    @Test("Mono icon.json: default fill is #FFFFFF→#EFEFF1, dark is #2C2C2E→#1C1C1E, tinted unchanged")
+    func monoFills() throws {
+        let fills = try HelperBundleManager.declarativeFillsP3(for: DockTileConfiguration(name: "Media", tintColor: .blue, background: .mono))
+        let json = IconDocumentBuilder.iconJSON(
+            fillTopP3: fills.lightTop, fillBottomP3: fills.lightBottom,
+            darkFillTopP3: fills.darkTop, darkFillBottomP3: fills.darkBottom,
+            tintedFillTopP3: fills.tintedTop, tintedFillBottomP3: fills.tintedBottom, layers: [])
+        let specs = try #require(json["fill-specializations"] as? [[String: Any]])
+        func stops(_ i: Int) throws -> [String] {
+            let value = try #require(specs[i]["value"] as? [String: Any])
+            return try #require(value["linear-gradient"] as? [String])
+        }
+        #expect(try stops(0) == [p3("#FFFFFF"), p3("#EFEFF1")])
+        #expect(try stops(1) == [p3("#2C2C2E"), p3("#1C1C1E")])
+        #expect(try stops(2) == [p3("#8E8E93"), p3("#636366")])
     }
 
     @Test("writeDocument lays out icon.json + Assets/")

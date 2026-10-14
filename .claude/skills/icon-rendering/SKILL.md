@@ -59,6 +59,7 @@ instead of the 4 variants).
 | `IconWeight` dual mappings | `fontWeight` (SwiftUI) and `nsFontWeight` (AppKit) MUST agree; emoji/brand ignore weight | `IconWeightTests` |
 | `IconStyle.resolve` | style string → style; absent → Default; unrecognised string OR non-string type → nil = don't act, NEVER Default | `IconStyleResolveTests` |
 | `IconGenerator.emojiInkMetrics` + `emojiInkFit` | emoji sized by measured artwork, never font em | `EmojiInkFitRenderTests` |
+| `TilePalette.resolve` + `ToneMap.fit` | every tile colour role (fill top/bottom, glyph) per background (Colour/Mono) x style x icon type, each drawn pair >= 3:1; `TintColor`/`IconStyleManager` are adapters; replaced `liftedForDarkGlyph`/`darkenedForDarkMode` | `TilePaletteTests` |
 | `iconMatchesStyle` | launch heal decision | `HelperIconMatchTests` |
 | `replaceIconAtomically` | the only way to replace a live `AppIcon.icns` | `IconSwapAtomicityTests` |
 

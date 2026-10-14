@@ -985,6 +985,222 @@
         }
       }
     },
+    "label.background": {
+      "comment": "Customise Tile: background row label",
+      "extractionState": "manual",
+      "localizations": {
+        "en-AU": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Background"
+          }
+        },
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Background"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Background"
+          }
+        }
+      }
+    },
+    "label.background.colour": {
+      "comment": "Customise Tile: Colour background chip",
+      "extractionState": "manual",
+      "localizations": {
+        "en-AU": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Colour"
+          }
+        },
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Colour"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Color"
+          }
+        }
+      }
+    },
+    "label.background.colour.accessibility": {
+      "comment": "VoiceOver label for the Colour chip",
+      "extractionState": "manual",
+      "localizations": {
+        "en-AU": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Colour, filled with your colour"
+          }
+        },
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Colour, filled with your colour"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Color, filled with your color"
+          }
+        }
+      }
+    },
+    "label.background.hint.colour": {
+      "comment": "Customise Tile: hint under Background when Colour",
+      "extractionState": "manual",
+      "localizations": {
+        "en-AU": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Filled with your colour"
+          }
+        },
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Filled with your colour"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Filled with your color"
+          }
+        }
+      }
+    },
+    "label.background.hint.mono": {
+      "comment": "Customise Tile: hint under Background when Mono",
+      "extractionState": "manual",
+      "localizations": {
+        "en-AU": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "White in Light Mode, black in Dark Mode"
+          }
+        },
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "White in Light Mode, black in Dark Mode"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "White in Light Mode, black in Dark Mode"
+          }
+        }
+      }
+    },
+    "label.background.hint.mono.static": {
+      "comment": "Customise Tile: hint under Background when Mono on macOS 15 (static white tile)",
+      "extractionState": "manual",
+      "localizations": {
+        "en-AU": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "White tile with a coloured symbol"
+          }
+        },
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "White tile with a coloured symbol"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "White tile with a colored symbol"
+          }
+        }
+      }
+    },
+    "label.background.mono": {
+      "comment": "Customise Tile: Mono background chip",
+      "extractionState": "manual",
+      "localizations": {
+        "en-AU": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mono"
+          }
+        },
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mono"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mono"
+          }
+        }
+      }
+    },
+    "label.background.mono.accessibility": {
+      "comment": "VoiceOver label for the Mono chip",
+      "extractionState": "manual",
+      "localizations": {
+        "en-AU": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mono, white in Light Mode and black in Dark Mode"
+          }
+        },
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mono, white in Light Mode and black in Dark Mode"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mono, white in Light Mode and black in Dark Mode"
+          }
+        }
+      }
+    },
+    "label.background.mono.static.accessibility": {
+      "comment": "VoiceOver label for the Mono chip on macOS 15",
+      "extractionState": "manual",
+      "localizations": {
+        "en-AU": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mono, a white tile with a coloured symbol"
+          }
+        },
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mono, a white tile with a coloured symbol"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mono, a white tile with a colored symbol"
+          }
+        }
+      }
+    },
     "label.colour": {
       "comment": "Label for colour picker section",
       "extractionState": "manual",
@@ -1005,6 +1221,126 @@
           "stringUnit": {
             "state": "translated",
             "value": "Color"
+          }
+        }
+      }
+    },
+    "label.colour.hint.deepened": {
+      "comment": "Customise Tile: colour hint when the fill was darkened for contrast",
+      "extractionState": "manual",
+      "localizations": {
+        "en-AU": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deepened slightly so the symbol stays clear"
+          }
+        },
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deepened slightly so the symbol stays clear"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deepened slightly so the symbol stays clear"
+          }
+        }
+      }
+    },
+    "label.colour.hint.emoji": {
+      "comment": "Customise Tile: colour hint, Mono emoji tile (row disabled)",
+      "extractionState": "manual",
+      "localizations": {
+        "en-AU": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Emoji keep their own colours"
+          }
+        },
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Emoji keep their own colours"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Emoji keep their own colors"
+          }
+        }
+      }
+    },
+    "label.colour.hint.fills": {
+      "comment": "Customise Tile: colour hint, Colour tile",
+      "extractionState": "manual",
+      "localizations": {
+        "en-AU": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fills the tile"
+          }
+        },
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fills the tile"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fills the tile"
+          }
+        }
+      }
+    },
+    "label.colour.hint.toned": {
+      "comment": "Customise Tile: colour hint, Mono tile",
+      "extractionState": "manual",
+      "localizations": {
+        "en-AU": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Toned for Light and Dark"
+          }
+        },
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Toned for Light and Dark"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Toned for Light and Dark"
+          }
+        }
+      }
+    },
+    "label.colour.hint.toned.static": {
+      "comment": "Customise Tile: colour hint, Mono tile on macOS 15",
+      "extractionState": "manual",
+      "localizations": {
+        "en-AU": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Toned to stay clear on white"
+          }
+        },
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Toned to stay clear on white"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Toned to stay clear on white"
           }
         }
       }
@@ -1173,6 +1509,54 @@
           "stringUnit": {
             "state": "translated",
             "value": "Not installed"
+          }
+        }
+      }
+    },
+    "label.preview.dark": {
+      "comment": "Customise Tile: caption under the Dark Mode preview",
+      "extractionState": "manual",
+      "localizations": {
+        "en-AU": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dark"
+          }
+        },
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dark"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dark"
+          }
+        }
+      }
+    },
+    "label.preview.light": {
+      "comment": "Customise Tile: caption under the Light Mode preview",
+      "extractionState": "manual",
+      "localizations": {
+        "en-AU": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Light"
+          }
+        },
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Light"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Light"
           }
         }
       }
@@ -1365,6 +1749,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "You’re using version %@. Dock Tile checks for updates automatically."
+          }
+        }
+      }
+    },
+    "label.symbolColour": {
+      "comment": "Customise Tile: colour row label for a Mono tile",
+      "extractionState": "manual",
+      "localizations": {
+        "en-AU": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Symbol Colour"
+          }
+        },
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Symbol Colour"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Symbol Color"
           }
         }
       }

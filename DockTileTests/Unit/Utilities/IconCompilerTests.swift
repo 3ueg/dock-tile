@@ -202,7 +202,7 @@ struct IconCompilerTests {
 
         func layerPNG(_ appearance: IconAppearance) throws -> Data {
             try IconGenerator.generateGlyphLayerPNG(
-                appearance: appearance, tintColor: tint, iconType: iconType,
+                appearance: appearance, tintColor: tint, background: .colour, iconType: iconType,
                 iconValue: iconValue, iconScale: 16, iconWeight: .semibold)
         }
 
@@ -221,9 +221,9 @@ struct IconCompilerTests {
             pngs = ["glyph-light.png": try layerPNG(.light), "glyph-dark.png": try layerPNG(.dark)]
         }
 
-        let light = tint.nsColors(for: .defaultStyle, iconType: iconType)
-        let dark = tint.nsColors(for: .dark, iconType: iconType)
-        let tinted = tint.nsColors(for: .tinted, iconType: iconType)
+        let light = tint.nsColors(for: .defaultStyle, iconType: iconType, background: .colour)
+        let dark = tint.nsColors(for: .dark, iconType: iconType, background: .colour)
+        let tinted = tint.nsColors(for: .tinted, iconType: iconType, background: .colour)
         let json = IconDocumentBuilder.iconJSON(
             fillTopP3: try Self.p3(light.backgroundTop),
             fillBottomP3: try Self.p3(light.backgroundBottom),

@@ -46,7 +46,7 @@ struct CustomiseTileView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(NSColorBackgroundView.windowBackground)
-        .paneTitleBand(AppStrings.Navigation.customiseTile)
+        .paneTitleBand(configManager.displayName(for: editedConfig.id), subtitle: AppStrings.Navigation.customiseTile)
         .toolbar {
             ToolbarItem(placement: .navigation) {
                 Button(action: {
@@ -86,6 +86,9 @@ struct CustomiseTileView: View {
         .onChange(of: editedConfig.tintColor) { _, newValue in
             DiagnosticsLog.shared.log("tile", "Colour changed for \(editedConfig.diagnosticName) → \(newValue)", verbose: true)
         }
+        .onChange(of: editedConfig.background) { _, newValue in
+            DiagnosticsLog.shared.ui("Customise → Background \(newValue.rawValue) for '\(editedConfig.name)'")
+        }
         .onChange(of: editedConfig.iconScale) { _, newValue in
             DiagnosticsLog.shared.log("tile", "Icon size changed to \(newValue) for \(editedConfig.diagnosticName)", verbose: true)
         }
@@ -98,6 +101,41 @@ struct CustomiseTileView: View {
         .onChange(of: selectedIconTab) { _, newTab in
             DiagnosticsLog.shared.ui("Customise → Icon picker tab '\(newTab == .symbol ? "Symbol" : "Emoji")'")
         }
+    }
+
+    enum ColourRowState: Equatable {
+        case fillsTile, deepened, toned, emojiLocked
+        var isDisabled: Bool { self == .emojiLocked }
+        var usesSymbolLabel: Bool { self == .toned || self == .emojiLocked }
+    }
+
+    /// Colour row copy + enablement. Mono + emoji locks the swatches (an emoji can't take a colour)
+    /// but never resets `tintColor` — switching back to a symbol restores the same colour.
+    nonisolated static func colourRowState(background: TileBackground, iconType: IconType, fillDeepened: Bool) -> ColourRowState {
+        switch background {
+        case .mono: return iconType == .emoji ? .emojiLocked : .toned
+        // The "Deepened … so the symbol stays clear" copy names a symbol; an emoji tile has none.
+        case .colour: return (fillDeepened && iconType == .sfSymbol) ? .deepened : .fillsTile
+        }
+    }
+
+    /// Which hero previews Customise shows. Mono follows Light/Dark only where the tile's icon is
+    /// compiled per appearance (macOS 26+, `IconPipeline.isDeclarative`); the macOS 15 legacy
+    /// bake always shows the light variant (there is no icon-style setting to follow), so the
+    /// screen must not promise a black tile there. `nil` = follow the live style (Colour).
+    nonisolated static func heroStyles(background: TileBackground, followsAppearance: Bool) -> [IconStyle?] {
+        switch background {
+        case .colour: return [nil]
+        case .mono: return followsAppearance ? [.defaultStyle, .dark] : [.defaultStyle]
+        }
+    }
+
+    /// The one place the Mono presentation forks on OS: true where Mono really is white-or-black.
+    private var monoFollowsAppearance: Bool { IconPipeline.isDeclarative }
+
+    private var colourRow: ColourRowState {
+        Self.colourRowState(background: editedConfig.background, iconType: editedConfig.iconType,
+                            fillDeepened: TilePalette.fillWasDeepened(tint: editedConfig.tintColor))
     }
 
     // MARK: - Actions
@@ -117,32 +155,18 @@ struct CustomiseTileView: View {
     // MARK: - Studio Canvas (Hero Section)
 
     private var studioCanvas: some View {
-        VStack(spacing: 12) {
-            // Icon preview with grid overlay
-            ZStack {
-                DockTileIconPreview(
-                    tintColor: editedConfig.tintColor,
-                    iconType: editedConfig.iconType,
-                    iconValue: editedConfig.iconValue,
-                    iconScale: editedConfig.iconScale,
-                    iconWeight: editedConfig.iconWeight,
-                    size: 100
-                )
-
-                // Apple icon guide grid overlay (adaptive color based on background). Sized to
-                // the full canvas: reversed 2026-09-02 (Task 6) — the preview now fills its
-                // frame (the icon-grid margin is an artifact fact, not a UI-slot fact), so the
-                // grid matches the canvas rather than a shape inset from it.
-                IconGridOverlay(
-                    size: 100,
-                    backgroundColor: editedConfig.tintColor
-                )
+        HStack(alignment: .top, spacing: 28) {
+            let styles = Self.heroStyles(background: editedConfig.background, followsAppearance: monoFollowsAppearance)
+            ForEach(Array(styles.enumerated()), id: \.offset) { _, style in
+                // Captions only label a Light/Dark pair; a lone preview needs none.
+                if styles.count > 1 {
+                    heroTile(style: style,
+                             caption: style == .dark ? AppStrings.Label.previewDark : AppStrings.Label.previewLight,
+                             symbol: style == .dark ? "moon" : "sun.max")
+                } else {
+                    heroTile(style: style, caption: nil, symbol: nil)
+                }
             }
-
-            // Tile name anchored below preview
-            Text(editedConfig.name)
-                .font(.headline)
-                .foregroundColor(.primary)
         }
         .frame(maxWidth: .infinity)
         .padding(.bottom, 12)
@@ -150,10 +174,48 @@ struct CustomiseTileView: View {
         .background(StudioCanvasBackgroundView().ignoresSafeArea(edges: .top))
     }
 
+    /// One hero preview. `style` forces canonical Default/Dark for the Mono pair — whatever the
+    /// user's system icon style — so the two always explain what Mono means; `nil` follows the
+    /// live style (Colour tiles show one preview, as before).
+    @ViewBuilder
+    private func heroTile(style: IconStyle?, caption: String?, symbol: String?) -> some View {
+        VStack(spacing: 8) {
+            ZStack {
+                DockTileIconPreview(
+                    tintColor: editedConfig.tintColor,
+                    iconType: editedConfig.iconType,
+                    iconValue: editedConfig.iconValue,
+                    iconScale: editedConfig.iconScale,
+                    iconWeight: editedConfig.iconWeight,
+                    background: editedConfig.background,
+                    size: 100
+                )
+                .forcing(style)
+                if editedConfig.background == .mono {
+                    IconGridOverlay(size: 100, lineColor: style == .dark ? .white.opacity(0.25) : .black.opacity(0.15))
+                } else {
+                    IconGridOverlay(size: 100, backgroundColor: editedConfig.tintColor)
+                }
+            }
+            if let caption, let symbol {
+                Label(caption, systemImage: symbol)
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundStyle(.secondary)
+            }
+        }
+    }
+
     // MARK: - Inspector Card
 
     private var inspectorCard: some View {
         VStack(spacing: 0) {
+            // Background Section
+            backgroundSection
+
+            Rectangle()
+                .fill(Color(nsColor: .quinaryLabel))
+                .frame(height: 1)
+
             // Colour Section
             colourSection
 
@@ -178,20 +240,69 @@ struct CustomiseTileView: View {
         .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
     }
 
+    // MARK: - Background Section
+
+    private var backgroundSection: some View {
+        HStack(alignment: .center, spacing: 16) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(AppStrings.Label.background)
+                    .font(.system(size: 13))
+                    .foregroundColor(.primary)
+                Text(backgroundHint)
+                    .font(.system(size: 11))
+                    .foregroundStyle(.secondary)
+            }
+            Spacer()
+            HStack(spacing: 16) {
+                ForEach(TileBackground.allCases, id: \.self) { option in
+                    BackgroundChip(option: option, config: editedConfig, isSelected: editedConfig.background == option,
+                                   followsAppearance: monoFollowsAppearance) {
+                        editedConfig.background = option
+                    }
+                }
+            }
+        }
+        .frame(height: 76)
+    }
+
     // MARK: - Colour Section
 
     private var colourSection: some View {
-        HStack(alignment: .center, spacing: 16) {
-            Text(AppStrings.Label.colour)
-                .font(.system(size: 13))
-                .foregroundColor(.primary)
-
+        let state = colourRow
+        return HStack(alignment: .center, spacing: 16) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(state.usesSymbolLabel ? AppStrings.Label.symbolColour : AppStrings.Label.colour)
+                    .font(.system(size: 13))
+                    .foregroundColor(.primary)
+                Text(colourHint(state))
+                    .font(.system(size: 11))
+                    .foregroundStyle(.secondary)
+            }
             Spacer()
-
-            // Colour picker strip (right-aligned)
+            // `.disabled` on the swatches only; the ROW carries the fade and the tooltip —
+            // `.help` never fires inside a disabled subtree (development.md).
             colourPickerStrip
+                .disabled(state.isDisabled)
         }
-        .frame(height: 52)
+        .frame(height: 56)
+        .opacity(state.isDisabled ? 0.45 : 1)
+        .help(state.isDisabled ? AppStrings.Label.colourHintEmoji : "")
+    }
+
+    private var backgroundHint: String {
+        switch editedConfig.background {
+        case .colour: return AppStrings.Label.backgroundHintColour
+        case .mono: return monoFollowsAppearance ? AppStrings.Label.backgroundHintMono : AppStrings.Label.backgroundHintMonoStatic
+        }
+    }
+
+    private func colourHint(_ state: ColourRowState) -> String {
+        switch state {
+        case .fillsTile: return AppStrings.Label.colourHintFills
+        case .deepened: return AppStrings.Label.colourHintDeepened
+        case .toned: return monoFollowsAppearance ? AppStrings.Label.colourHintToned : AppStrings.Label.colourHintTonedStatic
+        case .emojiLocked: return AppStrings.Label.colourHintEmoji
+        }
     }
 
     private var colourPickerStrip: some View {
@@ -629,4 +740,89 @@ extension Color {
     )
     .environmentObject(ConfigurationManager())
     .frame(width: 500, height: 700)
+}
+
+/// A 44pt tile thumbnail for the Background choice. Colour shows the tile filled; Mono is split
+/// on the diagonal into its Light and Dark renders, so the one chip explains "follows the system".
+private struct BackgroundChip: View {
+    let option: TileBackground
+    let config: DockTileConfiguration
+    let isSelected: Bool
+    /// False on macOS 15, where Mono is always the light render (see `CustomiseTileView.heroStyles`).
+    let followsAppearance: Bool
+    let action: () -> Void
+
+    private let side: CGFloat = 44
+
+    var body: some View {
+        Button(action: action) {
+            VStack(spacing: 6) {
+                thumbnail
+                    .frame(width: side, height: side)
+                    .overlay {
+                        // 2pt ring, 2pt gap: the 2pt stroke is centred on a path 3pt outside the tile.
+                        RoundedRectangle(cornerRadius: side * 0.225 + 3, style: .continuous)
+                            .stroke(isSelected ? Color.accentColor : .clear, lineWidth: 2)
+                            .padding(-3)
+                    }
+                Text(option == .colour ? AppStrings.Label.backgroundColour : AppStrings.Label.backgroundMono)
+                    .font(.system(size: 11, weight: isSelected ? .semibold : .regular))
+                    .foregroundStyle(isSelected ? .primary : .secondary)
+            }
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(accessibilityText)
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
+    }
+
+    private var accessibilityText: String {
+        switch option {
+        case .colour: return AppStrings.Label.backgroundColourAccessibility
+        case .mono: return followsAppearance ? AppStrings.Label.backgroundMonoAccessibility : AppStrings.Label.backgroundMonoStaticAccessibility
+        }
+    }
+
+    private func preview(_ style: IconStyle) -> some View {
+        DockTileIconPreview(
+            tintColor: config.tintColor, iconType: config.iconType, iconValue: config.iconValue,
+            iconScale: config.iconScale, iconWeight: config.iconWeight, background: option, size: side
+        )
+        .forcing(style)
+    }
+
+    /// Canonical styles (forced), never the live system style: under a fixed Clear/Tinted system
+    /// style the two chips would otherwise be indistinguishable.
+    @ViewBuilder
+    private var thumbnail: some View {
+        switch option {
+        case .colour:
+            preview(.defaultStyle)
+        case .mono where followsAppearance:
+            ZStack {
+                preview(.defaultStyle).clipShape(DiagonalHalf(upperLeading: true))
+                preview(.dark).clipShape(DiagonalHalf(upperLeading: false))
+            }
+        case .mono:
+            preview(.defaultStyle)
+        }
+    }
+}
+
+/// The triangle above (or below) the top-trailing → bottom-leading diagonal.
+private struct DiagonalHalf: Shape {
+    let upperLeading: Bool
+    func path(in rect: CGRect) -> Path {
+        var p = Path()
+        if upperLeading {
+            p.move(to: CGPoint(x: rect.minX, y: rect.minY))
+            p.addLine(to: CGPoint(x: rect.maxX, y: rect.minY))
+            p.addLine(to: CGPoint(x: rect.minX, y: rect.maxY))
+        } else {
+            p.move(to: CGPoint(x: rect.maxX, y: rect.minY))
+            p.addLine(to: CGPoint(x: rect.maxX, y: rect.maxY))
+            p.addLine(to: CGPoint(x: rect.minX, y: rect.maxY))
+        }
+        p.closeSubpath()
+        return p
+    }
 }

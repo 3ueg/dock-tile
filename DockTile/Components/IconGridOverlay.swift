@@ -58,14 +58,15 @@ struct IconGridOverlay: View {
             return Color(hex: "#5DB3F9").opacity(0.6)  // Default blue
         }
 
-        let luminance = bgColor.colorBottom.luminance
-        // Light backgrounds (yellow, etc.): darker overlay
-        // Dark backgrounds (blue, purple): lighter overlay
-        if luminance > 0.5 {
-            return Color.black.opacity(0.25)
-        } else {
-            return Color.white.opacity(0.35)
-        }
+        // Key on the fill the palette actually draws for a Colour tile (the 3:1-fitted top stop),
+        // not the raw tint: a pale tint is deepened, so its raw luminance misjudges the fill.
+        let top = TilePalette.resolve(tint: bgColor, background: .colour, style: .defaultStyle, iconType: .sfSymbol).top
+        return Self.usesDarkLines(forFillTop: top) ? Color.black.opacity(0.25) : Color.white.opacity(0.35)
+    }
+
+    /// Light fills get dark grid lines, dark fills light ones (WCAG relative luminance > 0.5).
+    nonisolated static func usesDarkLines(forFillTop top: SRGB) -> Bool {
+        ToneMap.relativeLuminance(top) > 0.5
     }
 
     /// Warning color for outer circle when icon is at safe area limit
@@ -178,19 +179,6 @@ struct IconGridOverlay: View {
         let outerColor = showSafeAreaWarning ? warningColor : lineColor
         let outerLineWidth = showSafeAreaWarning ? lineWidth * 2 : lineWidth
         context.stroke(outerPath, with: .color(outerColor), lineWidth: outerLineWidth)
-    }
-}
-
-// MARK: - Color Luminance Extension
-
-extension Color {
-    /// Calculate perceived luminance using standard formula
-    /// Returns 0.0 (dark) to 1.0 (light)
-    var luminance: CGFloat {
-        let nsColor = NSColor(self)
-        guard let rgb = nsColor.usingColorSpace(.deviceRGB) else { return 0.5 }
-        // Standard luminance formula: 0.299R + 0.587G + 0.114B
-        return 0.299 * rgb.redComponent + 0.587 * rgb.greenComponent + 0.114 * rgb.blueComponent
     }
 }
 

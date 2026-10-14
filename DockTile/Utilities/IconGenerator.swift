@@ -54,6 +54,7 @@ struct IconGenerator {
         iconValue: String,
         iconScale: Int = ConfigurationDefaults.iconScale,
         iconWeight: IconWeight = ConfigurationDefaults.iconWeight,
+        background: TileBackground,
         size: CGSize,
         iconStyle: IconStyle = IconStyle.current
     ) -> NSImage {
@@ -109,9 +110,9 @@ struct IconGenerator {
         // Create squircle path (continuous corners matching Tahoe guidelines)
         let squirclePath = createSquirclePath(in: shapeRect, cornerRadius: cornerRadius)
 
-        // Get appearance-aware colors. Dark style diverges by icon type (SF Symbol → tinted
-        // glyph on neutral near-black; emoji → darkened-own-tint), so thread the type through.
-        let colors = tintColor.nsColors(for: iconStyle, iconType: iconType)
+        // Get appearance-aware colors. Colours come from `TilePalette` by background × style × icon
+        // type (Colour emoji keeps its darkened own tint in Dark; Mono uses the neutral near-black).
+        let colors = tintColor.nsColors(for: iconStyle, iconType: iconType, background: background)
 
         // Draw gradient background (appearance-aware)
         drawGradient(
@@ -207,6 +208,7 @@ struct IconGenerator {
             iconType: .emoji,
             iconValue: symbol,
             iconScale: ConfigurationDefaults.iconScale,
+            background: .colour,
             size: size,
             iconStyle: IconStyle.current
         )
@@ -835,6 +837,7 @@ struct IconGenerator {
         iconValue: String,
         iconScale: Int = ConfigurationDefaults.iconScale,
         iconWeight: IconWeight = ConfigurationDefaults.iconWeight,
+        background: TileBackground,
         outputURL: URL,
         iconStyle: IconStyle = IconStyle.current
     ) throws {
@@ -845,6 +848,7 @@ struct IconGenerator {
                 iconValue: iconValue,
                 iconScale: iconScale,
                 iconWeight: iconWeight,
+                background: background,
                 size: size,
                 iconStyle: iconStyle
             )
@@ -911,6 +915,7 @@ struct IconGenerator {
             iconType: .emoji,
             iconValue: symbol,
             iconScale: ConfigurationDefaults.iconScale,
+            background: .colour,
             outputURL: outputURL,
             iconStyle: IconStyle.current
         )
@@ -943,6 +948,7 @@ struct IconGenerator {
         iconValue: String,
         iconScale: Int = ConfigurationDefaults.iconScale,
         iconWeight: IconWeight = ConfigurationDefaults.iconWeight,
+        background: TileBackground,
         size: CGFloat = 80,
         iconStyle: IconStyle = IconStyle.current
     ) -> NSImage {
@@ -952,6 +958,7 @@ struct IconGenerator {
             iconValue: iconValue,
             iconScale: iconScale,
             iconWeight: iconWeight,
+            background: background,
             size: CGSize(width: size, height: size),
             iconStyle: iconStyle
         )
@@ -968,6 +975,7 @@ struct IconGenerator {
             iconType: .emoji,
             iconValue: symbol,
             iconScale: ConfigurationDefaults.iconScale,
+            background: .colour,
             size: CGSize(width: size, height: size),
             iconStyle: IconStyle.current
         )
@@ -992,10 +1000,11 @@ extension IconGenerator {
     /// fully transparent.
     ///
     /// Appearance is a LAYER SWAP (the document hides/shows whole layers; a layer `fill` does
-    /// not recolour a glyph), so the colour is baked here: `.light`/`.tinted` → white (the
-    /// system tints what we supply), `.dark` → the tile's tint lifted for visibility. All three
-    /// come from the existing `TintColor.nsColors(for:iconType:)` — the luminance floor is not
-    /// re-derived. **Emoji ignore appearance entirely**: they are colour glyphs that cannot be
+    /// not recolour a glyph), so the colour is baked here: `.light` and `.tinted` → the
+    /// palette's light glyph (white for Colour, the fitted tone for Mono — the two-layer document
+    /// shows the light layer for tinted; macOS derives the tinted/clear relief from alpha),
+    /// `.dark` → the palette's dark glyph. All come from `TintColor.nsColors(for:iconType:background:)`
+    /// — the contrast fit is not re-derived. **Emoji ignore appearance entirely**: they are colour glyphs that cannot be
     /// recoloured, so one full-colour layer serves every appearance (verified 2026-09-01 —
     /// the system's tinted pass renders emoji as a legible monochrome relief, even for flat
     /// single-colour artwork). The brand glyph is a tintable raster and routes as a symbol.
@@ -1012,6 +1021,7 @@ extension IconGenerator {
     static func generateGlyphLayerPNG(
         appearance: IconAppearance,
         tintColor: TintColor,
+        background: TileBackground,
         iconType: IconType,
         iconValue: String,
         iconScale: Int,
@@ -1049,7 +1059,7 @@ extension IconGenerator {
 
         // Emoji ride ONE shared layer, so their depth must not vary by appearance either.
         let style = depthStyle(for: appearance, iconType: iconType)
-        let colors = tintColor.nsColors(for: style, iconType: iconType)
+        let colors = tintColor.nsColors(for: style, iconType: iconType, background: background)
         let fontSize = side * IconDepthMetrics.glyphSizeRatio(
             iconScale: iconScale, iconType: iconType, iconValue: iconValue
         )
@@ -1094,6 +1104,7 @@ extension IconGenerator {
     /// because those are effects the system supplies for the real icon.
     static func generateFallbackIcns(
         tintColor: TintColor,
+        background: TileBackground,
         iconType: IconType,
         iconValue: String,
         iconScale: Int,
@@ -1103,6 +1114,7 @@ extension IconGenerator {
         try buildIcns(outputURL: outputURL) { size in
             fallbackIcon(
                 tintColor: tintColor,
+                background: background,
                 iconType: iconType,
                 iconValue: iconValue,
                 iconScale: iconScale,
@@ -1115,6 +1127,7 @@ extension IconGenerator {
     /// One rendition of the fallback icon: margined gradient squircle + the light lean glyph.
     private static func fallbackIcon(
         tintColor: TintColor,
+        background: TileBackground,
         iconType: IconType,
         iconValue: String,
         iconScale: Int,
@@ -1153,7 +1166,7 @@ extension IconGenerator {
         )
 
         // Light appearance = the Default style's colours, from the shared seam.
-        let colors = tintColor.nsColors(for: .defaultStyle, iconType: iconType)
+        let colors = tintColor.nsColors(for: .defaultStyle, iconType: iconType, background: background)
         drawGradient(
             context: context,
             path: squirclePath,

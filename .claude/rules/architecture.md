@@ -151,7 +151,7 @@ detail column, so navigation invariants matter.
 
 **v2 chrome**: the window has no title (`.toolbar(removing: .title)` on
 `DockTileConfigurationView`) — the 52pt title band IS the page header (`paneTitleBand`, see "Tile
-editor" below), and it carries the pane's **title text only, no pane icon**. The sidebar keeps the
+editor" below), and it carries the pane's **title text only, no pane icon**. `paneTitleBand(_:subtitle:)` takes an optional subtitle rendered in the same title `ToolbarItem` — used only by Customise Tile (tile name + "Customise Tile"). The sidebar keeps the
 **standard macOS header pair — the collapse toggle and `+`** (as in Notes/Reminders); v2 briefly
 removed the toggle via `.toolbar(removing: .sidebarToggle)` and that was **deliberately reverted**,
 so do not re-add it. The sidebar is three **static** sections — **Tiles · Settings (General,

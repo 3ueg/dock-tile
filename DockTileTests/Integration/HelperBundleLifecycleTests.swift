@@ -157,7 +157,7 @@ struct IconGenerationIntegrationTests {
             iconType: .sfSymbol,
             iconValue: "star.fill",
             iconScale: 14,
-            outputURL: outputURL
+            background: .colour, outputURL: outputURL
         )
 
         // Verify file was created
@@ -186,7 +186,7 @@ struct IconGenerationIntegrationTests {
             iconType: .emoji,
             iconValue: "📁",
             iconScale: 14,
-            outputURL: icnsURL
+            background: .colour, outputURL: icnsURL
         )
 
         // Extract back to iconset using iconutil
@@ -239,7 +239,7 @@ struct IconGenerationIntegrationTests {
             iconType: .sfSymbol,
             iconValue: "folder.fill",
             iconScale: 14,
-            outputURL: icnsURL
+            background: .colour, outputURL: icnsURL
         )
 
         let iconsetURL = tempDir.appendingPathComponent("Extracted.iconset")

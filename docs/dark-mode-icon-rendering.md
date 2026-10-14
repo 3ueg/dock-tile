@@ -1,5 +1,8 @@
 # Dark-Mode Tile Icon Rendering — Design Notes
 
+> **2026-10-14:** the Dark glyph lift and emoji darkening are now `TilePalette` (a 3:1 contrast fit, see the icon-system rule). `liftedForDarkGlyph`, `darkenedForDarkMode`, `TintColor.nsColorTop/Bottom` and `darkGlyphLuminanceFloor` named below were deleted; read them as history.
+
+
 How Dock Tile renders a helper tile's icon in the macOS Tahoe **Dark** icon style
 (`AppleIconAppearanceTheme = "RegularDark"`). This is one of the four icon-style variants
 generated up front per tile — see [icon-system rule](../.claude/rules/icon-system.md) for the

@@ -22,6 +22,7 @@ struct DockTileConfiguration: Identifiable, Codable, Hashable {
     var iconValue: String  // v3: The actual symbol name or emoji character
     var iconScale: Int  // v4: Icon size scale (10-20 range, affects symbol/emoji size)
     var iconWeight: IconWeight  // v7: SF Symbol stroke weight (ignored for emojis)
+    var background: TileBackground  // v9: Colour fill or Mono (white/near-black)
     var layoutMode: LayoutMode
     var appItems: [AppItem]
     var isVisibleInDock: Bool
@@ -52,6 +53,7 @@ struct DockTileConfiguration: Identifiable, Codable, Hashable {
         iconValue: String = ConfigurationDefaults.iconValue,
         iconScale: Int = ConfigurationDefaults.iconScale,
         iconWeight: IconWeight = ConfigurationDefaults.iconWeight,
+        background: TileBackground = ConfigurationDefaults.background,
         layoutMode: LayoutMode = ConfigurationDefaults.layoutMode,
         appItems: [AppItem] = [],
         isVisibleInDock: Bool = ConfigurationDefaults.isVisibleInDock,
@@ -68,6 +70,7 @@ struct DockTileConfiguration: Identifiable, Codable, Hashable {
         self.iconValue = iconValue
         self.iconScale = iconScale
         self.iconWeight = iconWeight
+        self.background = background
         self.layoutMode = layoutMode
         self.appItems = appItems
         self.isVisibleInDock = isVisibleInDock
@@ -115,6 +118,10 @@ struct DockTileConfiguration: Identifiable, Codable, Hashable {
         iconWeight = try container.decodeIfPresent(IconWeight.self, forKey: .iconWeight)
             ?? ConfigurationDefaults.iconWeight
 
+        // v9 fields - tile background (old configs are Colour tiles)
+        background = try container.decodeIfPresent(TileBackground.self, forKey: .background)
+            ?? ConfigurationDefaults.background
+
         // v5 fields - last Dock position
         lastDockIndex = try container.decodeIfPresent(Int.self, forKey: .lastDockIndex)
 
@@ -136,6 +143,8 @@ struct DockTileConfiguration: Identifiable, Codable, Hashable {
         case iconScale
         // v7 fields
         case iconWeight
+        // v9 fields
+        case background
         // v5 fields
         case lastDockIndex
         // v6 fields
@@ -214,6 +223,23 @@ enum IconWeight: String, Codable, CaseIterable, Hashable {
     }
 }
 
+// MARK: - Tile Background
+
+/// Where a tile's one colour goes (v9). `.colour` fills the tile (white symbol); `.mono` is white
+/// in Light Mode and near-black in Dark Mode with the colour on the symbol. The concrete tones come
+/// from `TilePalette` — never stored, so tuning the tone map re-renders every tile consistently.
+enum TileBackground: String, Codable, CaseIterable, Hashable {
+    case colour
+    case mono
+
+    /// Tolerant decode, same reason as `IconWeight`: a key that is present with an unknown value
+    /// would otherwise fail the ENTIRE configuration decode. Fall back to the default.
+    init(from decoder: Decoder) throws {
+        let raw = try decoder.singleValueContainer().decode(String.self)
+        self = TileBackground(rawValue: raw) ?? .colour
+    }
+}
+
 // MARK: - Tint Color
 
 /// Represents a tile's background color - either a preset or custom hex color
@@ -244,31 +270,37 @@ enum TintColor: Hashable, Codable {
             }
         }
 
-        /// Primary color for icon background gradient (top) - lighter shade
-        var colorTop: Color {
+        /// Lighter stop (the gradient top before tone-mapping; still the Colour+Dark+emoji source).
+        var lightHex: String {
             switch self {
-            case .red: return Color(hex: "#FF6B6B")
-            case .orange: return Color(hex: "#FFA94D")
-            case .green: return Color(hex: "#6BCF7F")
-            case .blue: return Color(hex: "#4DABF7")
-            case .purple: return Color(hex: "#B197FC")
-            case .pink: return Color(hex: "#FF6B9D")
-            case .gray: return Color(hex: "#ADB5BD")
+            case .red: return "#FF6B6B"
+            case .orange: return "#FFA94D"
+            case .green: return "#6BCF7F"
+            case .blue: return "#4DABF7"
+            case .purple: return "#B197FC"
+            case .pink: return "#FF6B9D"
+            case .gray: return "#ADB5BD"
             }
         }
 
-        /// Secondary color for icon background gradient (bottom) - darker/saturated shade
-        var colorBottom: Color {
+        /// The saturated base every tone is derived from (`TilePalette`).
+        var baseHex: String {
             switch self {
-            case .red: return Color(hex: "#FF3B30")
-            case .orange: return Color(hex: "#FF9500")
-            case .green: return Color(hex: "#34C759")
-            case .blue: return Color(hex: "#007AFF")
-            case .purple: return Color(hex: "#AF52DE")
-            case .pink: return Color(hex: "#FF2D55")
-            case .gray: return Color(hex: "#8E8E93")
+            case .red: return "#FF3B30"
+            case .orange: return "#FF9500"
+            case .green: return "#34C759"
+            case .blue: return "#007AFF"
+            case .purple: return "#AF52DE"
+            case .pink: return "#FF2D55"
+            case .gray: return "#8E8E93"
             }
         }
+
+        /// Primary color for icon background gradient (top) - lighter shade
+        var colorTop: Color { Color(hex: lightHex) }
+
+        /// Secondary color for icon background gradient (bottom) - darker/saturated shade
+        var colorBottom: Color { Color(hex: baseHex) }
 
         /// Primary SwiftUI Color (uses bottom/saturated color)
         var color: Color {

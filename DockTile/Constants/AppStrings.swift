@@ -322,6 +322,93 @@ enum AppStrings {
             comment: "Label for colour picker section"
         )
 
+        // MARK: Tile background (Colour / Mono)
+        static let background = NSLocalizedString(
+            "label.background",
+            value: "Background",
+            comment: "Customise Tile: background row label"
+        )
+        static let backgroundColour = NSLocalizedString(
+            "label.background.colour",
+            value: "Colour",
+            comment: "Customise Tile: Colour background chip"
+        )
+        static let backgroundMono = NSLocalizedString(
+            "label.background.mono",
+            value: "Mono",
+            comment: "Customise Tile: Mono background chip"
+        )
+        static let backgroundHintColour = NSLocalizedString(
+            "label.background.hint.colour",
+            value: "Filled with your colour",
+            comment: "Customise Tile: hint under Background when Colour"
+        )
+        static let backgroundHintMono = NSLocalizedString(
+            "label.background.hint.mono",
+            value: "White in Light Mode, black in Dark Mode",
+            comment: "Customise Tile: hint under Background when Mono"
+        )
+        static let backgroundHintMonoStatic = NSLocalizedString(
+            "label.background.hint.mono.static",
+            value: "White tile with a coloured symbol",
+            comment: "Customise Tile: hint under Background when Mono on macOS 15 (static white tile)"
+        )
+        static let backgroundColourAccessibility = NSLocalizedString(
+            "label.background.colour.accessibility",
+            value: "Colour, filled with your colour",
+            comment: "VoiceOver label for the Colour chip"
+        )
+        static let backgroundMonoAccessibility = NSLocalizedString(
+            "label.background.mono.accessibility",
+            value: "Mono, white in Light Mode and black in Dark Mode",
+            comment: "VoiceOver label for the Mono chip"
+        )
+        static let backgroundMonoStaticAccessibility = NSLocalizedString(
+            "label.background.mono.static.accessibility",
+            value: "Mono, a white tile with a coloured symbol",
+            comment: "VoiceOver label for the Mono chip on macOS 15"
+        )
+        static let symbolColour = NSLocalizedString(
+            "label.symbolColour",
+            value: "Symbol Colour",
+            comment: "Customise Tile: colour row label for a Mono tile"
+        )
+        static let colourHintFills = NSLocalizedString(
+            "label.colour.hint.fills",
+            value: "Fills the tile",
+            comment: "Customise Tile: colour hint, Colour tile"
+        )
+        static let colourHintDeepened = NSLocalizedString(
+            "label.colour.hint.deepened",
+            value: "Deepened slightly so the symbol stays clear",
+            comment: "Customise Tile: colour hint when the fill was darkened for contrast"
+        )
+        static let colourHintToned = NSLocalizedString(
+            "label.colour.hint.toned",
+            value: "Toned for Light and Dark",
+            comment: "Customise Tile: colour hint, Mono tile"
+        )
+        static let colourHintTonedStatic = NSLocalizedString(
+            "label.colour.hint.toned.static",
+            value: "Toned to stay clear on white",
+            comment: "Customise Tile: colour hint, Mono tile on macOS 15"
+        )
+        static let colourHintEmoji = NSLocalizedString(
+            "label.colour.hint.emoji",
+            value: "Emoji keep their own colours",
+            comment: "Customise Tile: colour hint, Mono emoji tile (row disabled)"
+        )
+        static let previewLight = NSLocalizedString(
+            "label.preview.light",
+            value: "Light",
+            comment: "Customise Tile: caption under the Light Mode preview"
+        )
+        static let previewDark = NSLocalizedString(
+            "label.preview.dark",
+            value: "Dark",
+            comment: "Customise Tile: caption under the Dark Mode preview"
+        )
+
         // MARK: Popover Appearance controls
 
         static let popoverLayout = NSLocalizedString(
