@@ -132,3 +132,10 @@ hard-coded to the macOS 26 pipeline (follow `IconPipeline.isDeclarative`, or `#a
 the test), and a test that reads the source tree through `#filePath` works on macOS 15 only
 because that job checks the repo out at the same path. The first macOS 15 run failed 11 tests for
 exactly these two reasons. UI/integration tests run locally only.
+
+**Count tests per suite, not by grepping a whole log.** `grep -c "passed"` over an `xcodebuild`
+log drifted between runs of the same tree (748/750/765 for one branch), so a "+N tests" claim
+built on it cannot be checked. Report `-only-testing:` per-suite executed counts and the
+`TEST SUCCEEDED`/`FAILED` line. `DockPlistWatcherReplaceTests.survivesAtomicReplace` still flaked
+on macos-26 CI after `81507dd` (2.2.0 main push, passed on re-run) — re-run before suspecting the
+change under test.
