@@ -596,7 +596,8 @@ struct DockTileDetailView: View {
                     AnalyticsService.shared.log(wasInDock ? .tileUpdated : .tileAddedToDock, [
                         "layout": configToSave.layoutMode.rawValue,
                         "app_count": configToSave.appItems.count,
-                        "show_in_app_switcher": configToSave.showInAppSwitcher
+                        "show_in_app_switcher": configToSave.showInAppSwitcher,
+                        "background": configToSave.background.rawValue
                     ])
                     print("✅ Helper installed: \(configToSave.name)")
                     print("   User can open it from: ~/Library/Application Support/DockTile/")
