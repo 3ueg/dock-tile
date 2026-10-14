@@ -1,5 +1,7 @@
 //  TilePaletteTests.swift — the colour each renderer draws, per background × style × icon type.
+import AppKit
 import Foundation
+import SwiftUI
 import Testing
 @testable import Dock_Tile
 
@@ -42,22 +44,31 @@ struct TilePaletteTests {
     func monoDarkEmoji() {
         let r = TilePalette.resolve(tint: .blue, background: .mono, style: .dark, iconType: .emoji)
         #expect(r.top == SRGB(hex: TintColor.darkNeutralTopHex))
+        #expect(r.bottom == SRGB(hex: TintColor.darkNeutralBottomHex))
     }
 
-    @Test("Colour Dark emoji keeps the darkened-own-tint background (brightness caps 0.22 / 0.13)")
+    @Test("Colour Dark emoji keeps the darkened-own-tint background (exact blue values)")
     func colourDarkEmoji() throws {
         let r = TilePalette.resolve(tint: .blue, background: .colour, style: .dark, iconType: .emoji)
-        #expect(abs(max(r.top.r, r.top.g, r.top.b) - 0.22) < 1e-9)
-        #expect(abs(max(r.bottom.r, r.bottom.g, r.bottom.b) - 0.13) < 1e-9)
-        #expect(r.top.b > r.top.r)   // still blue
+        // top = light stop #4DABF7 scaled so its max channel is 0.22; bottom = base #007AFF scaled to 0.13
+        let tol = 1e-9
+        #expect(abs(r.top.r - 0.22 * 77.0 / 247.0) < tol)
+        #expect(abs(r.top.g - 0.22 * 171.0 / 247.0) < tol)
+        #expect(abs(r.top.b - 0.22) < tol)
+        #expect(abs(r.bottom.r - 0) < tol)
+        #expect(abs(r.bottom.g - 0.13 * 122.0 / 255.0) < tol)
+        #expect(abs(r.bottom.b - 0.13) < tol)
     }
 
     @Test("Colour Default: white symbol clears 3.0 against the fill's lighter top; bottom is darker")
     func colourFill() throws {
+        let shade = try #require(IconDepthMetrics.glyphBottomDarken(style: .defaultStyle, iconType: .sfSymbol, nominalSize: 1024))
         for tint in presets + customs {
             let r = TilePalette.resolve(tint: tint, background: .colour, style: .defaultStyle, iconType: .sfSymbol)
             #expect(r.glyph == .white)
             #expect(ToneMap.contrastRatio(.white, q(r.top)) >= ToneMap.floor, "\(tint)")
+            // The symbol's SHADED bottom sits over the fill's darker bottom stop.
+            #expect(ToneMap.contrastRatio(q(SRGB.white.darkened(by: Double(shade))), q(r.bottom)) >= ToneMap.floor, "\(tint) shaded")
             // Never lighter at the bottom; strictly darker for every colour that is not already black
             // (a black custom fill has nowhere darker to go — L clamps at 0).
             #expect(ToneMap.relativeLuminance(r.bottom) <= ToneMap.relativeLuminance(r.top), "\(tint) bottom lighter")
@@ -104,11 +115,30 @@ struct TilePaletteTests {
         #expect(!TilePalette.fillWasDeepened(tint: .blue))
     }
 
-    @Test("Preset hex tables back the SwiftUI colours (one table, no copies)")
-    func presetHexIsTheSource() {
-        for p in TintColor.PresetColor.allCases {
-            #expect(TintColor.preset(p).baseRGB == SRGB(hex: p.baseHex))
-            #expect(TintColor.preset(p).lightRGB == SRGB(hex: p.lightHex))
+    @Test("Preset stops are pinned to independent literals, and the SwiftUI colours match them")
+    func presetStopsPinned() throws {
+        func c(_ r: Double, _ g: Double, _ b: Double) -> SRGB { SRGB(r: r / 255, g: g / 255, b: b / 255) }
+        // (preset, light stop, base stop) as r/g/b components, not parsed from hex
+        let table: [(TintColor.PresetColor, SRGB, SRGB)] = [
+            (.red, c(0xFF, 0x6B, 0x6B), c(0xFF, 0x3B, 0x30)),
+            (.orange, c(0xFF, 0xA9, 0x4D), c(0xFF, 0x95, 0x00)),
+            (.green, c(0x6B, 0xCF, 0x7F), c(0x34, 0xC7, 0x59)),
+            (.blue, c(0x4D, 0xAB, 0xF7), c(0x00, 0x7A, 0xFF)),
+            (.purple, c(0xB1, 0x97, 0xFC), c(0xAF, 0x52, 0xDE)),
+            (.pink, c(0xFF, 0x6B, 0x9D), c(0xFF, 0x2D, 0x55)),
+            (.gray, c(0xAD, 0xB5, 0xBD), c(0x8E, 0x8E, 0x93)),
+        ]
+        #expect(table.count == TintColor.PresetColor.allCases.count)
+        func rgb(_ color: Color) throws -> (Double, Double, Double) {
+            let ns = try #require(NSColor(color).usingColorSpace(.sRGB))
+            return (Double(ns.redComponent), Double(ns.greenComponent), Double(ns.blueComponent))
+        }
+        for (p, light, base) in table {
+            #expect(TintColor.preset(p).lightRGB == light, "\(p) light")
+            #expect(TintColor.preset(p).baseRGB == base, "\(p) base")
+            let top = try rgb(p.colorTop), bottom = try rgb(p.colorBottom)
+            #expect(abs(top.0 - light.r) < 0.002 && abs(top.1 - light.g) < 0.002 && abs(top.2 - light.b) < 0.002, "\(p) colorTop")
+            #expect(abs(bottom.0 - base.r) < 0.002 && abs(bottom.1 - base.g) < 0.002 && abs(bottom.2 - base.b) < 0.002, "\(p) colorBottom")
         }
     }
 }

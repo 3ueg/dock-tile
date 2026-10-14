@@ -37,8 +37,8 @@ struct SRGB: Hashable, Sendable {
                   b: Double(rgb & 0xFF) / 255)
     }
 
-    /// Blend toward black by `fraction` — the arithmetic `NSColor.darkened(by:)` applies to the
-    /// glyph's shaded bottom, so contrast checks measure what is actually drawn.
+    /// Blend toward black by `fraction` — a conservative approximation of `NSColor.darkened(by:)`
+    /// (it darkens slightly MORE than AppKit's blend, so contrast checks built on it err safe).
     nonisolated func darkened(by fraction: Double) -> SRGB {
         SRGB(r: r * (1 - fraction), g: g * (1 - fraction), b: b * (1 - fraction))
     }
@@ -284,9 +284,16 @@ enum TilePalette {
 
     // MARK: Fits — each tests the weakest pair the renderer actually draws
 
-    /// White symbol against the fill's LIGHTER (top) stop.
+    /// White symbol against the fill's LIGHTER (top) stop, AND the symbol's SHADED bottom
+    /// against the fill's darker (bottom) stop.
     private nonisolated static func colourFill(_ base: SRGB) -> SRGB {
-        ToneMap.fit(base, direction: .darker) { ToneMap.contrastRatio(.white, $0) >= ToneMap.searchTarget }
+        let shade = Double(IconDepthMetrics.glyphBottomDarken(style: .defaultStyle, iconType: .sfSymbol, nominalSize: 1024) ?? 0)
+        let shadedWhite = SRGB.white.darkened(by: shade)
+        return ToneMap.fit(base, direction: .darker) { top in
+            let bottom = ToneMap.shiftingLightness(top, by: colourFillBottomStep)
+            return ToneMap.contrastRatio(.white, top) >= ToneMap.searchTarget
+                && ToneMap.contrastRatio(shadedWhite, bottom) >= ToneMap.searchTarget
+        }
     }
 
     /// Unshaded symbol top against the tile's DARKER (bottom) stop.
