@@ -22,6 +22,9 @@ struct DockTileIconPreview: View {
     let iconValue: String
     let iconScale: Int  // 10–19 symbols / 10–22 emoji, default 14
     let iconWeight: IconWeight  // SF Symbol stroke weight (ignored for emojis)
+    /// Named `tileBackground`, not `background`: a stored `background` on a `View` collides with
+    /// SwiftUI's `.background(_:)` modifier.
+    let tileBackground: TileBackground
     let size: CGFloat
 
     /// Test-only override for the raw icon-style token. Production call sites never set this —
@@ -31,6 +34,9 @@ struct DockTileIconPreview: View {
     /// makes Light vs. Dark colorScheme produce different renders — an explicit style like
     /// ClearDark would legitimately render identically in both, discriminating nothing.
     var rawStyleOverride: RawStyleToken? = nil
+
+    /// Pins the style (Customise's canonical Light/Dark previews); `nil` follows the live style.
+    var forcedStyle: IconStyle? = nil
 
     // Observe IconStyleManager for icon style changes (single source of truth)
     @ObservedObject private var iconStyleManager = IconStyleManager.shared
@@ -42,11 +48,20 @@ struct DockTileIconPreview: View {
     /// Current icon style, resolved for display. `.defaultStyle` fallback: an unresolved raw
     /// token is an edge case with no established prior render to fall back to here.
     private var iconStyle: IconStyle {
-        IconStyle.forDisplay(
-            raw: rawStyleOverride ?? iconStyleManager.rawStyle,
-            colorScheme: colorScheme,
-            fallback: .defaultStyle
-        )
+        Self.displayStyle(forced: forcedStyle, raw: rawStyleOverride ?? iconStyleManager.rawStyle, colorScheme: colorScheme)
+    }
+
+    /// A forced style (Customise's canonical Light/Dark previews) wins; otherwise the live
+    /// system style resolved against this view's colour scheme.
+    nonisolated static func displayStyle(forced: IconStyle?, raw: RawStyleToken, colorScheme: ColorScheme) -> IconStyle {
+        forced ?? IconStyle.forDisplay(raw: raw, colorScheme: colorScheme, fallback: .defaultStyle)
+    }
+
+    /// Copy of this preview pinned to `style` (`nil` = follow the live system style).
+    func forcing(_ style: IconStyle?) -> Self {
+        var copy = self
+        copy.forcedStyle = style
+        return copy
     }
 
     /// Whether we're in dark icon style
@@ -61,6 +76,7 @@ struct DockTileIconPreview: View {
         self.iconValue = symbol
         self.iconScale = ConfigurationDefaults.iconScale
         self.iconWeight = ConfigurationDefaults.iconWeight
+        self.tileBackground = .colour
         self.size = size
     }
 
@@ -71,6 +87,7 @@ struct DockTileIconPreview: View {
         self.iconValue = iconValue
         self.iconScale = ConfigurationDefaults.iconScale
         self.iconWeight = ConfigurationDefaults.iconWeight
+        self.tileBackground = .colour
         self.size = size
     }
 
@@ -81,6 +98,7 @@ struct DockTileIconPreview: View {
         iconValue: String,
         iconScale: Int,
         iconWeight: IconWeight = ConfigurationDefaults.iconWeight,
+        background: TileBackground,
         size: CGFloat
     ) {
         self.tintColor = tintColor
@@ -88,6 +106,7 @@ struct DockTileIconPreview: View {
         self.iconValue = iconValue
         self.iconScale = iconScale
         self.iconWeight = iconWeight
+        self.tileBackground = background
         self.size = size
     }
 
@@ -113,11 +132,11 @@ struct DockTileIconPreview: View {
         size * IconDepthMetrics.glyphSizeRatio(iconScale: iconScale, iconType: iconType, iconValue: iconValue)
     }
 
-    /// Colors based on current icon style. Threads `iconType` so Dark style splits the same way
-    /// the baked `.icns` does: SF Symbol → tinted glyph on neutral near-black; emoji → darkened
-    /// own-tint (tint-coloured symbol on dark background).
+    /// Colors for the current icon style, from `TilePalette` via
+    /// `colors(for:iconType:background:)` — the same seam the baked renderers use, so the preview
+    /// and the Dock icon cannot drift. `iconType` and the tile's background both shape the result.
     private var styleColors: (backgroundTop: Color, backgroundBottom: Color, foreground: Color) {
-        tintColor.colors(for: iconStyle, iconType: iconType, background: .colour) // Task 5/6 threads config.background
+        tintColor.colors(for: iconStyle, iconType: iconType, background: tileBackground)
     }
 
     // MARK: Depth treatment (mirrors IconGenerator via the shared seam)
@@ -340,6 +359,7 @@ extension DockTileIconPreview {
             iconValue: config.iconValue,
             iconScale: config.iconScale,
             iconWeight: config.iconWeight,
+            background: config.background,
             size: size
         )
     }
@@ -355,6 +375,7 @@ extension DockTileIconPreview {
                 iconType: .sfSymbol,
                 iconValue: "star.fill",
                 iconScale: 14,
+                background: .colour,
                 size: 80
             )
             DockTileIconPreview(
@@ -362,6 +383,7 @@ extension DockTileIconPreview {
                 iconType: .sfSymbol,
                 iconValue: "folder.fill",
                 iconScale: 14,
+                background: .colour,
                 size: 80
             )
             DockTileIconPreview(
@@ -369,6 +391,7 @@ extension DockTileIconPreview {
                 iconType: .emoji,
                 iconValue: "🚀",
                 iconScale: 14,
+                background: .colour,
                 size: 80
             )
         }
@@ -393,6 +416,7 @@ extension DockTileIconPreview {
             iconType: .sfSymbol,
             iconValue: "star.fill",
             iconScale: 18,
+            background: .colour,
             size: 160
         )
     }
@@ -408,6 +432,7 @@ extension DockTileIconPreview {
                 iconType: .sfSymbol,
                 iconValue: "star.fill",
                 iconScale: 14,
+                background: .colour,
                 size: 80
             )
             DockTileIconPreview(
@@ -415,6 +440,7 @@ extension DockTileIconPreview {
                 iconType: .sfSymbol,
                 iconValue: "folder.fill",
                 iconScale: 14,
+                background: .colour,
                 size: 80
             )
             DockTileIconPreview(
@@ -422,6 +448,7 @@ extension DockTileIconPreview {
                 iconType: .emoji,
                 iconValue: "🚀",
                 iconScale: 14,
+                background: .colour,
                 size: 80
             )
         }
@@ -444,4 +471,20 @@ extension DockTileIconPreview {
     .padding(60)
     .background(Color(hex: "#1C1C1E"))
     .preferredColorScheme(.dark)
+}
+
+#Preview("Mono") {
+    HStack(spacing: 20) {
+        ForEach([TileBackground.colour, .mono], id: \.self) { background in
+            DockTileIconPreview(
+                tintColor: .blue,
+                iconType: .sfSymbol,
+                iconValue: "star.fill",
+                iconScale: 14,
+                background: background,
+                size: 80
+            )
+        }
+    }
+    .padding(60)
 }

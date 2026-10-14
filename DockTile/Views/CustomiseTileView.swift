@@ -126,6 +126,7 @@ struct CustomiseTileView: View {
                     iconValue: editedConfig.iconValue,
                     iconScale: editedConfig.iconScale,
                     iconWeight: editedConfig.iconWeight,
+                    background: editedConfig.background,
                     size: 100
                 )
 

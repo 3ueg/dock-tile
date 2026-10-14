@@ -40,6 +40,7 @@ struct IconPreviewGeometryTests {
             iconValue: iconValue,
             iconScale: iconScale,
             iconWeight: .medium,
+            background: .colour,
             size: Self.side
         )
         let renderer = ImageRenderer(content: view)
@@ -241,6 +242,7 @@ struct IconPreviewGeometryTests {
             iconValue: "star.fill",
             iconScale: 14,
             iconWeight: .medium,
+            background: .colour,
             size: Self.side
         )
         view.rawStyleOverride = .value("RegularAutomatic")
