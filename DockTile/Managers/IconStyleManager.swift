@@ -539,135 +539,44 @@ extension Notification.Name {
 
 // MARK: - Icon Style Color Generation
 
+// MARK: - TilePalette -> framework colours
+
+extension SRGB {
+    var color: Color { Color(.sRGB, red: r, green: g, blue: b, opacity: 1) }
+    var nsColor: NSColor { NSColor(srgbRed: r, green: g, blue: b, alpha: 1) }
+}
+
 extension TintColor {
 
-    /// Dark-style glyph colours: SF-Symbol tiles render the tile's own tint as the *glyph*
-    /// (lifted to this perceived-luminance floor) on a neutral near-black background — the
-    /// HIG-native Tahoe Dark model. The floor is deliberately restrained (0.55, not a hotter
-    /// 0.6+) so lifted glyphs read calm rather than punchy on the dark tile.
-    static let darkGlyphLuminanceFloor: CGFloat = 0.55
-
-    /// Neutral near-black background gradient for Dark-style SF-Symbol tiles (the pre-tint
+    /// Neutral near-black background gradient for Dark-style tiles (the pre-tint
     /// `#2C2C2E → #1C1C1E` values), so the tinted glyph reads against a monochrome surface.
     static let darkNeutralTopHex = "#2C2C2E"
     static let darkNeutralBottomHex = "#1C1C1E"
 
-    /// Returns colors appropriate for the given icon style
-    /// - Parameters:
-    ///   - style: The icon style to generate colors for
-    ///   - iconType: SF Symbol vs emoji — in Dark style the two diverge (a symbol becomes a
-    ///     tinted glyph on neutral near-black; an emoji keeps the darkened-own-tint background
-    ///     since it can't be recoloured).
-    /// - Returns: A tuple of (background top, background bottom, foreground) colors
-    ///
-    /// NOTE: Clear and Tinted use GRAYSCALE colors (no user tint color).
-    /// This follows Apple HIG - macOS applies system tinting on top of grayscale icons.
-    func colors(for style: IconStyle, iconType: IconType = .sfSymbol) -> (backgroundTop: Color, backgroundBottom: Color, foreground: Color) {
-        switch style {
-        case .defaultStyle:
-            // Default: colorful gradient background, white foreground
-            return (colorTop, colorBottom, .white)
-
-        case .dark:
-            switch iconType {
-            case .sfSymbol:
-                // Dark + SF Symbol (HIG-native): flip the roles — the tile's picked colour
-                // becomes the GLYPH, lifted on perceived luminance so even deep violet stays
-                // visible, on a neutral near-black background.
-                let bgTop = Color(hex: TintColor.darkNeutralTopHex)
-                let bgBottom = Color(hex: TintColor.darkNeutralBottomHex)
-                let glyph = colorBottom.liftedForDarkGlyph(minLuminance: TintColor.darkGlyphLuminanceFloor)
-                return (bgTop, bgBottom, glyph)
-            case .emoji:
-                // Dark + emoji: keep the darkened-own-tint background (an emoji can't be
-                // recoloured, so it keeps its full colour + contact shadow; foreground unused).
-                let darkTop = colorTop.darkenedForDarkMode(maxBrightness: 0.22)
-                let darkBottom = colorBottom.darkenedForDarkMode(maxBrightness: 0.13)
-                return (darkTop, darkBottom, .white)
-            }
-
-        case .clear:
-            // Clear: light gray background, dark gray symbol
-            // NO user color - macOS applies system tinting
-            let clearTop = Color(hex: "#F0F0F2")
-            let clearBottom = Color(hex: "#E0E0E4")
-            let clearForeground = Color(hex: "#6E6E73")  // Dark gray symbol
-            return (clearTop, clearBottom, clearForeground)
-
-        case .tinted:
-            // Tinted: medium gray gradient, white/light symbol
-            // NO user color - macOS applies wallpaper-derived tinting
-            let tintedTop = Color(hex: "#8E8E93")
-            let tintedBottom = Color(hex: "#636366")
-            return (tintedTop, tintedBottom, .white)
-        }
+    /// Returns colors appropriate for the given icon style and tile background.
+    /// Thin adapter over `TilePalette.resolve` — no colour logic here.
+    /// `background` is REQUIRED: omitting it must be a compile error, never a silent Colour tile.
+    func colors(for style: IconStyle, iconType: IconType = .sfSymbol, background: TileBackground)
+        -> (backgroundTop: Color, backgroundBottom: Color, foreground: Color) {
+        let r = TilePalette.resolve(tint: self, background: background, style: style, iconType: iconType)
+        return (r.top.color, r.bottom.color, r.glyph.color)
     }
 
     /// Style mapping for NON-TILE squircles that carry a raw `Color` tint (the sidebar Settings/
-    /// About badges — `SettingsBadgeIcon`). Mirrors `colors(for:iconType:)` above case-for-case
-    /// (SF-symbol branch only; badges are always symbols) and MUST stay in lock-step with it —
-    /// guarded by `DarkGlyphTreatmentTests.badgeColorsMirrorTileMapping`. Before 2026-09-06 the
-    /// badges pinned `.defaultStyle`, so a Dark icon style restyled every tile icon in the
-    /// sidebar while the Settings badges stayed colourful beside them.
+    /// About badges — `SettingsBadgeIcon`). Thin adapter over `TilePalette.resolve` (Colour
+    /// background, SF Symbol branch — badges are always coloured symbols).
     static func badgeColors(for style: IconStyle, tint: Color) -> (top: Color, bottom: Color, foreground: Color) {
-        switch style {
-        case .defaultStyle:
-            return (tint.opacity(0.95), tint.opacity(0.7), .white)
-        case .dark:
-            return (Color(hex: TintColor.darkNeutralTopHex),
-                    Color(hex: TintColor.darkNeutralBottomHex),
-                    tint.liftedForDarkGlyph(minLuminance: TintColor.darkGlyphLuminanceFloor))
-        case .clear:
-            return (Color(hex: "#F0F0F2"), Color(hex: "#E0E0E4"), Color(hex: "#6E6E73"))
-        case .tinted:
-            return (Color(hex: "#8E8E93"), Color(hex: "#636366"), .white)
-        }
+        let ns = NSColor(tint).usingColorSpace(.sRGB) ?? NSColor(srgbRed: 0.557, green: 0.557, blue: 0.576, alpha: 1)
+        let base = SRGB(r: ns.redComponent, g: ns.greenComponent, b: ns.blueComponent)
+        let r = TilePalette.resolve(base: base, light: base, background: .colour, style: style, iconType: .sfSymbol)
+        return (r.top.color, r.bottom.color, r.glyph.color)
     }
 
-    /// Returns NSColors appropriate for the given icon style (for IconGenerator)
-    ///
-    /// Kept in lock-step with `colors(for:iconType:)` — the SwiftUI preview must match the
-    /// baked `.icns`, including the Dark-style split between SF Symbol and emoji.
-    ///
-    /// NOTE: Clear and Tinted use GRAYSCALE colors (no user tint color).
-    /// This follows Apple HIG - macOS applies system tinting on top of grayscale icons.
-    func nsColors(for style: IconStyle, iconType: IconType = .sfSymbol) -> (backgroundTop: NSColor, backgroundBottom: NSColor, foreground: NSColor) {
-        switch style {
-        case .defaultStyle:
-            // Default: colorful gradient, white symbol
-            return (nsColorTop, nsColorBottom, .white)
-
-        case .dark:
-            switch iconType {
-            case .sfSymbol:
-                // Dark + SF Symbol (HIG-native): tile's picked colour becomes the GLYPH, lifted
-                // on perceived luminance (so deep violet stays visible), on neutral near-black.
-                let bgTop = NSColor(hex: TintColor.darkNeutralTopHex) ?? NSColor(white: 0.17, alpha: 1)
-                let bgBottom = NSColor(hex: TintColor.darkNeutralBottomHex) ?? NSColor(white: 0.11, alpha: 1)
-                let glyph = nsColorBottom.liftedForDarkGlyph(minLuminance: TintColor.darkGlyphLuminanceFloor)
-                return (bgTop, bgBottom, glyph)
-            case .emoji:
-                // Dark + emoji: darkened-own-tint background (emoji keeps its own colour; the
-                // white foreground is unused by the emoji draw path).
-                let darkTop = nsColorTop.darkenedForDarkMode(maxBrightness: 0.22)
-                let darkBottom = nsColorBottom.darkenedForDarkMode(maxBrightness: 0.13)
-                return (darkTop, darkBottom, .white)
-            }
-
-        case .clear:
-            // Clear: light gray background, dark gray symbol
-            // NO user color - macOS applies system tinting
-            let clearTop = NSColor(red: 0.941, green: 0.941, blue: 0.949, alpha: 1.0)  // #F0F0F2
-            let clearBottom = NSColor(red: 0.878, green: 0.878, blue: 0.894, alpha: 1.0)  // #E0E0E4
-            let clearForeground = NSColor(red: 0.431, green: 0.431, blue: 0.451, alpha: 1.0)  // #6E6E73
-            return (clearTop, clearBottom, clearForeground)
-
-        case .tinted:
-            // Tinted: medium gray gradient, white symbol
-            // NO user color - macOS applies wallpaper-derived tinting
-            let tintedTop = NSColor(red: 0.557, green: 0.557, blue: 0.576, alpha: 1.0)  // #8E8E93
-            let tintedBottom = NSColor(red: 0.388, green: 0.388, blue: 0.400, alpha: 1.0)  // #636366
-            return (tintedTop, tintedBottom, .white)
-        }
+    /// Returns NSColors appropriate for the given icon style and tile background (for
+    /// IconGenerator). Thin adapter over `TilePalette.resolve` — no colour logic here.
+    func nsColors(for style: IconStyle, iconType: IconType = .sfSymbol, background: TileBackground)
+        -> (backgroundTop: NSColor, backgroundBottom: NSColor, foreground: NSColor) {
+        let r = TilePalette.resolve(tint: self, background: background, style: style, iconType: iconType)
+        return (r.top.nsColor, r.bottom.nsColor, r.glyph.nsColor)
     }
 }

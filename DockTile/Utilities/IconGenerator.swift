@@ -111,7 +111,7 @@ struct IconGenerator {
 
         // Get appearance-aware colors. Dark style diverges by icon type (SF Symbol → tinted
         // glyph on neutral near-black; emoji → darkened-own-tint), so thread the type through.
-        let colors = tintColor.nsColors(for: iconStyle, iconType: iconType)
+        let colors = tintColor.nsColors(for: iconStyle, iconType: iconType, background: .colour) // Task 5/6 threads config.background
 
         // Draw gradient background (appearance-aware)
         drawGradient(
@@ -1049,7 +1049,7 @@ extension IconGenerator {
 
         // Emoji ride ONE shared layer, so their depth must not vary by appearance either.
         let style = depthStyle(for: appearance, iconType: iconType)
-        let colors = tintColor.nsColors(for: style, iconType: iconType)
+        let colors = tintColor.nsColors(for: style, iconType: iconType, background: .colour) // Task 5/6 threads config.background
         let fontSize = side * IconDepthMetrics.glyphSizeRatio(
             iconScale: iconScale, iconType: iconType, iconValue: iconValue
         )
@@ -1153,7 +1153,7 @@ extension IconGenerator {
         )
 
         // Light appearance = the Default style's colours, from the shared seam.
-        let colors = tintColor.nsColors(for: .defaultStyle, iconType: iconType)
+        let colors = tintColor.nsColors(for: .defaultStyle, iconType: iconType, background: .colour) // Task 5/6 threads config.background
         drawGradient(
             context: context,
             path: squirclePath,

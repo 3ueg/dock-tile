@@ -117,7 +117,7 @@ struct DockTileIconPreview: View {
     /// the baked `.icns` does: SF Symbol → tinted glyph on neutral near-black; emoji → darkened
     /// own-tint (tint-coloured symbol on dark background).
     private var styleColors: (backgroundTop: Color, backgroundBottom: Color, foreground: Color) {
-        tintColor.colors(for: iconStyle, iconType: iconType)
+        tintColor.colors(for: iconStyle, iconType: iconType, background: .colour) // Task 5/6 threads config.background
     }
 
     // MARK: Depth treatment (mirrors IconGenerator via the shared seam)

@@ -50,10 +50,10 @@ struct GlyphLayerRenderTests {
 
     @Test("Light layer glyph is white-family; dark layer carries the LIFTED tint")
     func appearanceDrivesGlyphColour() throws {
-        // #5F00FF is the colour `liftedForDarkGlyph` exists for: maximum HSB brightness, perceived
-        // luminance (0.23) far under the 0.55 floor, so it vanishes on the dark background unless
+        // #5F00FF is the colour the tone map exists for: maximum HSB brightness, perceived
+        // luminance (0.23) far under what the tone map needs, so it vanishes on the dark background unless
         // lifted. A saturated tint like .green would satisfy a "saturation > 0.3" check straight
-        // from the raw tint, proving nothing about the lift.
+        // from the raw tint, proving nothing about the tone map.
         let violet = TintColor.custom("#5F00FF")
         func layer(_ appearance: IconAppearance) throws -> Data {
             try IconGenerator.generateGlyphLayerPNG(
@@ -79,10 +79,13 @@ struct GlyphLayerRenderTests {
             .filter { $0.alphaComponent > 0.99 }
             .map(Self.perceivedLuminance)
         let rendered = try #require(glyphLuminances.max())
-        let expected = Self.perceivedLuminance(
-            violet.nsColors(for: .dark, iconType: .sfSymbol).foreground)
+        let foreground = violet.nsColors(for: .dark, iconType: .sfSymbol, background: .colour).foreground
+        let expected = Self.perceivedLuminance(foreground)
         let unlifted = Self.perceivedLuminance(try #require(NSColor(hex: "#5F00FF")))
-        #expect(expected >= TintColor.darkGlyphLuminanceFloor - 0.001)  // the seam lifted at all
+        let fg = try #require(foreground.usingColorSpace(.sRGB))
+        // The seam lifted at all: the shaded glyph bottom clears 3:1 on the near-black tile.
+        #expect(ToneMap.contrastRatio(SRGB(r: fg.redComponent, g: fg.greenComponent, b: fg.blueComponent).darkened(by: 0.10),
+                                      TilePalette.darkTop) >= ToneMap.floor)
         // …and the pixels carry it. The shading gradient costs the composited glyph ~15% of its
         // luminance, so the rendered maximum sits just under the seam's value — and, crucially,
         // far above the ~0.23 an unlifted #5F00FF would leave (which is the regression).
@@ -97,7 +100,7 @@ struct GlyphLayerRenderTests {
         #expect(tintedData == lightData)
     }
 
-    /// The same 0.299/0.587/0.114 weighting `liftedForDarkGlyph` lifts on — HSB brightness cannot
+    /// The same 0.299/0.587/0.114 weighting the old luminance lift (replaced by `TilePalette`) used — HSB brightness cannot
     /// see the `#5F00FF` case at all (it is already 1.0 there).
     private static func perceivedLuminance(_ color: NSColor) -> CGFloat {
         guard let rgb = color.usingColorSpace(.sRGB) else { return 0 }

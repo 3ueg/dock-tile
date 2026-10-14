@@ -892,9 +892,9 @@ final class HelperBundleManager {
         // Backgrounds are JSON fills, not pixels — and they are exactly the colours the legacy
         // bake uses (near-black for a Dark symbol tile, darkened-own-tint for a Dark emoji tile),
         // read from the same `nsColors(for:iconType:)` seam so the two paths cannot drift.
-        let light = config.tintColor.nsColors(for: .defaultStyle, iconType: config.iconType)
-        let dark = config.tintColor.nsColors(for: .dark, iconType: config.iconType)
-        let tinted = config.tintColor.nsColors(for: .tinted, iconType: config.iconType)
+        let light = config.tintColor.nsColors(for: .defaultStyle, iconType: config.iconType, background: .colour) // Task 5/6 threads config.background
+        let dark = config.tintColor.nsColors(for: .dark, iconType: config.iconType, background: .colour) // Task 5/6 threads config.background
+        let tinted = config.tintColor.nsColors(for: .tinted, iconType: config.iconType, background: .colour) // Task 5/6 threads config.background
 
         let json = IconDocumentBuilder.iconJSON(
             fillTopP3: try Self.p3Components(light.backgroundTop),
