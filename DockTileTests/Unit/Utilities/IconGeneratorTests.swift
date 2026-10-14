@@ -104,7 +104,7 @@ struct IconGeneratorTests {
             iconType: .sfSymbol,
             iconValue: "star.fill",
             iconScale: 14,
-            size: CGSize(width: 64, height: 64)
+            background: .colour, size: CGSize(width: 64, height: 64)
         )
 
         #expect(image.size.width == 64)
@@ -122,7 +122,7 @@ struct IconGeneratorTests {
                 iconType: .sfSymbol,
                 iconValue: "folder.fill",
                 iconScale: 14,
-                size: size
+                background: .colour, size: size
             )
 
             #expect(image.size.width == sizeValue, "Width for size \(sizeValue)")
@@ -137,7 +137,7 @@ struct IconGeneratorTests {
             iconType: .sfSymbol,
             iconValue: "star.fill",
             iconScale: 14,
-            size: CGSize(width: 128, height: 128)
+            background: .colour, size: CGSize(width: 128, height: 128)
         )
 
         #expect(image.size.width == 128)
@@ -151,7 +151,7 @@ struct IconGeneratorTests {
             iconType: .emoji,
             iconValue: "📁",
             iconScale: 14,
-            size: CGSize(width: 128, height: 128)
+            background: .colour, size: CGSize(width: 128, height: 128)
         )
 
         #expect(image.size.width == 128)
@@ -168,7 +168,7 @@ struct IconGeneratorTests {
                 iconType: .sfSymbol,
                 iconValue: "star.fill",
                 iconScale: 14,
-                size: CGSize(width: 64, height: 64)
+                background: .colour, size: CGSize(width: 64, height: 64)
             )
 
             #expect(image.isValid, "Image for \(color.displayName) should be valid")
@@ -184,7 +184,7 @@ struct IconGeneratorTests {
             iconType: .sfSymbol,
             iconValue: "star.fill",
             iconScale: 14,
-            size: CGSize(width: 128, height: 128)
+            background: .colour, size: CGSize(width: 128, height: 128)
         )
 
         #expect(image.isValid)
@@ -197,7 +197,7 @@ struct IconGeneratorTests {
             iconType: .sfSymbol,
             iconValue: "this.symbol.does.not.exist",
             iconScale: 14,
-            size: CGSize(width: 64, height: 64)
+            background: .colour, size: CGSize(width: 64, height: 64)
         )
 
         // Should still return a valid image (fallback star)
@@ -214,7 +214,7 @@ struct IconGeneratorTests {
                 iconType: .sfSymbol,
                 iconValue: "star.fill",
                 iconScale: scale,
-                size: CGSize(width: 64, height: 64)
+                background: .colour, size: CGSize(width: 64, height: 64)
             )
 
             #expect(image.isValid, "Image at scale \(scale) should be valid")
@@ -228,7 +228,7 @@ struct IconGeneratorTests {
         let preview = IconGenerator.generatePreview(
             tintColor: .blue,
             iconType: .sfSymbol,
-            iconValue: "star.fill"
+            iconValue: "star.fill", background: .colour
         )
 
         #expect(preview.size.width == 80)
@@ -241,7 +241,7 @@ struct IconGeneratorTests {
             tintColor: .blue,
             iconType: .sfSymbol,
             iconValue: "star.fill",
-            size: 160
+            background: .colour, size: 160
         )
 
         #expect(preview.size.width == 160)
@@ -267,7 +267,7 @@ struct IconGeneratorTests {
             iconType: .sfSymbol,
             iconValue: "star.fill",
             iconScale: 14,
-            outputURL: outputURL
+            background: .colour, outputURL: outputURL
         )
 
         #expect(FileManager.default.fileExists(atPath: outputURL.path))
@@ -290,7 +290,7 @@ struct IconGeneratorTests {
             iconType: .sfSymbol,
             iconValue: "star.fill",
             iconScale: 14,
-            outputURL: outputURL
+            background: .colour, outputURL: outputURL
         )
 
         // 16/32/128/256/512 at 1x and 2x. This is the wrong-pixel-count regression class the
@@ -325,7 +325,7 @@ struct IconGeneratorTests {
             iconType: .emoji,
             iconValue: "📁",
             iconScale: 14,
-            outputURL: outputURL
+            background: .colour, outputURL: outputURL
         )
 
         #expect(FileManager.default.fileExists(atPath: outputURL.path))
@@ -348,7 +348,7 @@ struct IconGeneratorTests {
             iconType: .sfSymbol,
             iconValue: "folder.fill",
             iconScale: 16,
-            outputURL: outputURL
+            background: .colour, outputURL: outputURL
         )
 
         #expect(FileManager.default.fileExists(atPath: outputURL.path))
@@ -372,7 +372,7 @@ struct IconGeneratorTests {
             iconType: .sfSymbol,
             iconValue: "star.fill",
             iconScale: 14,
-            outputURL: outputURL
+            background: .colour, outputURL: outputURL
         )
 
         // Iconset should be cleaned up

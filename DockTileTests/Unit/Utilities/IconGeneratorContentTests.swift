@@ -27,7 +27,7 @@ struct IconGeneratorContentTests {
         // separately by DarkGlyphTreatmentTests.
         IconGenerator.generateIcon(
             tintColor: tint, iconType: type, iconValue: value,
-            iconScale: 14, size: CGSize(width: px, height: px),
+            iconScale: 14, background: .colour, size: CGSize(width: px, height: px),
             iconStyle: .defaultStyle)
     }
 
@@ -52,6 +52,23 @@ struct IconGeneratorContentTests {
         guard count > 0 else { return nil }
         let n = Double(count)
         return (rs / n, gs / n, bs / n, n / Double(rep.pixelsWide * rep.pixelsHigh), peak)
+    }
+
+    @Test("macOS 15 bake: a Mono Default tile's background is white, its Dark variant near-black")
+    func legacyMonoBackgrounds() throws {
+        func centreEdge(_ style: IconStyle) throws -> NSColor {
+            let image = IconGenerator.generateIcon(
+                tintColor: .preset(.blue), iconType: .sfSymbol, iconValue: "star.fill",
+                iconScale: 10, iconWeight: .medium, background: .mono,
+                size: CGSize(width: 256, height: 256), iconStyle: style)
+            let rep = try #require(raster(image))
+            // Inside the inset shape, left of the (small, scale-10) glyph.
+            return try #require(rep.colorAt(x: 64, y: 128)?.usingColorSpace(.sRGB))
+        }
+        let light = try centreEdge(.defaultStyle)
+        #expect(light.redComponent > 0.9 && light.greenComponent > 0.9 && light.blueComponent > 0.9)
+        let dark = try centreEdge(.dark)
+        #expect(dark.redComponent < 0.25 && dark.greenComponent < 0.25 && dark.blueComponent < 0.25)
     }
 
     @Test("Generated icon is not blank: the squircle covers the canvas and a bright glyph is present")
@@ -121,7 +138,7 @@ struct IconStrokeGeometryTests {
     private func rasterisedTile() throws -> NSBitmapImageRep {
         let image = IconGenerator.generateIcon(
             tintColor: .blue, iconType: .sfSymbol, iconValue: "star.fill",
-            iconScale: 14, size: CGSize(width: Self.px, height: Self.px),
+            iconScale: 14, background: .colour, size: CGSize(width: Self.px, height: Self.px),
             iconStyle: .defaultStyle)
         return try #require(image.representations.compactMap { $0 as? NSBitmapImageRep }.first)
     }

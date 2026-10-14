@@ -202,7 +202,7 @@ struct IconCompilerTests {
 
         func layerPNG(_ appearance: IconAppearance) throws -> Data {
             try IconGenerator.generateGlyphLayerPNG(
-                appearance: appearance, tintColor: tint, iconType: iconType,
+                appearance: appearance, tintColor: tint, background: .colour, iconType: iconType,
                 iconValue: iconValue, iconScale: 16, iconWeight: .semibold)
         }
 

@@ -30,7 +30,7 @@ struct LegacyIcnsMarginTests {
                       scale: Int = 14) throws -> NSBitmapImageRep {
         let image = IconGenerator.generateIcon(
             tintColor: .green, iconType: type, iconValue: value, iconScale: scale,
-            size: CGSize(width: Self.px, height: Self.px), iconStyle: style)
+            background: .colour, size: CGSize(width: Self.px, height: Self.px), iconStyle: style)
         return try #require(image.representations.compactMap { $0 as? NSBitmapImageRep }.first)
     }
 
@@ -96,7 +96,7 @@ struct LegacyIcnsMarginTests {
 
         try IconGenerator.generateIcns(
             tintColor: .green, iconType: .sfSymbol, iconValue: "square.fill",
-            iconScale: 14, iconWeight: .medium, outputURL: out, iconStyle: .defaultStyle)
+            iconScale: 14, iconWeight: .medium, background: .colour, outputURL: out, iconStyle: .defaultStyle)
 
         let image = try #require(NSImage(contentsOf: out))
         let rep = try #require(

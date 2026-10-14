@@ -863,6 +863,7 @@ final class HelperBundleManager {
                     iconValue: config.iconValue,
                     iconScale: config.iconScale,
                     iconWeight: config.iconWeight,
+                    background: config.background,
                     outputURL: iconPath,
                     iconStyle: style
                 )
@@ -882,6 +883,23 @@ final class HelperBundleManager {
         print("   ✓ Compiled declarative icon (Assets.car + fallback AppIcon.icns)")
     }
 
+    struct DeclarativeFills {
+        let lightTop, lightBottom, darkTop, darkBottom, tintedTop, tintedBottom: (r: Double, g: Double, b: Double)
+    }
+
+    /// The `.icon` background fills for a tile, Display-P3 — read from `TilePalette` through
+    /// `nsColors`, so the compiled icon, the fallback `.icns` and the preview cannot drift
+    /// (a Dark emoji fill included).
+    nonisolated static func declarativeFillsP3(for config: DockTileConfiguration) throws -> DeclarativeFills {
+        let light = config.tintColor.nsColors(for: .defaultStyle, iconType: config.iconType, background: config.background)
+        let dark = config.tintColor.nsColors(for: .dark, iconType: config.iconType, background: config.background)
+        let tinted = config.tintColor.nsColors(for: .tinted, iconType: config.iconType, background: config.background)
+        return DeclarativeFills(
+            lightTop: try p3Components(light.backgroundTop), lightBottom: try p3Components(light.backgroundBottom),
+            darkTop: try p3Components(dark.backgroundTop), darkBottom: try p3Components(dark.backgroundBottom),
+            tintedTop: try p3Components(tinted.backgroundTop), tintedBottom: try p3Components(tinted.backgroundBottom))
+    }
+
     /// macOS 26+: author an Icon Composer `.icon` document for this tile, compile it to a
     /// per-tile `Assets.car`, and drop one fallback `.icns` beside it. The system then renders
     /// every appearance itself — no variants, no detection, and the bundle's icon is never
@@ -889,20 +907,16 @@ final class HelperBundleManager {
     private func installDeclarativeIcon(for config: DockTileConfiguration, resourcesPath: URL) async throws {
         let (specs, pngs) = try declarativeLayerSpecs(for: config)
 
-        // Backgrounds are JSON fills, not pixels — and they are exactly the colours the legacy
-        // bake uses (near-black for a Dark symbol tile, darkened-own-tint for a Dark emoji tile),
-        // read from the same `nsColors(for:iconType:)` seam so the two paths cannot drift.
-        let light = config.tintColor.nsColors(for: .defaultStyle, iconType: config.iconType, background: .colour) // Task 5/6 threads config.background
-        let dark = config.tintColor.nsColors(for: .dark, iconType: config.iconType, background: .colour) // Task 5/6 threads config.background
-        let tinted = config.tintColor.nsColors(for: .tinted, iconType: config.iconType, background: .colour) // Task 5/6 threads config.background
+        // Backgrounds are JSON fills, not pixels (see `declarativeFillsP3`).
+        let fills = try Self.declarativeFillsP3(for: config)
 
         let json = IconDocumentBuilder.iconJSON(
-            fillTopP3: try Self.p3Components(light.backgroundTop),
-            fillBottomP3: try Self.p3Components(light.backgroundBottom),
-            darkFillTopP3: try Self.p3Components(dark.backgroundTop),
-            darkFillBottomP3: try Self.p3Components(dark.backgroundBottom),
-            tintedFillTopP3: try Self.p3Components(tinted.backgroundTop),
-            tintedFillBottomP3: try Self.p3Components(tinted.backgroundBottom),
+            fillTopP3: fills.lightTop,
+            fillBottomP3: fills.lightBottom,
+            darkFillTopP3: fills.darkTop,
+            darkFillBottomP3: fills.darkBottom,
+            tintedFillTopP3: fills.tintedTop,
+            tintedFillBottomP3: fills.tintedBottom,
             layers: specs
         )
 
@@ -934,6 +948,7 @@ final class HelperBundleManager {
         // ONE fallback `.icns` (not four variants) for the contexts that read `CFBundleIconFile`.
         try IconGenerator.generateFallbackIcns(
             tintColor: config.tintColor,
+            background: config.background,
             iconType: config.iconType,
             iconValue: config.iconValue,
             iconScale: config.iconScale,
@@ -962,6 +977,7 @@ final class HelperBundleManager {
             try IconGenerator.generateGlyphLayerPNG(
                 appearance: appearance,
                 tintColor: config.tintColor,
+                background: config.background,
                 iconType: config.iconType,
                 iconValue: config.iconValue,
                 iconScale: config.iconScale,

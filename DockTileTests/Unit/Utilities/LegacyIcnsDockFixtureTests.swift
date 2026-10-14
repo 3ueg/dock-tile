@@ -34,7 +34,7 @@ struct LegacyIcnsDockFixtureTests {
             let icns = folder.appendingPathComponent("AppIcon.icns")
             try IconGenerator.generateIcns(
                 tintColor: tint, iconType: type, iconValue: value,
-                iconScale: 14, iconWeight: .medium, outputURL: icns, iconStyle: .defaultStyle)
+                iconScale: 14, iconWeight: .medium, background: .colour, outputURL: icns, iconStyle: .defaultStyle)
             let size = try FileManager.default.attributesOfItem(atPath: icns.path)[.size] as? Int ?? 0
             #expect(size > 10_000, "\(name): .icns not written (\(size) bytes)")
         }
