@@ -323,14 +323,7 @@ final class ConfigurationManager: ObservableObject {
     /// Duplicate an existing configuration
     @discardableResult
     func duplicateConfiguration(_ config: DockTileConfiguration) -> DockTileConfiguration {
-        let duplicate = DockTileConfiguration(
-            name: generateUniqueName(base: config.name),
-            tintColor: config.tintColor,
-            symbolEmoji: config.symbolEmoji,
-            layoutMode: config.layoutMode,
-            appItems: config.appItems,
-            isVisibleInDock: false  // Don't auto-show duplicate
-        )
+        let duplicate = config.duplicate(named: generateUniqueName(base: config.name))
 
         configurations.append(duplicate)
         committedNames[duplicate.id] = duplicate.name

@@ -42,6 +42,31 @@ struct DockTileConfiguration: Identifiable, Codable, Hashable {
     /// entry, the helper folder and the `[helper:…]` process tag.
     var diagnosticName: String { "'\(name)' (\(shortId))" }
 
+    // MARK: - Duplicate
+
+    /// A copy that looks exactly like this tile. Only identity and Dock bookkeeping are new: a fresh
+    /// `id` (and so a fresh bundle identifier — the copy must never share this tile's helper), the
+    /// given name, not visible in the Dock until the user adds it, and no saved Dock position or
+    /// helper version. Every content field is passed explicitly — a defaulted one would silently
+    /// reset (issue #21). Guarded by `DockTileDuplicateTests`, which also fails when a new field is
+    /// added without a non-default value in its sample.
+    func duplicate(named name: String) -> DockTileConfiguration {
+        DockTileConfiguration(
+            name: name,
+            tintColor: tintColor,
+            symbolEmoji: symbolEmoji,
+            iconType: iconType,
+            iconValue: iconValue,
+            iconScale: iconScale,
+            iconWeight: iconWeight,
+            background: background,
+            layoutMode: layoutMode,
+            appItems: appItems,
+            isVisibleInDock: false,
+            showInAppSwitcher: showInAppSwitcher
+        )
+    }
+
     // MARK: - Initialization
 
     init(
