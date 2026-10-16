@@ -109,9 +109,10 @@ Every role (fill top/bottom, glyph) per background x style x icon type is derive
 - **Layer model (spike, 2026-10-14)**: a Mono symbol `.icon` keeps the SAME two glyph layers as a
   Colour one; the tinted appearance reuses the (coloured) light layer, and macOS 27 derives a legible
   Tinted/Clear relief from it (verified by eye in Finder). No third layer was needed.
-- **Verify icon styles by eye in Finder/Dock**: scripted renders (`NSWorkspace.icon(forFile:)`) do
-  NOT follow the system icon style on macOS 27, and `AppleIconAppearanceTheme` is absent from the
-  global domain there.
+- **Verify icon styles by eye in Finder/Dock**: `NSWorkspace.icon(forFile:)` from a CLI script does
+  NOT follow the system icon style on macOS 27 (inside the running app it does — `TileFace` relies
+  on that). `AppleIconAppearanceTheme` IS written on macOS 27 with the documented values (an
+  earlier note here said it was absent; issue #22 measured it).
 - **Not adopted**: Apple's `system-light`/`system-dark` fills — their values are unpublished, so
   contrast cannot be computed against them.
 - Existing Colour tiles change look on update (saturated gradient start; sub-3:1 colours deepen).
@@ -275,7 +276,13 @@ with their own environment via `IconStyle.forDisplay(raw: iconStyleManager.rawSt
 colorScheme:)` (the 2026-09-02 appearance-environment rewrite). `rawStyle` is kept live in the
 MAIN APP by a display-only KVO observer (`startDisplayObservation()` — read-only, republishes the
 token, never rewrites an icon, so the detection quarantine is untouched) plus a
-`didBecomeActiveNotification` refresh as sleep recovery; helpers seed it once at launch (their
+`didBecomeActiveNotification` refresh as sleep recovery, **plus a 2 s poll while the app is visible**
+(`displayPollAction` / `displayPollInterval`, stopped on `didChangeOcclusionStateNotification`; each
+read synchronizes first). The poll is required: on macOS 27 no notification is posted for an Icon &
+widget style change (NSWorkspace's undeclared icon-appearance notification and
+`AppleInterfaceThemeChangedNotification` both stayed silent over 9 real changes) and the KVO reached
+the app 1.4 s to 8 min late or not at all, while a bare CLI process got it in ~100 ms (measured
+2026-10-15, issue #22; the key itself is written promptly with the documented values). Helpers seed it once at launch (their
 popover content rebuilds on every `show()`). `currentStyle` itself is still seeded once at `init`
 (a Swift definite-initialization guarantee — see [Icon Style
 Detection](icon-style-detection.md)) and on Tahoe never changes afterwards — it is
@@ -319,11 +326,26 @@ single light `.icns` with no `Assets.car` (e.g. VS Code, most Electron apps).
   composites, so the variant tracks Light↔Dark and theme switches live.
 - **Popover cells draw a cached bitmap, never the IconServices `NSImage` (critical)**:
   `TileIconRasterCache` holds rasterised `CGImage`s for the process lifetime, keyed by item, pixel
-  size, appearance token (icon style + Light/Dark) and the app bundle's modification time, and is
+  size, appearance token (icon style + Light/Dark + the stored style value — Tinted Light and
+  Tinted Dark are one `IconStyle` but different system renders, issue #22) and the app bundle's
+  modification time, and is
   prewarmed at helper launch. Drawing the `NSImage` directly makes SwiftUI trigger a synchronous
   XPC render per icon; `iconservicesagent` evicts within minutes, so every first open after idle
   paid ~3.5 ms per app on the main thread (201 ms on a 10-app Release tile). Guarded by
   `TileIconRasterCacheTests`.
+
+## Tinted tile face in the app (`TileFace`, issue #22)
+
+macOS draws the Tinted style in a colour no public API exposes (it is NOT `controlAccentColor`:
+measured cyan beside a blue accent), so `DockTileIconPreview` can only show a grey stand-in. The
+sidebar row and the Tile Detail hero use `TileFace`, which under Tinted shows the icon macOS
+renders for the tile's helper (`NSWorkspace.icon(forFile:)`, enlarged by the icon-grid margin so
+the shape fills the slot) — but only when `TileFace.showsSystemIcon` holds: the helper's
+Info.plist `DTIconSignature` (stamped by `helperInfoPlist` from `DockTileConfiguration.iconSignature`)
+equals the tile's current one. Edits not yet applied with Update, never-added tiles and helpers
+built before the stamp all keep our drawing. Every other style keeps our drawing (it matches the
+system there). The helper lookup scans the helper folder, so it runs under Tinted only. Customise
+and Smart Add keep `DockTileIconPreview` (canonical / not-yet-built previews).
 
 ## Helper Bundle Icon Priority
 

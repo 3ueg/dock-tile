@@ -204,7 +204,7 @@ struct ConfigurationRow: View {
     var body: some View {
         HStack(spacing: 12) {
             // Mini icon preview (24×24pt) - uses same component as other previews
-            DockTileIconPreview.fromConfig(config, size: 24)
+            TileFace(config: config, size: 24)
 
             // The COMMITTED name, not the stored one: a rename in the editor re-titles the live
             // preview immediately but only reaches this row on Add to Dock / Update / Done.

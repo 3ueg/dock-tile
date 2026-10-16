@@ -114,15 +114,22 @@ struct TileIconRasterCacheTests {
     @Test("The appearance token tracks the live style read, so a style change flushes the cache")
     func tokenTracksTheLiveStyleRead() {
         // Exact tokens for the values macOS actually stores in AppleIconAppearanceTheme.
-        #expect(TileIconRasterCache.appearanceToken(rawStyleObject: nil, isDark: false) == "defaultStyle-light")
-        #expect(TileIconRasterCache.appearanceToken(rawStyleObject: "TintedAutomatic", isDark: false) == "tinted-light")
-        #expect(TileIconRasterCache.appearanceToken(rawStyleObject: "ClearDark", isDark: true) == "clear-dark")
-        #expect(TileIconRasterCache.appearanceToken(rawStyleObject: "RegularDark", isDark: false) == "dark-light")
+        #expect(TileIconRasterCache.appearanceToken(rawStyleObject: nil, isDark: false) == "defaultStyle-light-absent")
+        #expect(TileIconRasterCache.appearanceToken(rawStyleObject: "TintedAutomatic", isDark: false) == "tinted-light-TintedAutomatic")
+        #expect(TileIconRasterCache.appearanceToken(rawStyleObject: "ClearDark", isDark: true) == "clear-dark-ClearDark")
+        #expect(TileIconRasterCache.appearanceToken(rawStyleObject: "RegularDark", isDark: false) == "dark-light-RegularDark")
         // Automatic follows the colour scheme, so the same stored value yields two tokens.
-        #expect(TileIconRasterCache.appearanceToken(rawStyleObject: "RegularAutomatic", isDark: false) == "defaultStyle-light")
-        #expect(TileIconRasterCache.appearanceToken(rawStyleObject: "RegularAutomatic", isDark: true) == "dark-dark")
+        #expect(TileIconRasterCache.appearanceToken(rawStyleObject: "RegularAutomatic", isDark: false) == "defaultStyle-light-RegularAutomatic")
+        #expect(TileIconRasterCache.appearanceToken(rawStyleObject: "RegularAutomatic", isDark: true) == "dark-dark-RegularAutomatic")
         // A present-but-unreadable value is the documented "don't act" case: keep the fallback.
-        #expect(TileIconRasterCache.appearanceToken(rawStyleObject: 42, isDark: false) == "defaultStyle-light")
+        #expect(TileIconRasterCache.appearanceToken(rawStyleObject: 42, isDark: false) == "defaultStyle-light-unreadable")
+        // Tinted Light and Tinted Dark are both `.tinted` to our renderer, but macOS draws app icons
+        // differently for each — under the SAME window appearance. Issue #22: the cache served the
+        // Tinted Dark bitmaps after a switch to Tinted Light because the two tokens were identical.
+        #expect(TileIconRasterCache.appearanceToken(rawStyleObject: "TintedLight", isDark: true)
+                != TileIconRasterCache.appearanceToken(rawStyleObject: "TintedDark", isDark: true))
+        #expect(TileIconRasterCache.appearanceToken(rawStyleObject: "ClearLight", isDark: false)
+                != TileIconRasterCache.appearanceToken(rawStyleObject: "ClearDark", isDark: false))
 
         // End-to-end through the real cache: ONE process, two popover opens, the preference changed
         // in between. The second open must rasterise again rather than serve the old appearance.

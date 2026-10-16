@@ -155,19 +155,27 @@ final class TileIconRasterCache {
     /// the launch-time appearance for its entire process lifetime. Keeping this overload private
     /// means a call site cannot reach it with a stale snapshot: the only ways in are
     /// `appearanceToken(rawStyleObject:isDark:)` and `liveAppearanceToken(isDark:)`.
-    private nonisolated static func appearanceToken(style: IconStyle, isDark: Bool) -> String {
-        "\(style.rawValue)-\(isDark ? "dark" : "light")"
+    private nonisolated static func appearanceToken(style: IconStyle, isDark: Bool, raw: RawStyleToken) -> String {
+        let stored: String
+        switch raw {
+        case .absent: stored = "absent"
+        case .unreadable: stored = "unreadable"
+        case .value(let value): stored = value
+        }
+        return "\(style.rawValue)-\(isDark ? "dark" : "light")-\(stored)"
     }
 
     /// Resolve the token from the UNTYPED `AppleIconAppearanceTheme` object as just read. Pure —
     /// this is the seam `TileIconRasterCacheTests.tokenTracksTheLiveStyleRead` drives with values
     /// it supplies, so a token that ignores the read (the frozen-at-launch regression) fails.
+    /// The stored value itself is part of the token: `IconStyle` folds Tinted Light and Tinted Dark
+    /// (and Clear Light/Dark) into one case, but macOS draws app icons differently for each, so a
+    /// switch between them must re-rasterise (issue #22).
     nonisolated static func appearanceToken(rawStyleObject: Any?, isDark: Bool) -> String {
-        appearanceToken(
-            style: IconStyle.forDisplay(raw: IconStyleManager.token(from: rawStyleObject),
-                                        colorScheme: isDark ? .dark : .light,
-                                        fallback: .defaultStyle),
-            isDark: isDark)
+        let raw = IconStyleManager.token(from: rawStyleObject)
+        return appearanceToken(
+            style: IconStyle.forDisplay(raw: raw, colorScheme: isDark ? .dark : .light, fallback: .defaultStyle),
+            isDark: isDark, raw: raw)
     }
 
     /// The token for a popover being built RIGHT NOW: reads the preference on every call. The
