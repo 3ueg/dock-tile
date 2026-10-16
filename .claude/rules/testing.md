@@ -58,6 +58,7 @@ it, and unit-test the seam so a broken rule fails loudly. Existing seams: `resol
 `SmartAddEngine.suggestionsForAddFlow` (filters what an opened add dialog shows; since 2026-09-02 the dialog only opens while Smart Add is on — off creates a blank tile directly),
 `CustomiseTileView.heroStyles` (Mono hero previews: Light+Dark only where the icon is compiled per appearance, one light preview on macOS 15; guarded by `CustomiseHeroStylesTests`),
 `ConfigurationDefaults.iconValue` (new tiles default to the `"plus"` placeholder glyph, not a category icon),
+`DockTileConfiguration.duplicate(named:)` (a duplicate keeps every content field; only id/name/bundle id/Dock bookkeeping reset — compared through the encoded JSON, issue #21; guarded by `DockTileDuplicateTests`),
 `PopoverItemMenu.targetPath` / `.entries` / `.dismissesPopover` / `.runningMatchIndex` / `.claimsEvent` (popover item context menu — missing → no target → no menu, apps target the copy `AppLauncher` launches (lastKnownPath first), apps never get a bundle hand-off item (App Management alert), folders never get running rows, hidden app → no Hide, running match by bundle path not id, overlay claims only right-/Control-clicks so left-click launch and scrolling stay SwiftUI's; guarded by `PopoverItemMenuTests`),
 `MacOSFloorGuardTests` (the deployment target ↔ appcast floor ↔ macOS 15 CI leg ↔ website requirement claims — read from the files, so the macOS 15 leg cannot be dropped while 15 is supported, and must be once it is not).
 
