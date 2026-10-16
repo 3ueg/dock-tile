@@ -28,7 +28,10 @@ reopening any option.
   `reconcile(reason:)` on `NSWorkspace.didWakeNotification` and on popover show — discrete
   events, not polls. **Do not reintroduce a timer without new evidence**; the 1 Hz poll was three
   orders of magnitude faster than the at-most-twice-daily change it watched for, and was never
-  first in 13/13 measured transitions.
+  first in 13/13 measured transitions. (Scope: this rule is about the legacy DETECTION in helpers.
+  The main app's display-only 2 s poll, visible-window-only, IS that new evidence: on macOS 27 the
+  KVO reached the app 1.4 s–8 min late or never and no notification fires — see icon-system.md,
+  issue #22.)
 - **Never-fired self-test**: a change first found by a reconcile when no event was ever received
   logs once per process — event-path death must be loud, not a silent degrade.
 

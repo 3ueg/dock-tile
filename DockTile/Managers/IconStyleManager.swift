@@ -309,9 +309,53 @@ final class IconStyleManager: ObservableObject {
     /// (`startDisplayObservation()`) and `NSApplication.didBecomeActiveNotification` as recovery
     /// for an event missed while asleep. Helpers never call this, matching the doc on `rawStyle`.
     func refreshRawStyle() {
+        // Synchronize first: another process (System Settings) wrote the key, and an un-synced
+        // read can return this process's cached copy (issue #22). Display path only — the frozen
+        // legacy detection reads are deliberately left as they are.
+        CFPreferencesAppSynchronize(kCFPreferencesAnyApplication)
         let newToken = Self.token(from: IconStyle.rawPreferencesObject)
         guard Self.shouldAdopt(newToken: newToken, current: rawStyle) else { return }
+        DiagnosticsLog.shared.log("icon-style", "Display style \(rawStyle) → \(newToken)", verbose: true)
         rawStyle = newToken
+    }
+
+    // MARK: - Display poll (main app, while visible)
+
+    /// What the display poll should do for a visibility change.
+    enum DisplayPollAction: Equatable { case start, stop, none }
+
+    /// How often the main app re-reads the icon style while a window is visible.
+    static let displayPollInterval: TimeInterval = 2.0
+
+    /// Pure seam: poll only while the app is visible on screen (`NSApp.occlusionState`), never
+    /// restart a running poll, never stop an idle one. Guarded by `IconStyleDisplayPollTests`.
+    nonisolated static func displayPollAction(appVisible: Bool, polling: Bool) -> DisplayPollAction {
+        switch (appVisible, polling) {
+        case (true, false): return .start
+        case (false, true): return .stop
+        default: return .none
+        }
+    }
+
+    private var displayPollTimer: Timer?
+
+    /// Starts or stops the display poll to match the app's current visibility.
+    private func updateDisplayPoll() {
+        switch Self.displayPollAction(appVisible: NSApp.occlusionState.contains(.visible),
+                                      polling: displayPollTimer != nil) {
+        case .start:
+            let timer = Timer(timeInterval: Self.displayPollInterval, repeats: true) { _ in
+                Task { @MainActor in IconStyleManager.shared.refreshRawStyle() }
+            }
+            timer.tolerance = 0.5
+            RunLoop.main.add(timer, forMode: .common)
+            displayPollTimer = timer
+        case .stop:
+            displayPollTimer?.invalidate()
+            displayPollTimer = nil
+        case .none:
+            break
+        }
     }
 
     /// MAIN-APP ONLY: subscribe `rawStyle` to live `AppleIconAppearanceTheme` changes so the
@@ -331,6 +375,19 @@ final class IconStyleManager: ObservableObject {
             manager: self,
             mode: .display
         )
+
+        // KVO alone is not enough on macOS 27: no notification is posted for an Icon & widget
+        // style change, and the KVO reached this app 1.4 s to 8 min late, or not at all (measured
+        // 2026-10-15, issue #22). So while a window is visible, also re-read every
+        // `displayPollInterval`; the poll stops whenever the app is hidden or fully covered.
+        NotificationCenter.default.addObserver(
+            forName: NSApplication.didChangeOcclusionStateNotification,
+            object: nil,
+            queue: .main
+        ) { _ in
+            Task { @MainActor in IconStyleManager.shared.updateDisplayPoll() }
+        }
+        updateDisplayPoll()
     }
 
     /// Pure gate for the whole detection lifecycle (observer registration, reconciles). The
@@ -465,6 +522,8 @@ final class IconStyleManager: ObservableObject {
         defaultsObserver = nil
         displayObserver?.invalidate()
         displayObserver = nil
+        displayPollTimer?.invalidate()
+        displayPollTimer = nil
         DistributedNotificationCenter.default().removeObserver(self)
         print("[IconStyleManager] Cleaned up observers")
     }

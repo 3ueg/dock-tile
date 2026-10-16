@@ -365,6 +365,48 @@ extension DockTileIconPreview {
     }
 }
 
+// MARK: - Tile Face (sidebar row, Tile Detail hero)
+
+/// A tile as the app shows the tile itself. Under the Tinted icon style macOS recolours every
+/// icon with a colour no public API exposes (it is not `controlAccentColor`), so our own drawing
+/// can only show a grey stand-in (issue #22). When the tile's helper on disk was built from
+/// exactly this look, show the icon macOS renders for that helper instead — the Dock's own
+/// render. Otherwise (other styles, edits not yet applied with Update, never added) draw it.
+struct TileFace: View {
+    let config: DockTileConfiguration
+    let size: CGFloat
+
+    @ObservedObject private var iconStyleManager = IconStyleManager.shared
+    @Environment(\.colorScheme) private var colorScheme
+
+    nonisolated static func showsSystemIcon(style: IconStyle, helperSignature: String?, tileSignature: String) -> Bool {
+        style == .tinted && helperSignature == tileSignature
+    }
+
+    var body: some View {
+        if let icon = systemIcon {
+            // The system render carries the icon-grid margin; the tile drawing fills its frame,
+            // so enlarge the render until its shape fills the same slot.
+            let canvas = size / (1 - 2 * IconDepthMetrics.contentInsetRatio)
+            Image(nsImage: icon)
+                .resizable()
+                .frame(width: canvas, height: canvas)
+                .frame(width: size, height: size)
+        } else {
+            DockTileIconPreview.fromConfig(config, size: size)
+        }
+    }
+
+    private var systemIcon: NSImage? {
+        let style = IconStyle.forDisplay(raw: iconStyleManager.rawStyle, colorScheme: colorScheme, fallback: .defaultStyle)
+        guard style == .tinted,   // the helper lookup scans a folder — only pay for it here
+              let built = HelperBundleManager.shared.builtIconSignature(for: config),
+              Self.showsSystemIcon(style: style, helperSignature: built.signature, tileSignature: config.iconSignature)
+        else { return nil }
+        return NSWorkspace.shared.icon(forFile: built.path.path)
+    }
+}
+
 // MARK: - Previews
 
 #Preview("Default Style") {

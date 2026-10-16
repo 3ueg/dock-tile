@@ -345,17 +345,9 @@ struct DockTileDetailView: View {
             // icon/button overhung the card. 90pt icon + 6pt gap + 24pt button = 120pt keeps
             // it within the card bounds while the icon reads as large as the budget allows.
             VStack(alignment: .center, spacing: 6) {
-                // Uses DockTileIconPreview which is appearance-aware (light/dark mode)
+                // Appearance-aware tile face (the system's own render under Tinted — TileFace)
                 // Tappable to open customise view
-                DockTileIconPreview(
-                    tintColor: editedConfig.tintColor,
-                    iconType: editedConfig.iconType,
-                    iconValue: editedConfig.iconValue,
-                    iconScale: editedConfig.iconScale,
-                    iconWeight: editedConfig.iconWeight,
-                    background: editedConfig.background,
-                    size: 90
-                )
+                TileFace(config: editedConfig, size: 90)
                 .contentShape(RoundedRectangle(cornerRadius: 90 * 0.225, style: .continuous))
                 .onHover { hovering in
                     if hovering {
@@ -462,7 +454,9 @@ struct DockTileDetailView: View {
     /// iteration order is not stable — each cell resolves its own install status in its body.
     private var previewSignature: String {
         let style = IconStyle.forDisplay(raw: iconStyleManager.rawStyle, colorScheme: colorScheme, fallback: .defaultStyle)
-        return [editedConfig.layoutMode.rawValue, style.rawValue].joined(separator: "-")
+        // The raw token too: Tinted Light and Tinted Dark are one `IconStyle`, but the app icons
+        // inside are drawn differently for each (issue #22).
+        return [editedConfig.layoutMode.rawValue, style.rawValue, "\(iconStyleManager.rawStyle)"].joined(separator: "-")
     }
 
     /// The tile's apps, shown as the REAL popover panel (WYSIWYG — `settings: nil` makes it load the

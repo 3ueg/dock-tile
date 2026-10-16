@@ -42,6 +42,20 @@ struct DockTileConfiguration: Identifiable, Codable, Hashable {
     /// entry, the helper folder and the `[helper:…]` process tag.
     var diagnosticName: String { "'\(name)' (\(shortId))" }
 
+    /// Fingerprint of everything that shapes the tile's Dock icon, stamped into the helper's
+    /// Info.plist when it is built (`HelperBundleManager.iconSignatureKey`), so the app can tell
+    /// whether the helper on disk still shows this look (issue #22). A plain string, NOT a
+    /// `Hasher` value: `Hasher` is seeded per process, and this is compared across launches.
+    var iconSignature: String {
+        let tint: String
+        switch tintColor {
+        case .preset(let preset): tint = preset.rawValue
+        case .custom(let hex): tint = hex
+        }
+        return [tint, iconType.rawValue, iconValue, String(iconScale), iconWeight.rawValue, background.rawValue]
+            .joined(separator: "|")
+    }
+
     // MARK: - Duplicate
 
     /// A copy that looks exactly like this tile. Only identity and Dock bookkeeping are new: a fresh

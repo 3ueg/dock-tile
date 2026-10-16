@@ -36,7 +36,7 @@ struct HelperInfoPlistTests {
     func iconFileForcedToAppIcon() {
         let out = HelperBundleManager.helperInfoPlist(
             from: mainAppPlist(), bundleId: "com.docktile.helper.x", appName: "My Tile",
-            showInAppSwitcher: false, declarative: false)
+            showInAppSwitcher: false, declarative: false, iconSignature: "sig")
         #expect(out["CFBundleIconFile"] as? String == "AppIcon")
     }
 
@@ -47,7 +47,7 @@ struct HelperInfoPlistTests {
         // BOTH, never either — dropping the icns key would strand the fallback.
         let out = HelperBundleManager.helperInfoPlist(
             from: mainAppPlist(), bundleId: "com.docktile.helper.x", appName: "My Tile",
-            showInAppSwitcher: false, declarative: true)
+            showInAppSwitcher: false, declarative: true, iconSignature: "sig")
         #expect(out["CFBundleIconName"] as? String == "AppIcon")
         #expect(out["CFBundleIconFile"] as? String == "AppIcon")
     }
@@ -59,7 +59,7 @@ struct HelperInfoPlistTests {
         // users on a path this machine cannot exercise, so it gets no edits it does not need.
         let out = HelperBundleManager.helperInfoPlist(
             from: mainAppPlist(), bundleId: "com.docktile.helper.x", appName: "My Tile",
-            showInAppSwitcher: false, declarative: false)
+            showInAppSwitcher: false, declarative: false, iconSignature: "sig")
         #expect(out["CFBundleIconName"] == nil)
         #expect(out["CFBundleIconFile"] as? String == "AppIcon")
     }
@@ -68,7 +68,7 @@ struct HelperInfoPlistTests {
     func bundleIdentityRewritten() {
         let out = HelperBundleManager.helperInfoPlist(
             from: mainAppPlist(), bundleId: "com.docktile.helper.x", appName: "My Tile",
-            showInAppSwitcher: false, declarative: false)
+            showInAppSwitcher: false, declarative: false, iconSignature: "sig")
         #expect(out["CFBundleIdentifier"] as? String == "com.docktile.helper.x")
         #expect(out["CFBundleName"] as? String == "My Tile")
         #expect(out["CFBundleDisplayName"] as? String == "My Tile")
@@ -78,7 +78,7 @@ struct HelperInfoPlistTests {
     func stripsSparkleAndURLScheme() {
         let out = HelperBundleManager.helperInfoPlist(
             from: mainAppPlist(), bundleId: "com.docktile.helper.x", appName: "My Tile",
-            showInAppSwitcher: false, declarative: false)
+            showInAppSwitcher: false, declarative: false, iconSignature: "sig")
 
         #expect(out["SUFeedURL"] == nil)
         #expect(out["SUPublicEDKey"] == nil)
@@ -93,12 +93,12 @@ struct HelperInfoPlistTests {
     func ghostVsAppMode() {
         let ghost = HelperBundleManager.helperInfoPlist(
             from: mainAppPlist(), bundleId: "id", appName: "T", showInAppSwitcher: false,
-            declarative: false)
+            declarative: false, iconSignature: "sig")
         #expect(ghost["LSUIElement"] as? Bool == true)
 
         let app = HelperBundleManager.helperInfoPlist(
             from: ["LSUIElement": true], bundleId: "id", appName: "T", showInAppSwitcher: true,
-            declarative: false)
+            declarative: false, iconSignature: "sig")
         #expect(app["LSUIElement"] == nil)
     }
 }

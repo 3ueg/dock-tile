@@ -56,6 +56,8 @@ it, and unit-test the seam so a broken rule fails loudly. Existing seams: `resol
 `PopoverPreviewCanvas.naturalPanelSize` / `.naturalScale` (the `.natural` fit — the panel's intrinsic size and the scale that fits it into the fixed-width detail column),
 `ConfigurationManager.displayName(for:)` / `.commitDisplayName` (the sidebar/title-band name lags the stored one until an explicit commit — seeded on load, or the mechanism is silently inert),
 `SmartAddEngine.suggestionsForAddFlow` (filters what an opened add dialog shows; since 2026-09-02 the dialog only opens while Smart Add is on — off creates a blank tile directly),
+`IconStyleManager.displayPollAction` (main-app icon-style display poll runs only while the app is visible — never restarted while running, never left running hidden; issue #22, guarded by `IconStyleDisplayPollTests`),
+`TileFace.showsSystemIcon` + `DockTileConfiguration.iconSignature` (Tinted tile face shows the system's render only when the helper's `DTIconSignature` matches the tile's current look — stale/unstamped/other styles draw our own; every icon field moves the signature, non-icon fields don't; issue #22, guarded by `TileFaceTests`),
 `CustomiseTileView.heroStyles` (Mono hero previews: Light+Dark only where the icon is compiled per appearance, one light preview on macOS 15; guarded by `CustomiseHeroStylesTests`),
 `ConfigurationDefaults.iconValue` (new tiles default to the `"plus"` placeholder glyph, not a category icon),
 `DockTileConfiguration.duplicate(named:)` (a duplicate keeps every content field; only id/name/bundle id/Dock bookkeeping reset — compared through the encoded JSON, issue #21; guarded by `DockTileDuplicateTests`),
