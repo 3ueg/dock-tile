@@ -41,6 +41,7 @@
 		AAFB020 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = AAFB010 /* FirebaseAnalytics */; };
 		AAFB021 /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = AAFB011 /* FirebaseCrashlytics */; };
 		AAGSI01 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = AAGSI02 /* GoogleService-Info.plist */; };
+		AALOC01 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = AALOC02 /* Localizable.xcstrings */; };
 		AAGSV01 /* GeneralSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAGSV02 /* GeneralSettingsView.swift */; };
 		AAPAM01 /* PopoverAppearance.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAPAM02 /* PopoverAppearance.swift */; };
 		AAPAV01 /* PopoverAppearanceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAPAV02 /* PopoverAppearanceView.swift */; };
@@ -148,6 +149,7 @@
 		AAENV001 /* Environment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Environment.swift; sourceTree = "<group>"; };
 		AAEPGV01 /* EmojiPickerGrid.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmojiPickerGrid.swift; sourceTree = "<group>"; };
 		AAGSI02 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		AALOC02 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		AAGSV02 /* GeneralSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeneralSettingsView.swift; sourceTree = "<group>"; };
 		AAPAM02 /* PopoverAppearance.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopoverAppearance.swift; sourceTree = "<group>"; };
 		AAPAV02 /* PopoverAppearanceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopoverAppearanceView.swift; sourceTree = "<group>"; };
@@ -278,6 +280,7 @@
 				AAICND02 /* AppIcon-Dev.icon */,
 				AA0008 /* Info.plist */,
 				AAGSI02 /* GoogleService-Info.plist */,
+				AALOC02 /* Localizable.xcstrings */,
 				AADTG02 /* DockTileGlyph.png */,
 				AAHML02 /* HappyMachinesLogo.svg */,
 				AASPL02 /* SpadesIconLight.png */,
@@ -516,11 +519,14 @@
 				};
 			};
 			buildConfigurationList = AA0017 /* Build configuration list for PBXProject "DockTile" */;
-			developmentRegion = en;
+			developmentRegion = "en-GB";
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
 				Base,
+				"en-GB",
+				"en-AU",
+				"en-US",
 			);
 			mainGroup = AA0011;
 			minimizedProjectReferenceProxies = 1;
@@ -562,6 +568,7 @@
 				AAICON01 /* AppIcon.icon in Resources */,
 				AAICND01 /* AppIcon-Dev.icon in Resources */,
 				AAGSI01 /* GoogleService-Info.plist in Resources */,
+				AALOC01 /* Localizable.xcstrings in Resources */,
 				AADTG01 /* DockTileGlyph.png in Resources */,
 				AAHML01 /* HappyMachinesLogo.svg in Resources */,
 				AASPL01 /* SpadesIconLight.png in Resources */,
