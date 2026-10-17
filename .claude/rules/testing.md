@@ -135,7 +135,9 @@ built, and macos-15 via `test-without-building` — the only host that runs the 
 hard-coded to the macOS 26 pipeline (follow `IconPipeline.isDeclarative`, or `#available`-gate
 the test), and a test that reads the source tree through `#filePath` works on macOS 15 only
 because that job checks the repo out at the same path. The first macOS 15 run failed 11 tests for
-exactly these two reasons. UI/integration tests run locally only.
+exactly these two reasons. Since the String Catalog ships (2026-10-17), runtime `AppStrings` values
+also follow the test host's language: pin locale-specific expectations through the catalog JSON,
+never through `AppStrings` at runtime. UI/integration tests run locally only.
 
 **Count tests per suite, not by grepping a whole log.** `grep -c "passed"` over an `xcodebuild`
 log drifted between runs of the same tree (748/750/765 for one branch), so a "+N tests" claim

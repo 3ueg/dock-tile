@@ -63,6 +63,12 @@ class AppStringsParsing(unittest.TestCase):
             l10n.parse_appstrings('NSLocalizedString("x", comment: "no value")')
 
 
+    def test_unicode_escapes_become_characters(self):
+        calls = l10n.parse_appstrings(
+            r'NSLocalizedString("k", value: "Couldn\u{2019}t \u{1F600}", comment: "c")')
+        self.assertEqual(calls[0][1], "Couldn’t \U0001F600")
+
+
 class SyncKeys(unittest.TestCase):
     def test_adds_missing_keys_in_order_with_english_variants(self):
         cat = catalog_with(**{"alpha.one": {"en-GB": ("One", "translated")},
@@ -190,6 +196,25 @@ class Check(unittest.TestCase):
         self.assertEqual(l10n.lint_rows(ok, cat, "zh-Hans"), [])
         self.assertEqual(l10n.lint_rows(verbatim, cat, "zh-Hans"), ["menu.showInFinder: 'Finder' must appear as '访达'"])
         self.assertEqual(l10n.lint_rows(german, cat, "de"), [])
+
+    def test_smart_add_identity_collision_is_flagged_and_distinct_set_passes(self):
+        names = ("browse", "watch", "ship", "chat", "work", "together")
+        cat = catalog_with(**{f"smartAdd.identity.{n}": {"en-GB": (n.title(), "translated")} for n in names})
+
+        def rows(values):
+            return [l10n.Row(f"smartAdd.identity.{n}", n.title(), v, "machine", "") for n, v in zip(names, values)]
+
+        self.assertEqual(l10n.lint_rows(rows(["A", "B", "C", "D", "E", "F"]), cat, "de"), [])
+        self.assertEqual(l10n.lint_rows(rows(["A", "B", "C", "D", "A ", "F"]), cat, "de"), [
+            "smartAdd.identity.*: 'A' used by smartAdd.identity.browse and smartAdd.identity.work"
+            " — Smart Add drops one card"])
+
+    def test_english_drift_flags_code_value_that_differs_from_catalog(self):
+        cat = catalog_with(**{"a.k": {"en-GB": ("Old", "translated")}, "b.k": {"en-GB": ("Same", "translated")}})
+        calls = [("a.k", "New", "c"), ("b.k", "Same", "c"), ("c.k", "Unsynced", "c")]
+        self.assertEqual(l10n.english_drift(cat, calls), [
+            "a.k: AppStrings value differs from the catalog's en-GB — edit both "
+            "(see .claude/rules/localization-macos.md)"])
 
 
 if __name__ == "__main__":

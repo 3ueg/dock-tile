@@ -77,8 +77,12 @@ CALL = re.compile(
 SWIFT_ESCAPES = {"n": "\n", "t": "\t", '"': '"', "\\": "\\"}
 
 
+SWIFT_ESCAPE = re.compile(r"\\u\{([0-9A-Fa-f]+)\}|\\(.)", re.S)
+
+
 def swift_unescape(text: str) -> str:
-    return re.sub(r"\\(.)", lambda m: SWIFT_ESCAPES.get(m.group(1), m.group(1)), text)
+    return SWIFT_ESCAPE.sub(
+        lambda m: chr(int(m.group(1), 16)) if m.group(1) else SWIFT_ESCAPES.get(m.group(2), m.group(2)), text)
 
 
 def parse_appstrings(source: str) -> list[tuple[str, str, str]]:
@@ -217,6 +221,23 @@ def specifiers(text: str) -> list[str]:
     return sorted(SPECIFIER.findall(text))
 
 
+IDENTITY_KEYS = tuple(f"smartAdd.identity.{n}" for n in ("browse", "watch", "ship", "chat", "work", "together"))
+
+
+def identity_collisions(rows: list[Row]) -> list[str]:
+    """SmartAddEngine de-duplicates cards by localized identity name, so two equal translations
+    silently drop a card. Compared only when all six identity rows carry a translation."""
+    by_key = {r.key: r.translation.strip() for r in rows if r.key in IDENTITY_KEYS}
+    if len(by_key) != len(IDENTITY_KEYS) or not all(by_key.values()):
+        return []
+    problems: list[str] = []
+    for i, a in enumerate(IDENTITY_KEYS):
+        for b in IDENTITY_KEYS[i + 1:]:
+            if by_key[a] == by_key[b]:
+                problems.append(f"smartAdd.identity.*: '{by_key[a]}' used by {a} and {b} — Smart Add drops one card")
+    return problems
+
+
 def lint_rows(rows: list[Row], catalog: dict, lang: str) -> list[str]:
     """Problems a REVIEWER can introduce: an edited key, a lost placeholder, a dropped protected
     term. Both `check` and `import` refuse these. A translation that merely differs from the
@@ -237,6 +258,19 @@ def lint_rows(rows: list[Row], catalog: dict, lang: str) -> list[str]:
             if term in row.english and wanted not in row.translation:
                 problems.append(f"{row.key}: '{term}' must stay verbatim" if wanted == term
                                 else f"{row.key}: '{term}' must appear as '{wanted}'")
+    return problems + identity_collisions(rows)
+
+
+def english_drift(catalog: dict, calls: list[tuple[str, str, str]]) -> list[str]:
+    """The catalog's en-GB value overrides the Swift `value:` default at runtime, and `sync-keys`
+    skips existing keys — so editing one without the other silently does nothing."""
+    problems: list[str] = []
+    for key, value, _ in calls:
+        entry = catalog["strings"].get(key)
+        source = value_of(entry, SOURCE) if entry else None
+        if source and source[0] != value:
+            problems.append(f"{key}: AppStrings value differs from the catalog's en-GB — edit both "
+                            "(see .claude/rules/localization-macos.md)")
     return problems
 
 
@@ -301,7 +335,7 @@ def cmd_check(args: argparse.Namespace) -> int:
     """Green on a sheet that is ahead of the catalog (reviewer edits pending import); red on a
     missing or stale sheet, an unknown key, a lost placeholder or a dropped protected term."""
     catalog = load_catalog()
-    problems: list[str] = []
+    problems: list[str] = english_drift(catalog, parse_appstrings(APPSTRINGS.read_text(encoding="utf-8")))
     for lang in sheet_languages(catalog):
         path = SHEETS / f"{lang}.md"
         if not path.exists():

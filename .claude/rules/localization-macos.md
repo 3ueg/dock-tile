@@ -4,7 +4,7 @@
 
 | Locale | Role |
 |---|---|
-| `en-GB` | Source language and fallback for every unsupported language |
+| `en-GB` | Source language and development region |
 | `en-AU`, `en-US` | Spelling variants (Customise/Customize, Colour/Color) |
 | `zh-Hans`, `ja`, `de`, `ru`, `fr` | **Machine-first**, reviewed by native speakers from the user base |
 
@@ -18,8 +18,9 @@ cohort above 10 users. Adding a language costs one `export --lang`, one machine 
   stays OUT of the target on purpose: a localized `InfoPlist.strings` overrides `Info.plist` for Launch
   Services, and every helper is a copy with `CFBundleName` rewritten to the tile's name, so shipping it
   would make every tile read "Dock Tile" in ⌘Tab and Finder (`catalogShipsAndInfoPlistStringsDoesNot`).
-- **Development region is `en-GB`** (= the catalog's `sourceLanguage`), so a Mac set to an unshipped
-  language falls back to en-GB, not to a nonexistent `en.lproj`.
+- **Development region is `en-GB`** (= the catalog's `sourceLanguage`), not a nonexistent `en.lproj`.
+  A Mac set to an unshipped language resolves to one of the English localizations (a probe resolved
+  it to en-US, not en-GB), which is why the invitation test is "not `en*`".
 - **Accessors**: `DockTile/Constants/AppStrings.swift`, always `NSLocalizedString(key, value:, comment:)`
   in that three-argument shape — `Scripts/l10n/l10n.py` parses it and refuses any other shape.
 - **The catalog is the runtime source; the review sheets `docs/l10n/<lang>.md` are derived.**
@@ -29,14 +30,15 @@ cohort above 10 users. Adding a language costs one `export --lang`, one machine 
   code-key ⊆ catalog, per-language completeness and format-placeholder parity.
 - **Invitation**: `TranslationInvite` seams (`TranslationInviteTests`) show the About Translation
   row and a one-time alert only when `Bundle.main.preferredLocalizations.first` is non-English — an
-  unsupported language resolves to en-GB, so it is never invited. Events `translation_invite_shown`
+  unsupported language resolves to one of the English localizations, so it is never invited. Events `translation_invite_shown`
   / `translation_help_tapped` carry `ui_language` (never `language`, GA4's automatic dimension).
 
 ## Workflow
 
 | When | Run |
 |---|---|
-| New or changed `AppStrings` key | `python3 -I Scripts/l10n/l10n.py sync-keys`, fix any en-US spelling it warns about, then `export` |
+| New `AppStrings` key | `python3 -I Scripts/l10n/l10n.py sync-keys`, fix any en-US spelling it warns about, then `export` |
+| Changed English copy | Edit the `value:` in `AppStrings.swift` AND the en-GB/en-AU/en-US values in the catalog (textually, in place), then `export`. The catalog overrides the Swift default at runtime and `sync-keys` skips existing keys, so editing only one changes nothing a user sees; `check` fails when they differ |
 | Reviewer PR merged | `python3 -I Scripts/l10n/l10n.py import <lang>`, commit the catalog |
 | Before pushing | `python3 -I Scripts/l10n/l10n.py check` (CI runs it with the Python tests). Green while a reviewer's sheet is *ahead* of the catalog; red on a stale export, unknown key, lost placeholder or dropped glossary term |
 
@@ -54,7 +56,7 @@ Button("Customise") { ... }                   // wrong — never hardcode
 ```
 
 Categories: `Button.*`, `Label.*`, `Menu.*`, `Navigation.*`, `Section.*`, `Empty.*`, `Error.*`,
-`SmartAdd.*`, `Translation.*`, `Log.*` (logs are NOT localised).
+`SmartAdd.*`, `Translation.*`, `Layout.*`, `IconWeight.*`, `EmojiCategory.*`, `SymbolCategory.*`, `Log.*` (logs are NOT localised).
 
 - **A model's display name is a hardcoded string too (critical)**: a `displayName`/`title`
   property that returns a literal and reaches a view must route through `AppStrings`. The first
@@ -86,6 +88,10 @@ defaults write com.docktile.dev.app AppleLanguages "(de)"        # or zh-Hans, j
 defaults delete com.docktile.dev.app AppleLanguages              # reset
 defaults delete com.docktile.dev.app translationInviteShown      # see the one-time alert again
 ```
+
+`AppleLanguages` on `com.docktile.dev.app` (and System Settings' per-app language) reaches the MAIN
+app only. Helper tiles have their own bundle IDs, so popovers and helper Dock menus follow the system
+language (or `AppleLanguages` on that helper's bundle ID).
 
 Capture windows by ID (driving-the-dev-build.md). German and Russian run ~30% long: check toggle
 labels, the title-band action button, Smart Add cards. Glossary and register rules:
