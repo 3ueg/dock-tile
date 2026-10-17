@@ -52,6 +52,13 @@ Keep `%@`-style placeholders exactly as they are. `\n` means a line break, `\|` 
 | `button.scanForMissingApps` | Scan | Проверить | machine | Settings button that scans tiles for moved/uninstalled apps |
 | `button.update` | Update | Обновить | machine | Update button when tile is already in Dock |
 | `button.useThisTile` | Use This Tile | Использовать | machine | Smart Add sheet — button that creates a pre-filled tile from a suggestion |
+| `emojiCategory.activity` | Activity | Активность | machine | Emoji picker: section header |
+| `emojiCategory.animalsNature` | Animals & Nature | Животные и природа | machine | Emoji picker: section header |
+| `emojiCategory.foodDrink` | Food & Drink | Еда и напитки | machine | Emoji picker: section header |
+| `emojiCategory.objects` | Objects | Предметы | machine | Emoji picker: section header |
+| `emojiCategory.people` | People | Люди | machine | Emoji picker: section header |
+| `emojiCategory.symbols` | Symbols | Символы | machine | Emoji picker: section header |
+| `emojiCategory.travelPlaces` | Travel & Places | Путешествия и места | machine | Emoji picker: section header |
 | `empty.createFirstTile` | Create Your First Tile | Создайте первую плитку | machine | Header text for empty state |
 | `empty.detail` | Detail | Подробности | machine | Placeholder text in detail view |
 | `empty.noApps` | No apps configured | Приложения не добавлены | machine | Empty state text when no apps configured |
@@ -64,6 +71,12 @@ Keep `%@`-style placeholders exactly as they are. `\n` means a line break, `\|` 
 | `error.failedToWriteInfoPlist` | Failed to write Info.plist | Не удалось записать Info.plist | machine | Error when Info.plist cannot be written |
 | `error.mainAppNotFound` | Main Dock Tile.app not found | Основное приложение Dock Tile.app не найдено | machine | Error when main app bundle cannot be found |
 | `filePicker.message` | Select one or more applications or folders to add | Выберите одно или несколько приложений или папок для добавления | machine | Message in file picker dialog |
+| `iconWeight.bold` | Bold | Жирный | machine | Customise: icon weight picker option |
+| `iconWeight.heavy` | Heavy | Тяжелый | machine | Customise: icon weight picker option |
+| `iconWeight.light` | Light | Легкий | machine | Customise: icon weight picker option |
+| `iconWeight.medium` | Medium | Средний | machine | Customise: icon weight picker option |
+| `iconWeight.regular` | Regular | Обычный | machine | Customise: icon weight picker option |
+| `iconWeight.semibold` | Semibold | Полужирный | machine | Customise: icon weight picker option |
 | `label.background` | Background | Фон | machine | Customise Tile: background row label |
 | `label.background.colour` | Colour | Цвет | machine | Customise Tile: Colour background chip |
 | `label.background.colour.accessibility` | Colour, filled with your colour | Цвет: плитка залита вашим цветом | machine | VoiceOver label for the Colour chip |
@@ -192,6 +205,38 @@ Keep `%@`-style placeholders exactly as they are. `\n` means a line break, `\|` 
 | `subtitle.chooseColour` | Choose a background colour for your tile | Выберите цвет фона плитки | machine | Subtitle for colour picker section |
 | `subtitle.configureToAdd` | Configure to add apps | Настройте, чтобы добавить приложения | machine | Subtitle in empty state (grid view only) |
 | `subtitle.iconSize` | Adjust the size of your icon within the tile | Настройте размер значка внутри плитки | machine | Subtitle for icon size section |
+| `symbolCategory.accessibility` | Accessibility | Универсальный доступ | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.all` | All | Все | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.arrows` | Arrows | Стрелки | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.automotive` | Automotive | Автотранспорт | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.cameraandphotos` | Camera & Photos | Камера и фото | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.commerce` | Commerce | Коммерция | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.communication` | Communication | Общение | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.connectivity` | Connectivity | Связь | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.devices` | Devices | Устройства | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.draw` | Draw | Рисование | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.editing` | Editing | Редактирование | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.fitness` | Fitness | Спорт | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.gaming` | Gaming | Видеоигры | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.health` | Health | Здоровье | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.home` | Home | Дом | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.human` | Human | Люди | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.indices` | Indices | Индексы | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.keyboard` | Keyboard | Клавиатура | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.maps` | Maps | Карты | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.math` | Maths | Математика | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.media` | Media | Медиа | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.multicolor` | Multicolour | Многоцветные | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.nature` | Nature | Природа | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.objectsandtools` | Objects & Tools | Объекты и инструменты | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.privacyandsecurity` | Privacy & Security | Конфиденциальность и безопасность | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.shapes` | Shapes | Фигуры | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.textformatting` | Text Formatting | Форматирование текста | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.time` | Time | Время | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.transportation` | Transportation | Транспорт | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.variable` | Variable | Вариативность | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.weather` | Weather | Погода | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.whatsnew` | What's New | Что нового | machine | Symbol picker: section header (SF Symbols category) |
 | `tab.emoji` | Emoji | Эмодзи | machine | Emoji tab label |
 | `tab.symbol` | Symbol | Символ | machine | Symbol tab label |
 | `title.deleteTile` | Delete Tile | Удалить плитку | machine | Alert title for delete confirmation |

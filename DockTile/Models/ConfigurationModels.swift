@@ -206,7 +206,7 @@ enum IconType: String, Codable, Hashable {
 /// Applies to SF Symbols only — emojis are colour glyphs and ignore weight, so the
 /// renderers (`IconGenerator`, `DockTileIconPreview`) never apply it to emoji content.
 /// The curated set drops the extremes (ultralight/thin/black) that read poorly at
-/// tile size. `displayName` is intentionally not localised (mirrors `LayoutMode`).
+/// tile size.
 enum IconWeight: String, Codable, CaseIterable, Hashable {
     case light
     case regular
@@ -217,12 +217,12 @@ enum IconWeight: String, Codable, CaseIterable, Hashable {
 
     var displayName: String {
         switch self {
-        case .light: return "Light"
-        case .regular: return "Regular"
-        case .medium: return "Medium"
-        case .semibold: return "Semibold"
-        case .bold: return "Bold"
-        case .heavy: return "Heavy"
+        case .light: return AppStrings.IconWeight.light
+        case .regular: return AppStrings.IconWeight.regular
+        case .medium: return AppStrings.IconWeight.medium
+        case .semibold: return AppStrings.IconWeight.semibold
+        case .bold: return AppStrings.IconWeight.bold
+        case .heavy: return AppStrings.IconWeight.heavy
         }
     }
 
@@ -463,8 +463,8 @@ enum LayoutMode: String, Hashable {
 
     var displayName: String {
         switch self {
-        case .grid: return "Grid"
-        case .list: return "List"
+        case .grid: return AppStrings.Layout.grid
+        case .list: return AppStrings.Layout.list
         }
     }
 

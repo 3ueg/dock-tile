@@ -52,6 +52,13 @@ Keep `%@`-style placeholders exactly as they are. `\n` means a line break, `\|` 
 | `button.scanForMissingApps` | Scan | 扫描 | machine | Settings button that scans tiles for moved/uninstalled apps |
 | `button.update` | Update | 更新 | machine | Update button when tile is already in Dock |
 | `button.useThisTile` | Use This Tile | 使用此磁贴 | machine | Smart Add sheet — button that creates a pre-filled tile from a suggestion |
+| `emojiCategory.activity` | Activity | 活动 | machine | Emoji picker: section header |
+| `emojiCategory.animalsNature` | Animals & Nature | 动物与自然 | machine | Emoji picker: section header |
+| `emojiCategory.foodDrink` | Food & Drink | 食物与饮料 | machine | Emoji picker: section header |
+| `emojiCategory.objects` | Objects | 物体 | machine | Emoji picker: section header |
+| `emojiCategory.people` | People | 人物 | machine | Emoji picker: section header |
+| `emojiCategory.symbols` | Symbols | 符号 | machine | Emoji picker: section header |
+| `emojiCategory.travelPlaces` | Travel & Places | 旅行与地点 | machine | Emoji picker: section header |
 | `empty.createFirstTile` | Create Your First Tile | 创建你的第一个磁贴 | machine | Header text for empty state |
 | `empty.detail` | Detail | 详细信息 | machine | Placeholder text in detail view |
 | `empty.noApps` | No apps configured | 未配置App | machine | Empty state text when no apps configured |
@@ -64,6 +71,12 @@ Keep `%@`-style placeholders exactly as they are. `\n` means a line break, `\|` 
 | `error.failedToWriteInfoPlist` | Failed to write Info.plist | 写入Info.plist失败 | machine | Error when Info.plist cannot be written |
 | `error.mainAppNotFound` | Main Dock Tile.app not found | 找不到主程序Dock Tile.app | machine | Error when main app bundle cannot be found |
 | `filePicker.message` | Select one or more applications or folders to add | 选择要添加的一个或多个App或文件夹 | machine | Message in file picker dialog |
+| `iconWeight.bold` | Bold | 粗体 | machine | Customise: icon weight picker option |
+| `iconWeight.heavy` | Heavy | 特黑体 | machine | Customise: icon weight picker option |
+| `iconWeight.light` | Light | 细体 | machine | Customise: icon weight picker option |
+| `iconWeight.medium` | Medium | 中黑体 | machine | Customise: icon weight picker option |
+| `iconWeight.regular` | Regular | 常规体 | machine | Customise: icon weight picker option |
+| `iconWeight.semibold` | Semibold | 中粗体 | machine | Customise: icon weight picker option |
 | `label.background` | Background | 背景 | machine | Customise Tile: background row label |
 | `label.background.colour` | Colour | 颜色 | machine | Customise Tile: Colour background chip |
 | `label.background.colour.accessibility` | Colour, filled with your colour | 颜色，以你选择的颜色填充 | machine | VoiceOver label for the Colour chip |
@@ -192,6 +205,38 @@ Keep `%@`-style placeholders exactly as they are. `\n` means a line break, `\|` 
 | `subtitle.chooseColour` | Choose a background colour for your tile | 为磁贴选择背景颜色 | machine | Subtitle for colour picker section |
 | `subtitle.configureToAdd` | Configure to add apps | 配置以添加App | machine | Subtitle in empty state (grid view only) |
 | `subtitle.iconSize` | Adjust the size of your icon within the tile | 调整图标在磁贴中的大小 | machine | Subtitle for icon size section |
+| `symbolCategory.accessibility` | Accessibility | 无障碍 | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.all` | All | 全部 | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.arrows` | Arrows | 箭头 | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.automotive` | Automotive | 汽车 | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.cameraandphotos` | Camera & Photos | 相机与照片 | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.commerce` | Commerce | 商业 | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.communication` | Communication | 通信 | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.connectivity` | Connectivity | 连接状态 | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.devices` | Devices | 设备 | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.draw` | Draw | 绘制 | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.editing` | Editing | 编辑 | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.fitness` | Fitness | 健身 | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.gaming` | Gaming | 游戏 | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.health` | Health | 健康 | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.home` | Home | 家庭 | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.human` | Human | 人 | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.indices` | Indices | 索引 | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.keyboard` | Keyboard | 键盘 | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.maps` | Maps | 地图 | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.math` | Maths | 数学 | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.media` | Media | 媒体 | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.multicolor` | Multicolour | 多色 | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.nature` | Nature | 自然 | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.objectsandtools` | Objects & Tools | 物体与工具 | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.privacyandsecurity` | Privacy & Security | 隐私与安全性 | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.shapes` | Shapes | 形状 | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.textformatting` | Text Formatting | 文本格式化 | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.time` | Time | 时间 | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.transportation` | Transportation | 交通 | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.variable` | Variable | 可变 | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.weather` | Weather | 天气 | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.whatsnew` | What's New | 新符号 | machine | Symbol picker: section header (SF Symbols category) |
 | `tab.emoji` | Emoji | 表情符号 | machine | Emoji tab label |
 | `tab.symbol` | Symbol | 符号 | machine | Symbol tab label |
 | `title.deleteTile` | Delete Tile | 删除磁贴 | machine | Alert title for delete confirmation |

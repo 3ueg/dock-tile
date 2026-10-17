@@ -96,7 +96,7 @@ struct CustomiseTileView: View {
             DiagnosticsLog.shared.log("tile", "Icon changed to \(editedConfig.iconType == .emoji ? "emoji" : "symbol") '\(newValue)' for \(editedConfig.diagnosticName)")
         }
         .onChange(of: editedConfig.iconWeight) { _, newValue in
-            DiagnosticsLog.shared.ui("Customise → Icon weight \(newValue.displayName) for '\(editedConfig.name)'")
+            DiagnosticsLog.shared.ui("Customise → Icon weight \(newValue.rawValue) for '\(editedConfig.name)'")
         }
         .onChange(of: selectedIconTab) { _, newTab in
             DiagnosticsLog.shared.ui("Customise → Icon picker tab '\(newTab == .symbol ? "Symbol" : "Emoji")'")

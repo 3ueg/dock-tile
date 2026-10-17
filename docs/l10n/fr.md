@@ -52,6 +52,13 @@ Keep `%@`-style placeholders exactly as they are. `\n` means a line break, `\|` 
 | `button.scanForMissingApps` | Scan | Analyser | machine | Settings button that scans tiles for moved/uninstalled apps |
 | `button.update` | Update | Mettre à jour | machine | Update button when tile is already in Dock |
 | `button.useThisTile` | Use This Tile | Utiliser cette tuile | machine | Smart Add sheet — button that creates a pre-filled tile from a suggestion |
+| `emojiCategory.activity` | Activity | Activités | machine | Emoji picker: section header |
+| `emojiCategory.animalsNature` | Animals & Nature | Animaux et nature | machine | Emoji picker: section header |
+| `emojiCategory.foodDrink` | Food & Drink | Nourriture et boissons | machine | Emoji picker: section header |
+| `emojiCategory.objects` | Objects | Objets | machine | Emoji picker: section header |
+| `emojiCategory.people` | People | Personnes | machine | Emoji picker: section header |
+| `emojiCategory.symbols` | Symbols | Symboles | machine | Emoji picker: section header |
+| `emojiCategory.travelPlaces` | Travel & Places | Voyages et lieux | machine | Emoji picker: section header |
 | `empty.createFirstTile` | Create Your First Tile | Créez votre première tuile | machine | Header text for empty state |
 | `empty.detail` | Detail | Détails | machine | Placeholder text in detail view |
 | `empty.noApps` | No apps configured | Aucune app configurée | machine | Empty state text when no apps configured |
@@ -64,6 +71,12 @@ Keep `%@`-style placeholders exactly as they are. `\n` means a line break, `\|` 
 | `error.failedToWriteInfoPlist` | Failed to write Info.plist | Impossible d’écrire Info.plist | machine | Error when Info.plist cannot be written |
 | `error.mainAppNotFound` | Main Dock Tile.app not found | App principale Dock Tile.app introuvable | machine | Error when main app bundle cannot be found |
 | `filePicker.message` | Select one or more applications or folders to add | Sélectionnez une ou plusieurs apps ou un ou plusieurs dossiers à ajouter | machine | Message in file picker dialog |
+| `iconWeight.bold` | Bold | Gras | machine | Customise: icon weight picker option |
+| `iconWeight.heavy` | Heavy | Lourd | machine | Customise: icon weight picker option |
+| `iconWeight.light` | Light | Léger | machine | Customise: icon weight picker option |
+| `iconWeight.medium` | Medium | Moyen | machine | Customise: icon weight picker option |
+| `iconWeight.regular` | Regular | Courant | machine | Customise: icon weight picker option |
+| `iconWeight.semibold` | Semibold | Semi-gras | machine | Customise: icon weight picker option |
 | `label.background` | Background | Arrière-plan | machine | Customise Tile: background row label |
 | `label.background.colour` | Colour | Couleur | machine | Customise Tile: Colour background chip |
 | `label.background.colour.accessibility` | Colour, filled with your colour | Couleur, tuile remplie de votre couleur | machine | VoiceOver label for the Colour chip |
@@ -192,6 +205,38 @@ Keep `%@`-style placeholders exactly as they are. `\n` means a line break, `\|` 
 | `subtitle.chooseColour` | Choose a background colour for your tile | Choisissez une couleur d’arrière-plan pour votre tuile | machine | Subtitle for colour picker section |
 | `subtitle.configureToAdd` | Configure to add apps | Configurez pour ajouter des apps | machine | Subtitle in empty state (grid view only) |
 | `subtitle.iconSize` | Adjust the size of your icon within the tile | Ajustez la taille de votre icône dans la tuile | machine | Subtitle for icon size section |
+| `symbolCategory.accessibility` | Accessibility | Accessibilité | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.all` | All | Tout | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.arrows` | Arrows | Flèches | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.automotive` | Automotive | Automobile | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.cameraandphotos` | Camera & Photos | Appareil photo et photos | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.commerce` | Commerce | Commerce | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.communication` | Communication | Communication | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.connectivity` | Connectivity | Connectivité | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.devices` | Devices | Appareils | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.draw` | Draw | Dessin | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.editing` | Editing | Édition | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.fitness` | Fitness | Sport | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.gaming` | Gaming | Jeux | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.health` | Health | Santé | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.home` | Home | Domicile | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.human` | Human | Humain | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.indices` | Indices | Indices | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.keyboard` | Keyboard | Clavier | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.maps` | Maps | Plans | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.math` | Maths | Maths | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.media` | Media | Multimédia | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.multicolor` | Multicolour | Multicolore | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.nature` | Nature | Nature | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.objectsandtools` | Objects & Tools | Objets et outils | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.privacyandsecurity` | Privacy & Security | Confidentialité et sécurité | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.shapes` | Shapes | Formes | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.textformatting` | Text Formatting | Formatage du texte | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.time` | Time | Temps | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.transportation` | Transportation | Transports | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.variable` | Variable | Variable | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.weather` | Weather | Météo | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.whatsnew` | What's New | Nouveautés | machine | Symbol picker: section header (SF Symbols category) |
 | `tab.emoji` | Emoji | Emoji | machine | Emoji tab label |
 | `tab.symbol` | Symbol | Symbole | machine | Symbol tab label |
 | `title.deleteTile` | Delete Tile | Supprimer la tuile | machine | Alert title for delete confirmation |

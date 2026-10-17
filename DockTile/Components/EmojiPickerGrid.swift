@@ -114,13 +114,13 @@ enum EmojiCategory: CaseIterable {
 
     var displayName: String {
         switch self {
-        case .people: return "People"
-        case .animalsNature: return "Animals & Nature"
-        case .foodDrink: return "Food & Drink"
-        case .activity: return "Activity"
-        case .travelPlaces: return "Travel & Places"
-        case .objects: return "Objects"
-        case .symbols: return "Symbols"
+        case .people: return AppStrings.EmojiCategory.people
+        case .animalsNature: return AppStrings.EmojiCategory.animalsNature
+        case .foodDrink: return AppStrings.EmojiCategory.foodDrink
+        case .activity: return AppStrings.EmojiCategory.activity
+        case .travelPlaces: return AppStrings.EmojiCategory.travelPlaces
+        case .objects: return AppStrings.EmojiCategory.objects
+        case .symbols: return AppStrings.EmojiCategory.symbols
         }
     }
 

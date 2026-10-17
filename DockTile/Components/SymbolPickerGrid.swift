@@ -294,38 +294,38 @@ final class SFSymbolCatalog: @unchecked Sendable {
     /// Human-readable category names
     private static func categoryDisplayName(for key: String) -> String {
         switch key {
-        case "all": return "All"
-        case "whatsnew": return "What's New"
-        case "draw": return "Draw"
-        case "variable": return "Variable"
-        case "multicolor": return "Multicolour"
-        case "communication": return "Communication"
-        case "weather": return "Weather"
-        case "maps": return "Maps"
-        case "objectsandtools": return "Objects & Tools"
-        case "devices": return "Devices"
-        case "cameraandphotos": return "Camera & Photos"
-        case "gaming": return "Gaming"
-        case "connectivity": return "Connectivity"
-        case "transportation": return "Transportation"
-        case "automotive": return "Automotive"
-        case "accessibility": return "Accessibility"
-        case "privacyandsecurity": return "Privacy & Security"
-        case "human": return "Human"
-        case "home": return "Home"
-        case "fitness": return "Fitness"
-        case "nature": return "Nature"
-        case "editing": return "Editing"
-        case "textformatting": return "Text Formatting"
-        case "media": return "Media"
-        case "keyboard": return "Keyboard"
-        case "commerce": return "Commerce"
-        case "time": return "Time"
-        case "health": return "Health"
-        case "shapes": return "Shapes"
-        case "arrows": return "Arrows"
-        case "indices": return "Indices"
-        case "math": return "Maths"
+        case "all": return AppStrings.SymbolCategory.all
+        case "whatsnew": return AppStrings.SymbolCategory.whatsNew
+        case "draw": return AppStrings.SymbolCategory.draw
+        case "variable": return AppStrings.SymbolCategory.variable
+        case "multicolor": return AppStrings.SymbolCategory.multicolor
+        case "communication": return AppStrings.SymbolCategory.communication
+        case "weather": return AppStrings.SymbolCategory.weather
+        case "maps": return AppStrings.SymbolCategory.maps
+        case "objectsandtools": return AppStrings.SymbolCategory.objectsAndTools
+        case "devices": return AppStrings.SymbolCategory.devices
+        case "cameraandphotos": return AppStrings.SymbolCategory.cameraAndPhotos
+        case "gaming": return AppStrings.SymbolCategory.gaming
+        case "connectivity": return AppStrings.SymbolCategory.connectivity
+        case "transportation": return AppStrings.SymbolCategory.transportation
+        case "automotive": return AppStrings.SymbolCategory.automotive
+        case "accessibility": return AppStrings.SymbolCategory.accessibility
+        case "privacyandsecurity": return AppStrings.SymbolCategory.privacyAndSecurity
+        case "human": return AppStrings.SymbolCategory.human
+        case "home": return AppStrings.SymbolCategory.home
+        case "fitness": return AppStrings.SymbolCategory.fitness
+        case "nature": return AppStrings.SymbolCategory.nature
+        case "editing": return AppStrings.SymbolCategory.editing
+        case "textformatting": return AppStrings.SymbolCategory.textFormatting
+        case "media": return AppStrings.SymbolCategory.media
+        case "keyboard": return AppStrings.SymbolCategory.keyboard
+        case "commerce": return AppStrings.SymbolCategory.commerce
+        case "time": return AppStrings.SymbolCategory.time
+        case "health": return AppStrings.SymbolCategory.health
+        case "shapes": return AppStrings.SymbolCategory.shapes
+        case "arrows": return AppStrings.SymbolCategory.arrows
+        case "indices": return AppStrings.SymbolCategory.indices
+        case "math": return AppStrings.SymbolCategory.math
         default: return key.capitalized
         }
     }

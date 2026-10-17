@@ -825,6 +825,111 @@ enum AppStrings {
         )
     }
 
+    // MARK: - Icon Weight Options
+
+    enum IconWeight {
+        static let light = NSLocalizedString(
+            "iconWeight.light", value: "Light", comment: "Customise: icon weight picker option")
+        static let regular = NSLocalizedString(
+            "iconWeight.regular", value: "Regular", comment: "Customise: icon weight picker option")
+        static let medium = NSLocalizedString(
+            "iconWeight.medium", value: "Medium", comment: "Customise: icon weight picker option")
+        static let semibold = NSLocalizedString(
+            "iconWeight.semibold", value: "Semibold", comment: "Customise: icon weight picker option")
+        static let bold = NSLocalizedString(
+            "iconWeight.bold", value: "Bold", comment: "Customise: icon weight picker option")
+        static let heavy = NSLocalizedString(
+            "iconWeight.heavy", value: "Heavy", comment: "Customise: icon weight picker option")
+    }
+
+    // MARK: - Emoji Picker Categories
+
+    enum EmojiCategory {
+        static let people = NSLocalizedString(
+            "emojiCategory.people", value: "People", comment: "Emoji picker: section header")
+        static let animalsNature = NSLocalizedString(
+            "emojiCategory.animalsNature", value: "Animals & Nature", comment: "Emoji picker: section header")
+        static let foodDrink = NSLocalizedString(
+            "emojiCategory.foodDrink", value: "Food & Drink", comment: "Emoji picker: section header")
+        static let activity = NSLocalizedString(
+            "emojiCategory.activity", value: "Activity", comment: "Emoji picker: section header")
+        static let travelPlaces = NSLocalizedString(
+            "emojiCategory.travelPlaces", value: "Travel & Places", comment: "Emoji picker: section header")
+        static let objects = NSLocalizedString(
+            "emojiCategory.objects", value: "Objects", comment: "Emoji picker: section header")
+        static let symbols = NSLocalizedString(
+            "emojiCategory.symbols", value: "Symbols", comment: "Emoji picker: section header")
+    }
+
+    // MARK: - Symbol Picker Categories
+
+    enum SymbolCategory {
+        static let all = NSLocalizedString(
+            "symbolCategory.all", value: "All", comment: "Symbol picker: section header (SF Symbols category)")
+        static let whatsNew = NSLocalizedString(
+            "symbolCategory.whatsnew", value: "What's New", comment: "Symbol picker: section header (SF Symbols category)")
+        static let draw = NSLocalizedString(
+            "symbolCategory.draw", value: "Draw", comment: "Symbol picker: section header (SF Symbols category)")
+        static let variable = NSLocalizedString(
+            "symbolCategory.variable", value: "Variable", comment: "Symbol picker: section header (SF Symbols category)")
+        static let multicolor = NSLocalizedString(
+            "symbolCategory.multicolor", value: "Multicolour", comment: "Symbol picker: section header (SF Symbols category)")
+        static let communication = NSLocalizedString(
+            "symbolCategory.communication", value: "Communication", comment: "Symbol picker: section header (SF Symbols category)")
+        static let weather = NSLocalizedString(
+            "symbolCategory.weather", value: "Weather", comment: "Symbol picker: section header (SF Symbols category)")
+        static let maps = NSLocalizedString(
+            "symbolCategory.maps", value: "Maps", comment: "Symbol picker: section header (SF Symbols category)")
+        static let objectsAndTools = NSLocalizedString(
+            "symbolCategory.objectsandtools", value: "Objects & Tools", comment: "Symbol picker: section header (SF Symbols category)")
+        static let devices = NSLocalizedString(
+            "symbolCategory.devices", value: "Devices", comment: "Symbol picker: section header (SF Symbols category)")
+        static let cameraAndPhotos = NSLocalizedString(
+            "symbolCategory.cameraandphotos", value: "Camera & Photos", comment: "Symbol picker: section header (SF Symbols category)")
+        static let gaming = NSLocalizedString(
+            "symbolCategory.gaming", value: "Gaming", comment: "Symbol picker: section header (SF Symbols category)")
+        static let connectivity = NSLocalizedString(
+            "symbolCategory.connectivity", value: "Connectivity", comment: "Symbol picker: section header (SF Symbols category)")
+        static let transportation = NSLocalizedString(
+            "symbolCategory.transportation", value: "Transportation", comment: "Symbol picker: section header (SF Symbols category)")
+        static let automotive = NSLocalizedString(
+            "symbolCategory.automotive", value: "Automotive", comment: "Symbol picker: section header (SF Symbols category)")
+        static let accessibility = NSLocalizedString(
+            "symbolCategory.accessibility", value: "Accessibility", comment: "Symbol picker: section header (SF Symbols category)")
+        static let privacyAndSecurity = NSLocalizedString(
+            "symbolCategory.privacyandsecurity", value: "Privacy & Security", comment: "Symbol picker: section header (SF Symbols category)")
+        static let human = NSLocalizedString(
+            "symbolCategory.human", value: "Human", comment: "Symbol picker: section header (SF Symbols category)")
+        static let home = NSLocalizedString(
+            "symbolCategory.home", value: "Home", comment: "Symbol picker: section header (SF Symbols category)")
+        static let fitness = NSLocalizedString(
+            "symbolCategory.fitness", value: "Fitness", comment: "Symbol picker: section header (SF Symbols category)")
+        static let nature = NSLocalizedString(
+            "symbolCategory.nature", value: "Nature", comment: "Symbol picker: section header (SF Symbols category)")
+        static let editing = NSLocalizedString(
+            "symbolCategory.editing", value: "Editing", comment: "Symbol picker: section header (SF Symbols category)")
+        static let textFormatting = NSLocalizedString(
+            "symbolCategory.textformatting", value: "Text Formatting", comment: "Symbol picker: section header (SF Symbols category)")
+        static let media = NSLocalizedString(
+            "symbolCategory.media", value: "Media", comment: "Symbol picker: section header (SF Symbols category)")
+        static let keyboard = NSLocalizedString(
+            "symbolCategory.keyboard", value: "Keyboard", comment: "Symbol picker: section header (SF Symbols category)")
+        static let commerce = NSLocalizedString(
+            "symbolCategory.commerce", value: "Commerce", comment: "Symbol picker: section header (SF Symbols category)")
+        static let time = NSLocalizedString(
+            "symbolCategory.time", value: "Time", comment: "Symbol picker: section header (SF Symbols category)")
+        static let health = NSLocalizedString(
+            "symbolCategory.health", value: "Health", comment: "Symbol picker: section header (SF Symbols category)")
+        static let shapes = NSLocalizedString(
+            "symbolCategory.shapes", value: "Shapes", comment: "Symbol picker: section header (SF Symbols category)")
+        static let arrows = NSLocalizedString(
+            "symbolCategory.arrows", value: "Arrows", comment: "Symbol picker: section header (SF Symbols category)")
+        static let indices = NSLocalizedString(
+            "symbolCategory.indices", value: "Indices", comment: "Symbol picker: section header (SF Symbols category)")
+        static let math = NSLocalizedString(
+            "symbolCategory.math", value: "Maths", comment: "Symbol picker: section header (SF Symbols category)")
+    }
+
     // MARK: - Popover Appearance Options
 
     /// Segmented-control option labels for the popover appearance pickers.

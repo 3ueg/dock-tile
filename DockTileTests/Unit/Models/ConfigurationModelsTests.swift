@@ -628,10 +628,10 @@ struct LayoutModeTests {
         #expect(LayoutMode.list.rawValue == "list")
     }
 
-    @Test("Display names are not empty")
+    @Test("Display names come from the localised Layout strings")
     func displayNames() {
-        #expect(!LayoutMode.grid.displayName.isEmpty)
-        #expect(!LayoutMode.list.displayName.isEmpty)
+        #expect(LayoutMode.grid.displayName == AppStrings.Layout.grid)
+        #expect(LayoutMode.list.displayName == AppStrings.Layout.list)
     }
 
     @Test("Icon names are valid SF Symbol names")

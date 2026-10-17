@@ -52,6 +52,13 @@ Keep `%@`-style placeholders exactly as they are. `\n` means a line break, `\|` 
 | `button.scanForMissingApps` | Scan | スキャン | machine | Settings button that scans tiles for moved/uninstalled apps |
 | `button.update` | Update | 更新 | machine | Update button when tile is already in Dock |
 | `button.useThisTile` | Use This Tile | このタイルを使用 | machine | Smart Add sheet — button that creates a pre-filled tile from a suggestion |
+| `emojiCategory.activity` | Activity | 活動 | machine | Emoji picker: section header |
+| `emojiCategory.animalsNature` | Animals & Nature | 動物と自然 | machine | Emoji picker: section header |
+| `emojiCategory.foodDrink` | Food & Drink | 食べ物と飲み物 | machine | Emoji picker: section header |
+| `emojiCategory.objects` | Objects | 物 | machine | Emoji picker: section header |
+| `emojiCategory.people` | People | 人々 | machine | Emoji picker: section header |
+| `emojiCategory.symbols` | Symbols | 記号 | machine | Emoji picker: section header |
+| `emojiCategory.travelPlaces` | Travel & Places | 旅行と場所 | machine | Emoji picker: section header |
 | `empty.createFirstTile` | Create Your First Tile | 最初のタイルを作成 | machine | Header text for empty state |
 | `empty.detail` | Detail | 詳細 | machine | Placeholder text in detail view |
 | `empty.noApps` | No apps configured | アプリが設定されていません | machine | Empty state text when no apps configured |
@@ -64,6 +71,12 @@ Keep `%@`-style placeholders exactly as they are. `\n` means a line break, `\|` 
 | `error.failedToWriteInfoPlist` | Failed to write Info.plist | Info.plistに書き込めませんでした | machine | Error when Info.plist cannot be written |
 | `error.mainAppNotFound` | Main Dock Tile.app not found | メインのDock Tile.appが見つかりません | machine | Error when main app bundle cannot be found |
 | `filePicker.message` | Select one or more applications or folders to add | 追加するアプリケーションまたはフォルダを1つ以上選択してください | machine | Message in file picker dialog |
+| `iconWeight.bold` | Bold | ボールド | machine | Customise: icon weight picker option |
+| `iconWeight.heavy` | Heavy | ヘビー | machine | Customise: icon weight picker option |
+| `iconWeight.light` | Light | ライト | machine | Customise: icon weight picker option |
+| `iconWeight.medium` | Medium | ミディアム | machine | Customise: icon weight picker option |
+| `iconWeight.regular` | Regular | レギュラー | machine | Customise: icon weight picker option |
+| `iconWeight.semibold` | Semibold | セミボールド | machine | Customise: icon weight picker option |
 | `label.background` | Background | 背景 | machine | Customise Tile: background row label |
 | `label.background.colour` | Colour | カラー | machine | Customise Tile: Colour background chip |
 | `label.background.colour.accessibility` | Colour, filled with your colour | カラー、選択した色で塗りつぶし | machine | VoiceOver label for the Colour chip |
@@ -192,6 +205,38 @@ Keep `%@`-style placeholders exactly as they are. `\n` means a line break, `\|` 
 | `subtitle.chooseColour` | Choose a background colour for your tile | タイルの背景色を選択してください | machine | Subtitle for colour picker section |
 | `subtitle.configureToAdd` | Configure to add apps | 設定してアプリを追加 | machine | Subtitle in empty state (grid view only) |
 | `subtitle.iconSize` | Adjust the size of your icon within the tile | タイル内のアイコンのサイズを調整します | machine | Subtitle for icon size section |
+| `symbolCategory.accessibility` | Accessibility | アクセシビリティ | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.all` | All | すべて | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.arrows` | Arrows | 矢印 | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.automotive` | Automotive | 自動車 | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.cameraandphotos` | Camera & Photos | カメラと写真 | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.commerce` | Commerce | コマース | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.communication` | Communication | コミュニケーション | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.connectivity` | Connectivity | コネクティビティ | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.devices` | Devices | デバイス | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.draw` | Draw | 描画 | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.editing` | Editing | 編集 | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.fitness` | Fitness | フィットネス | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.gaming` | Gaming | ゲーム | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.health` | Health | ヘルスケア | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.home` | Home | ホーム | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.human` | Human | 人 | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.indices` | Indices | インデックス | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.keyboard` | Keyboard | キーボード | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.maps` | Maps | マップ | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.math` | Maths | 数学 | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.media` | Media | メディア | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.multicolor` | Multicolour | マルチカラー | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.nature` | Nature | 自然 | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.objectsandtools` | Objects & Tools | オブジェクトとツール | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.privacyandsecurity` | Privacy & Security | プライバシーとセキュリティ | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.shapes` | Shapes | 図形 | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.textformatting` | Text Formatting | テキストフォーマット | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.time` | Time | 時計 | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.transportation` | Transportation | 交通 | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.variable` | Variable | 可変 | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.weather` | Weather | 天気 | machine | Symbol picker: section header (SF Symbols category) |
+| `symbolCategory.whatsnew` | What's New | 新機能 | machine | Symbol picker: section header (SF Symbols category) |
 | `tab.emoji` | Emoji | 絵文字 | machine | Emoji tab label |
 | `tab.symbol` | Symbol | シンボル | machine | Symbol tab label |
 | `title.deleteTile` | Delete Tile | タイルを削除 | machine | Alert title for delete confirmation |
