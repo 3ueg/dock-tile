@@ -24,7 +24,7 @@ enforces this list (`PROTECTED_TERMS`).
 | Finder | 访达 | Finder | Finder | Finder | Finder |
 | Spotlight | 聚焦 | Spotlight | Spotlight | Spotlight | Spotlight |
 | tile (ours) | 磁贴 | タイル | Kachel | плитка | tuile |
-| popover (ours) | 弹出面板 | ポップオーバー | Popover | всплывающая панель | fenêtre contextuelle |
+| popover (ours) | 弹出面板 | ポップオーバー | Popover | всплывающая панель | fenêtre surgissante |
 | Applications folder | 应用程序 | アプリケーション | Programme | Программы | Applications |
 | Accessibility (permission) | 无障碍 | アクセシビリティ | Bedienungshilfen | Универсальный доступ | Accessibilité |
 | Login Items | 登录项 | ログイン項目 | Anmeldeobjekte | Объекты входа | Ouverture |
