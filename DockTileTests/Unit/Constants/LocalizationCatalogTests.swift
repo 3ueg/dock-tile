@@ -21,7 +21,16 @@ struct LocalizationCatalogTests {
         // A localized InfoPlist.strings overrides Info.plist for Launch Services, and helper
         // bundles are copies with CFBundleName rewritten to the tile's name — shipping it would
         // make every tile read "Dock Tile" in ⌘Tab and Finder. It stays out on purpose.
+        // Checked in every shipped lproj, not just the preferred one.
+        for localization in Bundle.main.localizations {
+            #expect(Bundle.main.url(forResource: "InfoPlist", withExtension: "strings",
+                                    subdirectory: nil, localization: localization) == nil,
+                    "InfoPlist.strings ships in \(localization)")
+        }
         #expect(Bundle.main.url(forResource: "InfoPlist", withExtension: "strings") == nil)
+        // A language dropped from the BUILT product (not just the catalog) fails here.
+        #expect(Set(Bundle.main.localizations).isSuperset(of: Self.languages),
+                "built product lacks \(Self.languages.subtracting(Bundle.main.localizations).sorted())")
     }
 
     /// Every localization the app ships. Pinned so dropping or adding one is a deliberate edit here.

@@ -104,5 +104,8 @@ promo-video/**
 # Vendored actool build artifacts (rebuilt via Scripts/build-compiler.sh)
 Vendor/actool/target/
 
+# Python bytecode (Scripts/l10n)
+__pycache__/
+
 # User feedback (emails, screenshots, reply drafts) — personal data, never committed to this public repo
 docs/feedback/

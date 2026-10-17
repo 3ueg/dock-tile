@@ -11,8 +11,8 @@ import AppKit
 
 enum TranslationInvite {
     /// The localization macOS chose for this bundle (`Bundle.main.preferredLocalizations.first`),
-    /// e.g. "zh-Hans". A Mac whose language the app does not ship resolves to "en-GB" (the
-    /// development region), so an unsupported language never sees the invitation.
+    /// e.g. "zh-Hans". A Mac whose language the app does not ship resolves to one of the
+    /// English localizations, so an unsupported language never sees the invitation.
     nonisolated static var runningLocalization: String? { Bundle.main.preferredLocalizations.first }
 
     nonisolated static func showsTranslationRow(localization: String?) -> Bool {
