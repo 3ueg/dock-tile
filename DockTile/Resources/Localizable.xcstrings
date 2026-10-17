@@ -1,6 +1,54 @@
 {
   "sourceLanguage": "en-GB",
   "strings": {
+    "alert.applyPopover.message": {
+      "comment": "Confirmation message warning the Dock will restart when applying popover settings",
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dock Tile will rebuild your pinned tiles with the new popover look and briefly restart the Dock. Your other Dock items won't be affected."
+          }
+        },
+        "en-AU": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dock Tile will rebuild your pinned tiles with the new popover look and briefly restart the Dock. Your other Dock items won't be affected."
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dock Tile will rebuild your pinned tiles with the new popover look and briefly restart the Dock. Your other Dock items won't be affected."
+          }
+        }
+      }
+    },
+    "alert.applyPopover.title": {
+      "comment": "Confirmation title before rebuilding tiles to apply popover appearance settings",
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apply to your Dock tiles?"
+          }
+        },
+        "en-AU": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apply to your Dock tiles?"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apply to your Dock tiles?"
+          }
+        }
+      }
+    },
     "alert.missingApps.message": {
       "comment": "Alert message offering to remove uninstalled apps from tiles",
       "extractionState": "manual",
@@ -117,6 +165,102 @@
           "stringUnit": {
             "state": "translated",
             "value": "No Missing Apps"
+          }
+        }
+      }
+    },
+    "alert.relocate.blockingMessage": {
+      "comment": "Message shown when a tile action is blocked because the app is translocated",
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dock Tile can't create or update this tile because it's running from a temporary, read-only location. This happens when the app is launched from Downloads. Move Dock Tile to your Applications folder and try again."
+          }
+        },
+        "en-AU": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dock Tile can't create or update this tile because it's running from a temporary, read-only location. This happens when the app is launched from Downloads. Move Dock Tile to your Applications folder and try again."
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dock Tile can't create or update this tile because it's running from a temporary, read-only location. This happens when the app is launched from Downloads. Move Dock Tile to your Applications folder and try again."
+          }
+        }
+      }
+    },
+    "alert.relocate.checkbox": {
+      "comment": "Checkbox to suppress future move-to-Applications nudges",
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Don't ask again"
+          }
+        },
+        "en-AU": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Don't ask again"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Don't ask again"
+          }
+        }
+      }
+    },
+    "alert.relocate.message": {
+      "comment": "Message of the launch-time nudge to move the app to Applications",
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dock Tile is running from outside your Applications folder. macOS may run it from a temporary, read-only location, which can stop new tiles from being created. Move it to Applications to make sure everything works."
+          }
+        },
+        "en-AU": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dock Tile is running from outside your Applications folder. macOS may run it from a temporary, read-only location, which can stop new tiles from being created. Move it to Applications to make sure everything works."
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dock Tile is running from outside your Applications folder. macOS may run it from a temporary, read-only location, which can stop new tiles from being created. Move it to Applications to make sure everything works."
+          }
+        }
+      }
+    },
+    "alert.relocate.title": {
+      "comment": "Title of the prompt asking the user to move the app into the Applications folder",
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Move Dock Tile to Applications?"
+          }
+        },
+        "en-AU": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Move Dock Tile to Applications?"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Move Dock Tile to Applications?"
           }
         }
       }
@@ -261,6 +405,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "Add to Dock"
+          }
+        }
+      }
+    },
+    "button.applyToTiles": {
+      "comment": "Confirm button that rebuilds tiles to apply popover settings",
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apply"
+          }
+        },
+        "en-AU": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apply"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apply"
           }
         }
       }
@@ -529,6 +697,30 @@
         }
       }
     },
+    "button.moveToApplications": {
+      "comment": "Button that moves the app into the Applications folder",
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Move to Applications"
+          }
+        },
+        "en-AU": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Move to Applications"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Move to Applications"
+          }
+        }
+      }
+    },
     "button.newTile": {
       "comment": "Button to create first tile on empty state",
       "extractionState": "manual",
@@ -549,6 +741,54 @@
           "stringUnit": {
             "state": "translated",
             "value": "New Tile"
+          }
+        }
+      }
+    },
+    "button.notNow": {
+      "comment": "Dismiss button for the non-blocking move-to-Applications nudge",
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not Now"
+          }
+        },
+        "en-AU": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not Now"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not Now"
+          }
+        }
+      }
+    },
+    "button.openAccessibilitySettings": {
+      "comment": "Button that opens the Accessibility pane in System Settings (Reduce Motion)",
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open Accessibility Settings…"
+          }
+        },
+        "en-AU": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open Accessibility Settings…"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open Accessibility Settings…"
           }
         }
       }
@@ -649,6 +889,30 @@
         }
       }
     },
+    "button.resetToDefaults": {
+      "comment": "Button that restores popover appearance settings to their defaults",
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reset to Defaults"
+          }
+        },
+        "en-AU": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reset to Defaults"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reset to Defaults"
+          }
+        }
+      }
+    },
     "button.reviewInTiles": {
       "comment": "Button that navigates to the first tile containing a missing app",
       "extractionState": "manual",
@@ -669,6 +933,54 @@
           "stringUnit": {
             "state": "translated",
             "value": "Review in Tiles"
+          }
+        }
+      }
+    },
+    "button.save": {
+      "comment": "Primary toolbar button that commits the popover appearance settings",
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Save"
+          }
+        },
+        "en-AU": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Save"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Save"
+          }
+        }
+      }
+    },
+    "button.saving": {
+      "comment": "Loading label on the Save button while applying settings to Dock tiles",
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Applying…"
+          }
+        },
+        "en-AU": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Applying…"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Applying…"
           }
         }
       }
@@ -837,6 +1149,54 @@
           "stringUnit": {
             "state": "translated",
             "value": "No Tiles"
+          }
+        }
+      }
+    },
+    "error.appTranslocated": {
+      "comment": "Error when the app is translocated and cannot generate helper bundles",
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dock Tile is running from a temporary, read-only location and can't create tiles. Move it to your Applications folder and try again."
+          }
+        },
+        "en-AU": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dock Tile is running from a temporary, read-only location and can't create tiles. Move it to your Applications folder and try again."
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dock Tile is running from a temporary, read-only location and can't create tiles. Move it to your Applications folder and try again."
+          }
+        }
+      }
+    },
+    "error.bundleBuildInProgress": {
+      "comment": "Error when a second build is requested for a tile whose helper bundle is already being built",
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This tile is already being rebuilt. Wait for that to finish, then try again."
+          }
+        },
+        "en-AU": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This tile is already being rebuilt. Wait for that to finish, then try again."
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This tile is already being rebuilt. Wait for that to finish, then try again."
           }
         }
       }
@@ -1513,6 +1873,198 @@
         }
       }
     },
+    "label.popover.animation": {
+      "comment": "Label for the popover animation segmented control",
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Animation"
+          }
+        },
+        "en-AU": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Animation"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Animation"
+          }
+        }
+      }
+    },
+    "label.popover.highlightOnHover": {
+      "comment": "Toggle label — show a background fill on the hovered item",
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Highlight on Hover"
+          }
+        },
+        "en-AU": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Highlight on Hover"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Highlight on Hover"
+          }
+        }
+      }
+    },
+    "label.popover.layout": {
+      "comment": "Label for the Grid/List preview toggle in popover settings",
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Layout"
+          }
+        },
+        "en-AU": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Layout"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Layout"
+          }
+        }
+      }
+    },
+    "label.popover.listAlwaysLabelled": {
+      "comment": "Hint shown beside the disabled Show Labels control when previewing List",
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "List view always shows labels"
+          }
+        },
+        "en-AU": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "List view always shows labels"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "List view always shows labels"
+          }
+        }
+      }
+    },
+    "label.popover.showLabels": {
+      "comment": "Toggle label — show app names under grid icons",
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show Labels"
+          }
+        },
+        "en-AU": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show Labels"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show Labels"
+          }
+        }
+      }
+    },
+    "label.popover.size": {
+      "comment": "Label for the popover size segmented control",
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Popover Size"
+          }
+        },
+        "en-AU": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Popover Size"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Popover Size"
+          }
+        }
+      }
+    },
+    "label.popover.spacing": {
+      "comment": "Label for the popover item spacing segmented control",
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spacing"
+          }
+        },
+        "en-AU": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spacing"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spacing"
+          }
+        }
+      }
+    },
+    "label.popover.tileSize": {
+      "comment": "Label for the icon/cell size control inside the popover",
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tile Size"
+          }
+        },
+        "en-AU": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tile Size"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tile Size"
+          }
+        }
+      }
+    },
     "label.preview.dark": {
       "comment": "Customise Tile: caption under the Dark Mode preview",
       "extractionState": "manual",
@@ -1749,6 +2301,54 @@
           "stringUnit": {
             "state": "translated",
             "value": "You’re using version %@. Dock Tile checks for updates automatically."
+          }
+        }
+      }
+    },
+    "label.startAtLogin": {
+      "comment": "Label for the start-at-login toggle in Settings",
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Start tiles at login"
+          }
+        },
+        "en-AU": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Start tiles at login"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Start tiles at login"
+          }
+        }
+      }
+    },
+    "label.startAtLoginDescription": {
+      "comment": "Explanation under the start-at-login toggle",
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keep your tiles ready in the Dock so they respond instantly after you restart your Mac."
+          }
+        },
+        "en-AU": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keep your tiles ready in the Dock so they respond instantly after you restart your Mac."
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keep your tiles ready in the Dock so they respond instantly after you restart your Mac."
           }
         }
       }
@@ -2113,6 +2713,54 @@
         }
       }
     },
+    "menu.configureTile": {
+      "comment": "Tooltip for gear icon in popover",
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Configure Tile"
+          }
+        },
+        "en-AU": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Configure Tile"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Configure Tile"
+          }
+        }
+      }
+    },
+    "menu.copyDiagnostics": {
+      "comment": "File menu item that copies recent diagnostic logs to the clipboard",
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copy Diagnostics"
+          }
+        },
+        "en-AU": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copy Diagnostics"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copy Diagnostics"
+          }
+        }
+      }
+    },
     "menu.newTile": {
       "comment": "Menu item to create a new tile",
       "extractionState": "manual",
@@ -2185,6 +2833,30 @@
         }
       }
     },
+    "menu.settings": {
+      "comment": "App menu item that opens the inline Settings pane (⌘,)",
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Settings…"
+          }
+        },
+        "en-AU": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Settings…"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Settings…"
+          }
+        }
+      }
+    },
     "navigation.customiseTile": {
       "comment": "Navigation title for customise tile view",
       "extractionState": "manual",
@@ -2205,6 +2877,222 @@
           "stringUnit": {
             "state": "translated",
             "value": "Customize Tile"
+          }
+        }
+      }
+    },
+    "popover.option.animation.default": {
+      "comment": "Animation tier — default",
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Default"
+          }
+        },
+        "en-AU": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Default"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Default"
+          }
+        }
+      }
+    },
+    "popover.option.animation.fast": {
+      "comment": "Animation tier — fast",
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fast"
+          }
+        },
+        "en-AU": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fast"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fast"
+          }
+        }
+      }
+    },
+    "popover.option.animation.none": {
+      "comment": "Animation tier — none",
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "None"
+          }
+        },
+        "en-AU": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "None"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "None"
+          }
+        }
+      }
+    },
+    "popover.option.comfortable": {
+      "comment": "Spacing tier — comfortable",
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Comfortable"
+          }
+        },
+        "en-AU": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Comfortable"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Comfortable"
+          }
+        }
+      }
+    },
+    "popover.option.compact": {
+      "comment": "Spacing tier — compact",
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compact"
+          }
+        },
+        "en-AU": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compact"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compact"
+          }
+        }
+      }
+    },
+    "popover.option.large": {
+      "comment": "Size tier — large",
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Large"
+          }
+        },
+        "en-AU": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Large"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Large"
+          }
+        }
+      }
+    },
+    "popover.option.medium": {
+      "comment": "Size tier — medium",
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Medium"
+          }
+        },
+        "en-AU": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Medium"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Medium"
+          }
+        }
+      }
+    },
+    "popover.option.small": {
+      "comment": "Size tier — small",
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Small"
+          }
+        },
+        "en-AU": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Small"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Small"
+          }
+        }
+      }
+    },
+    "popover.option.spacious": {
+      "comment": "Spacing tier — spacious",
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spacious"
+          }
+        },
+        "en-AU": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spacious"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spacious"
           }
         }
       }
@@ -2257,6 +3145,534 @@
         }
       }
     },
+    "settings.dockLock": {
+      "comment": "Section header for the Dock Lock feature in Settings",
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dock Lock"
+          }
+        },
+        "en-AU": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dock Lock"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dock Lock"
+          }
+        }
+      }
+    },
+    "settings.dockLock.accessibilityGranted": {
+      "comment": "Status shown when Accessibility permission is granted",
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Accessibility access granted"
+          }
+        },
+        "en-AU": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Accessibility access granted"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Accessibility access granted"
+          }
+        }
+      }
+    },
+    "settings.dockLock.accessibilityNeeded": {
+      "comment": "Status shown when Accessibility permission is missing",
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Accessibility access required"
+          }
+        },
+        "en-AU": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Accessibility access required"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Accessibility access required"
+          }
+        }
+      }
+    },
+    "settings.dockLock.accessibilityNeededDetail": {
+      "comment": "Explanation of why Accessibility access is needed",
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dock Tile needs Accessibility access to keep the Dock in place. Turn on Dock Tile in System Settings."
+          }
+        },
+        "en-AU": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dock Tile needs Accessibility access to keep the Dock in place. Turn on Dock Tile in System Settings."
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dock Tile needs Accessibility access to keep the Dock in place. Turn on Dock Tile in System Settings."
+          }
+        }
+      }
+    },
+    "settings.dockLock.anchor": {
+      "comment": "Label for the anchor display picker",
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keep Dock on"
+          }
+        },
+        "en-AU": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keep Dock on"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keep Dock on"
+          }
+        }
+      }
+    },
+    "settings.dockLock.defaultDisplay": {
+      "comment": "First option in the anchor picker — no lock, macOS default behaviour",
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Default (follow macOS)"
+          }
+        },
+        "en-AU": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Default (follow macOS)"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Default (follow macOS)"
+          }
+        }
+      }
+    },
+    "settings.dockLock.description": {
+      "comment": "Explanation under the Dock Lock toggle",
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stop the Dock from jumping between screens on multi-display setups. It stays on the display you choose."
+          }
+        },
+        "en-AU": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stop the Dock from jumping between screens on multi-display setups. It stays on the display you choose."
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stop the Dock from jumping between screens on multi-display setups. It stays on the display you choose."
+          }
+        }
+      }
+    },
+    "settings.dockLock.lockedTo": {
+      "comment": "Indicator confirming the display the Dock is pinned to",
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dock is locked to %@"
+          }
+        },
+        "en-AU": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dock is locked to %@"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dock is locked to %@"
+          }
+        }
+      }
+    },
+    "settings.dockLock.mainDisplay": {
+      "comment": "Suffix marking the main display in the anchor picker",
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Main"
+          }
+        },
+        "en-AU": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Main"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Main"
+          }
+        }
+      }
+    },
+    "settings.dockLock.moveFailed": {
+      "comment": "Error shown when the Dock could not be relocated",
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn't move the Dock to %@. Make sure that display isn't mirrored, then try again."
+          }
+        },
+        "en-AU": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn't move the Dock to %@. Make sure that display isn't mirrored, then try again."
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn't move the Dock to %@. Make sure that display isn't mirrored, then try again."
+          }
+        }
+      }
+    },
+    "settings.dockLock.moving": {
+      "comment": "Progress message shown while the Dock is being relocated",
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moving Dock to %@…"
+          }
+        },
+        "en-AU": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moving Dock to %@…"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moving Dock to %@…"
+          }
+        }
+      }
+    },
+    "settings.dockLock.note": {
+      "comment": "Footnote describing Dock Lock behaviour and trade-off",
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Works with the Dock at the bottom, left, or right. Keeping it on a screen reserves a few pixels at that edge on your other displays."
+          }
+        },
+        "en-AU": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Works with the Dock at the bottom, left, or right. Keeping it on a screen reserves a few pixels at that edge on your other displays."
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Works with the Dock at the bottom, left, or right. Keeping it on a screen reserves a few pixels at that edge on your other displays."
+          }
+        }
+      }
+    },
+    "settings.dockLock.openSettings": {
+      "comment": "Button that opens the Accessibility pane in System Settings",
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open System Settings…"
+          }
+        },
+        "en-AU": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open System Settings…"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open System Settings…"
+          }
+        }
+      }
+    },
+    "settings.dockLock.primer.body": {
+      "comment": "Explanation in the permission primer",
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dock Lock keeps the Dock on the display you choose. To do that, Dock Tile needs Accessibility access so it can stop macOS from moving the Dock to your other screens."
+          }
+        },
+        "en-AU": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dock Lock keeps the Dock on the display you choose. To do that, Dock Tile needs Accessibility access so it can stop macOS from moving the Dock to your other screens."
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dock Lock keeps the Dock on the display you choose. To do that, Dock Tile needs Accessibility access so it can stop macOS from moving the Dock to your other screens."
+          }
+        }
+      }
+    },
+    "settings.dockLock.primer.continue": {
+      "comment": "Primary button in the permission primer that triggers the macOS dialog",
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Continue"
+          }
+        },
+        "en-AU": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Continue"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Continue"
+          }
+        }
+      }
+    },
+    "settings.dockLock.primer.notNow": {
+      "comment": "Secondary button in the permission primer that cancels enabling Dock Lock",
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not Now"
+          }
+        },
+        "en-AU": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not Now"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not Now"
+          }
+        }
+      }
+    },
+    "settings.dockLock.primer.reassurance": {
+      "comment": "Reassurance line in the permission primer about what happens next",
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Next, macOS will ask you to turn on Dock Tile in System Settings. You can turn this off any time."
+          }
+        },
+        "en-AU": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Next, macOS will ask you to turn on Dock Tile in System Settings. You can turn this off any time."
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Next, macOS will ask you to turn on Dock Tile in System Settings. You can turn this off any time."
+          }
+        }
+      }
+    },
+    "settings.dockLock.primer.title": {
+      "comment": "Title of the permission primer shown before requesting Accessibility",
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Allow Accessibility Access"
+          }
+        },
+        "en-AU": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Allow Accessibility Access"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Allow Accessibility Access"
+          }
+        }
+      }
+    },
+    "settings.dockLock.retry": {
+      "comment": "Button to retry a failed Dock relocation",
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Try Again"
+          }
+        },
+        "en-AU": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Try Again"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Try Again"
+          }
+        }
+      }
+    },
+    "settings.dockLock.singleDisplay": {
+      "comment": "Note shown when only one display is connected",
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Connect a second display to use Dock Lock. With one screen the Dock stays exactly where macOS puts it."
+          }
+        },
+        "en-AU": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Connect a second display to use Dock Lock. With one screen the Dock stays exactly where macOS puts it."
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Connect a second display to use Dock Lock. With one screen the Dock stays exactly where macOS puts it."
+          }
+        }
+      }
+    },
+    "settings.dockLock.toggle": {
+      "comment": "Label for the Dock Lock enable toggle",
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lock Dock to one display"
+          }
+        },
+        "en-AU": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lock Dock to one display"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lock Dock to one display"
+          }
+        }
+      }
+    },
+    "settings.general": {
+      "comment": "Title of the General settings pane",
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "General"
+          }
+        },
+        "en-AU": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "General"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "General"
+          }
+        }
+      }
+    },
     "settings.login.registrationFailed": {
       "comment": "Shown under the Start tiles at login toggle when SMAppService registration failed; %@ is the system error",
       "extractionState": "manual",
@@ -2301,6 +3717,198 @@
           "stringUnit": {
             "state": "translated",
             "value": "Approve Dock Tile in Login Items to finish enabling this."
+          }
+        }
+      }
+    },
+    "settings.popover": {
+      "comment": "Section header and pane title for popover appearance settings",
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Popover"
+          }
+        },
+        "en-AU": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Popover"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Popover"
+          }
+        }
+      }
+    },
+    "settings.popover.configure": {
+      "comment": "Label for the Grid/List panel switcher in popover settings",
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Configure"
+          }
+        },
+        "en-AU": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Configure"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Configure"
+          }
+        }
+      }
+    },
+    "settings.popover.configure.subtitle": {
+      "comment": "Subtitle explaining that Grid and List popover settings are stored separately",
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Each layout's settings are saved independently"
+          }
+        },
+        "en-AU": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Each layout's settings are saved independently"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Each layout's settings are saved independently"
+          }
+        }
+      }
+    },
+    "settings.popover.footer": {
+      "comment": "Explanatory footer under the popover settings form",
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "These settings apply to every tile's popover. List view always shows labels. Animation follows your system Reduce Motion setting."
+          }
+        },
+        "en-AU": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "These settings apply to every tile's popover. List view always shows labels. Animation follows your system Reduce Motion setting."
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "These settings apply to every tile's popover. List view always shows labels. Animation follows your system Reduce Motion setting."
+          }
+        }
+      }
+    },
+    "settings.popover.reduceMotion": {
+      "comment": "Caption shown under Animation when the system Reduce Motion setting forces it off",
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Animation is off because Reduce Motion is on in System Settings."
+          }
+        },
+        "en-AU": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Animation is off because Reduce Motion is on in System Settings."
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Animation is off because Reduce Motion is on in System Settings."
+          }
+        }
+      }
+    },
+    "settings.popover.section.tiles": {
+      "comment": "Section header for the per-item controls inside the popover settings",
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tiles"
+          }
+        },
+        "en-AU": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tiles"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tiles"
+          }
+        }
+      }
+    },
+    "sidebar.section.settings": {
+      "comment": "Sidebar section header for the inline app settings panes",
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Settings"
+          }
+        },
+        "en-AU": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Settings"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Settings"
+          }
+        }
+      }
+    },
+    "sidebar.section.tiles": {
+      "comment": "Sidebar section header for the list of dock tiles",
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tiles"
+          }
+        },
+        "en-AU": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tiles"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tiles"
           }
         }
       }
@@ -3501,6 +5109,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "Copy"
+          }
+        }
+      }
+    },
+    "tooltip.openSettings": {
+      "comment": "Tooltip for the settings toolbar button",
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Settings"
+          }
+        },
+        "en-AU": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Settings"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Settings"
           }
         }
       }
