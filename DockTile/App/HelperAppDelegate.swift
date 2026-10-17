@@ -35,13 +35,14 @@ final class HelperAppDelegate: NSObject, NSApplicationDelegate {
     /// Track if popover was shown due to app activation (Cmd+Tab)
     private var showedPopoverOnActivation = false
 
-    /// When we auto-presented the popover on a user-initiated cold launch: the moment it
-    /// happened. Used to swallow the reopen event macOS may deliver right after launch, so
-    /// the auto-shown popover isn't immediately toggled back off. Must stay a timestamp,
-    /// never a bare flag: macOS does not always deliver that trailing reopen, and an
-    /// unbounded flag then silently ate the user's NEXT Dock click, however much later
-    /// (issue #12 "First Click doesn't trigger").
-    private var autoShowOnLaunchAt: CFAbsoluteTime?
+    /// When we auto-presented the popover without a reopen — on a user-initiated cold launch,
+    /// or on activation in App mode (⌘Tab): the moment it happened. Used to swallow the reopen
+    /// macOS may deliver right after, so the auto-shown popover isn't immediately toggled back
+    /// off (macOS 26 sends one ~100 ms after a ⌘Tab activation; macOS 27 sometimes does — #15).
+    /// Must stay a timestamp, never a bare flag: macOS does not always deliver that trailing
+    /// reopen, and an unbounded flag then silently ate the user's NEXT Dock click, however much
+    /// later (issue #12 "First Click doesn't trigger").
+    private var autoShownAt: CFAbsoluteTime?
 
     /// Timestamp of the last handled Dock reopen, used to coalesce click bursts.
     private var lastReopenTime: CFAbsoluteTime = 0
@@ -174,7 +175,7 @@ final class HelperAppDelegate: NSObject, NSApplicationDelegate {
         let isBackgroundLaunch = CommandLine.arguments.contains("--background-launch")
         if !isBackgroundLaunch {
             print("🟢 User cold-launch detected — showing popover immediately")
-            autoShowOnLaunchAt = CFAbsoluteTimeGetCurrent()
+            autoShownAt = CFAbsoluteTimeGetCurrent()
             DiagnosticsLog.shared.log("helper", "Cold-launch (Dock click) — auto-showing popover")
             showPopover(withKeyboardFocus: false)
         }
@@ -205,6 +206,7 @@ final class HelperAppDelegate: NSObject, NSApplicationDelegate {
             print("⌘Tab activated - showing popover with keyboard navigation")
             showPopover(withKeyboardFocus: true)
             showedPopoverOnActivation = true
+            autoShownAt = CFAbsoluteTimeGetCurrent()
         }
     }
 
@@ -220,8 +222,8 @@ final class HelperAppDelegate: NSObject, NSApplicationDelegate {
     // MARK: - Dock Icon Click Handler
 
     /// Pure seam (regression-guarded by HelperReopenSwallowTests): a reopen counts as the
-    /// tail of the cold-launch click only when it arrives within `window` of the launch
-    /// auto-show. Anything later is a genuine user click and must act — the unbounded
+    /// tail of the cold-launch click or ⌘Tab activation only when it arrives within `window`
+    /// of that auto-show. Anything later is a genuine user click and must act — the unbounded
     /// boolean this replaces ate the next Dock click whenever macOS skipped the trailing
     /// reopen (issue #12).
     nonisolated static func shouldSwallowReopen(
@@ -235,23 +237,24 @@ final class HelperAppDelegate: NSObject, NSApplicationDelegate {
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
         print("🖱️ Helper dock icon clicked (hasVisibleWindows: \(flag))")
         DiagnosticsLog.shared.ui("Dock icon clicked (popover \(floatingPanel.isVisible ? "open" : "closed"))")
-        showedPopoverOnActivation = false  // This was a dock click, not Cmd+Tab
-
         let now = CFAbsoluteTimeGetCurrent()
 
-        // Swallow the reopen macOS delivers right after a user cold-launch — we already
-        // auto-showed the popover in applicationDidFinishLaunching. Time-bounded: the
-        // trailing reopen arrives within milliseconds of launch, so anything later is a
-        // genuine user click and must act (issue #12).
-        if let autoShownAt = autoShowOnLaunchAt {
-            autoShowOnLaunchAt = nil
-            if Self.shouldSwallowReopen(now: now, autoShownAt: autoShownAt) {
+        // Swallow the reopen macOS delivers right after a user cold-launch or a ⌘Tab
+        // activation — we already auto-showed the popover. Time-bounded: the trailing reopen
+        // arrives within milliseconds, so anything later is a genuine user click and must act
+        // (issues #12, #15). Checked BEFORE clearing showedPopoverOnActivation: the swallowed
+        // reopen is part of the activation, and the ⌘Tab popover must still close on resign.
+        if let shownAt = autoShownAt {
+            autoShownAt = nil
+            if Self.shouldSwallowReopen(now: now, autoShownAt: shownAt) {
                 lastReopenTime = now
-                print("   Ignoring post-launch reopen (popover already shown)")
-                DiagnosticsLog.shared.log("helper", "Ignoring post-launch reopen (popover already shown)", verbose: true)
+                print("   Ignoring reopen trailing an auto-show (popover already shown)")
+                DiagnosticsLog.shared.log("helper", "Ignoring reopen trailing an auto-show (popover already shown)", verbose: true)
                 return true
             }
         }
+
+        showedPopoverOnActivation = false  // This was a dock click, not Cmd+Tab
 
         // Coalesce rapid bursts (e.g. queued clicks flushed after a cold start) so they
         // collapse into a single toggle instead of flickering the popover.

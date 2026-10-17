@@ -130,6 +130,20 @@ final class FloatingPanel: NSObject, NSPopoverDelegate {
     /// must not let that reopen immediately bounce the popover back open.
     private(set) var lastHiddenAt: CFAbsoluteTime = 0
 
+    /// Where this tile was last clicked in the Dock — that click was the icon's centre. A ⌘Tab
+    /// show has no click to read, so it anchors here instead (issue #15). Kept in the helper's
+    /// own defaults so a restarted helper (login, Update) doesn't fall back to the centre.
+    private var lastDockClick: CGPoint? = {
+        guard let xy = UserDefaults.standard.array(forKey: UserDefaultsKeys.lastDockClickPoint) as? [Double],
+              xy.count == 2 else { return nil }
+        return CGPoint(x: xy[0], y: xy[1])
+    }() {
+        didSet {
+            guard let point = lastDockClick else { return }
+            UserDefaults.standard.set([Double(point.x), Double(point.y)], forKey: UserDefaultsKeys.lastDockClickPoint)
+        }
+    }
+
     /// True while the popover is on screen or animating in. Callers use this to decide
     /// whether a Dock click should show or hide.
     var isVisible: Bool {
@@ -214,6 +228,18 @@ final class FloatingPanel: NSObject, NSPopoverDelegate {
         }
     }
 
+    /// The point a ⌘Tab (keyboard) show anchors at, in place of the mouse (issue #15): the tile's
+    /// last Dock click while it is on a connected screen, else the centre of the Dock's screen —
+    /// predictable, where the mouse put the popover anywhere along the Dock. Only the axis along
+    /// the Dock is used by `resolveAnchor`. A click can be about half a tile stale: the Dock
+    /// re-centres when apps open or quit.
+    nonisolated static func keyboardAnchorPoint(lastClick: CGPoint?, screens: [CGRect], dockScreen: CGRect) -> CGPoint {
+        if let lastClick, screens.contains(where: { NSMouseInRect(lastClick, $0, false) }) {
+            return lastClick
+        }
+        return CGPoint(x: dockScreen.midX, y: dockScreen.midY)
+    }
+
     /// Whether AppKit's popover appearance animation runs. Reduce Motion means NO motion, not a
     /// shorter one; the app's Animation tier "None" means the same. Guarded by
     /// FloatingPanelAnimationTests.
@@ -257,8 +283,20 @@ final class FloatingPanel: NSObject, NSPopoverDelegate {
     /// location and the current Dock prefs, then never chased — the same settle behaviour
     /// as the real Dock's stack popover (its body holds position when magnification
     /// collapses; only its tail tracks, which nothing public can replicate).
-    private func createAnchorWindowAndEdge() -> (window: NSWindow, edge: NSRectEdge) {
-        let mouseLocation = NSEvent.mouseLocation
+    private func createAnchorWindowAndEdge(fromKeyboard: Bool) -> (window: NSWindow, edge: NSRectEdge) {
+        // A Dock click: the cursor is on the icon, so anchor there and remember it. ⌘Tab: the
+        // cursor is anywhere, so use the remembered click (issue #15). The primary screen stands
+        // in for the Dock's screen before any click — the Dock's default home.
+        let mouseLocation: CGPoint
+        if fromKeyboard {
+            let dockScreen = (NSScreen.screens.first ?? NSScreen.main)?.frame ?? .zero
+            mouseLocation = Self.keyboardAnchorPoint(lastClick: lastDockClick,
+                                                     screens: NSScreen.screens.map(\.frame),
+                                                     dockScreen: dockScreen)
+        } else {
+            mouseLocation = NSEvent.mouseLocation
+            lastDockClick = mouseLocation
+        }
 
         // A Dock click lands on the display hosting the Dock, so the screen under the
         // cursor is the right one — NSScreen.main is the *key window's* screen, which can
@@ -288,7 +326,7 @@ final class FloatingPanel: NSObject, NSPopoverDelegate {
         )
         DiagnosticsLog.shared.log(
             "helper",
-            "Popover anchor \(Int(anchor.point.x)),\(Int(anchor.point.y)) " +
+            "Popover anchor \(Int(anchor.point.x)),\(Int(anchor.point.y)) from=\(fromKeyboard ? "keyboard" : "click") " +
             "edge=\(prefs.orientation) mag=\(prefs.magnificationEnabled) " +
             "tile=\(Int(prefs.tileSize)) large=\(Int(prefs.largeSize)) autohide=\(prefs.autohide)",
             verbose: true
@@ -328,7 +366,7 @@ final class FloatingPanel: NSObject, NSPopoverDelegate {
 
         // Fresh content on the reused popover, and a new anchor window with the appropriate edge
         configurePopoverForPresentation()
-        let (window, preferredEdge) = createAnchorWindowAndEdge()
+        let (window, preferredEdge) = createAnchorWindowAndEdge(fromKeyboard: withKeyboardFocus)
         anchorWindow = window
 
         // Activate app
