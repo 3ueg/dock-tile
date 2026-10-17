@@ -46,5 +46,5 @@ titles and toggle labels; keep sentences for descriptions. Never abbreviate a wo
 
 ## Punctuation
 zh-Hans and ja use full-width punctuation (，。：) and no space before or after Latin words only
-where Apple does; fr uses a narrow no-break space before `:` `;` `!` `?`; ru uses « » quotes;
+where Apple does; fr uses a no-break space (U+00A0, as Apple's French does) before `:` `;` `!` `?`; ru uses « » quotes;
 de uses „ “ quotes.
