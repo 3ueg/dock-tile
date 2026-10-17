@@ -18,6 +18,12 @@ enum AboutLinks {
     static let website = URL(string: "https://docktile.app/?\(campaign)")!
     static let studio  = URL(string: "https://happymachines.company/?\(campaign)")!
     static let spades  = URL(string: "https://spadesaudio.com/?\(campaign)")!
+    static let repository = URL(string: "https://github.com/k97/dock-tile")!
+    /// The language's review sheet on GitHub — its pencil icon is the whole reviewer toolchain.
+    /// Not UTM-tagged: GitHub is not one of our sites.
+    static func translationSheet(localization: String) -> URL {
+        URL(string: "https://github.com/k97/dock-tile/blob/main/docs/l10n/\(localization).md") ?? repository
+    }
     /// What the rows show — the bare hosts, without the tracking query.
     static let websiteDisplay = "docktile.app"
     static let studioDisplay  = "happymachines.company"
@@ -93,6 +99,23 @@ struct AboutPaneView: View {
                             Text(AppStrings.About.diagnosticsTitle)
                             Text(AppStrings.About.diagnosticsBody)
                                 .font(.caption).foregroundStyle(.secondary)
+                        }
+                    }
+                    if let localization = TranslationInvite.runningLocalization,
+                       TranslationInvite.showsTranslationRow(localization: localization) {
+                        Section {
+                            LabeledContent {
+                                Button(AppStrings.Translation.helpImprove) {
+                                    DiagnosticsLog.shared.ui("About → Help Improve translation")
+                                    AnalyticsService.shared.log(.translationHelpTapped,
+                                                                ["source": "about", "ui_language": localization])
+                                    NSWorkspace.shared.open(AboutLinks.translationSheet(localization: localization))
+                                }
+                            } label: {
+                                Text(AppStrings.Translation.title)
+                                Text(AppStrings.Translation.reviewLine)
+                                    .font(.caption).foregroundStyle(.secondary)
+                            }
                         }
                     }
                     Section {

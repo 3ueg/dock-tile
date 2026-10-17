@@ -25,6 +25,7 @@
 		AA7EF687 /* CustomiseTileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAC45935 /* CustomiseTileView.swift */; };
 		AAA2155B /* DiagnosticsLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAE6EC9F /* DiagnosticsLog.swift */; };
 		AAREL00B /* AppRelocation.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAREL00A /* AppRelocation.swift */; };
+		AATRI00B /* TranslationInvite.swift in Sources */ = {isa = PBXBuildFile; fileRef = AATRI00A /* TranslationInvite.swift */; };
 		AAAB0001 /* AboutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAB0002 /* AboutView.swift */; };
 		AAALB01 /* AppLauncher.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAALB02 /* AppLauncher.swift */; };
 		AAANS01 /* AnalyticsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAANS02 /* AnalyticsService.swift */; };
@@ -146,6 +147,7 @@
 		AASPD02 /* SpadesIconDark.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = SpadesIconDark.png; sourceTree = "<group>"; };
 		AAE6EC9F /* DiagnosticsLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiagnosticsLog.swift; sourceTree = "<group>"; };
 		AAREL00A /* AppRelocation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppRelocation.swift; sourceTree = "<group>"; };
+		AATRI00A /* TranslationInvite.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranslationInvite.swift; sourceTree = "<group>"; };
 		AAENV001 /* Environment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Environment.swift; sourceTree = "<group>"; };
 		AAEPGV01 /* EmojiPickerGrid.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmojiPickerGrid.swift; sourceTree = "<group>"; };
 		AAGSI02 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
@@ -380,6 +382,7 @@
 				AA4D24B5 /* DockLockManager.swift */,
 				AAE6EC9F /* DiagnosticsLog.swift */,
 				AAREL00A /* AppRelocation.swift */,
+				AATRI00A /* TranslationInvite.swift */,
 			);
 			path = Managers;
 			sourceTree = "<group>";
@@ -669,6 +672,7 @@
 				AA218BB9 /* DockLockSettingsView.swift in Sources */,
 				AAA2155B /* DiagnosticsLog.swift in Sources */,
 				AAREL00B /* AppRelocation.swift in Sources */,
+				AATRI00B /* TranslationInvite.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

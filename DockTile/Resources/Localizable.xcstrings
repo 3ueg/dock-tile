@@ -5352,6 +5352,126 @@
           }
         }
       }
+    },
+    "translation.helpImprove": {
+      "comment": "Button: opens the language's review sheet on GitHub",
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Help Improve…"
+          }
+        },
+        "en-AU": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Help Improve…"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Help Improve…"
+          }
+        }
+      }
+    },
+    "translation.invite.message": {
+      "comment": "One-time alert message inviting translation review",
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This translation was made by a machine and has not yet been checked by a native speaker. If something reads wrong, you can fix it on GitHub — no coding needed."
+          }
+        },
+        "en-AU": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This translation was made by a machine and has not yet been checked by a native speaker. If something reads wrong, you can fix it on GitHub — no coding needed."
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This translation was made by a machine and has not yet been checked by a native speaker. If something reads wrong, you can fix it on GitHub — no coding needed."
+          }
+        }
+      }
+    },
+    "translation.invite.title": {
+      "comment": "One-time alert title on first launch in a machine-translated language",
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dock Tile now speaks your language"
+          }
+        },
+        "en-AU": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dock Tile now speaks your language"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dock Tile now speaks your language"
+          }
+        }
+      }
+    },
+    "translation.reviewLine": {
+      "comment": "About: translation row description. Reviewers replace this in their language with who reviewed it, e.g. 'Reviewed by @handle'.",
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Machine translated. Not yet checked by a native speaker."
+          }
+        },
+        "en-AU": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Machine translated. Not yet checked by a native speaker."
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Machine translated. Not yet checked by a native speaker."
+          }
+        }
+      }
+    },
+    "translation.title": {
+      "comment": "About: translation row label (shown only when the UI runs in a non-English language)",
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Translation"
+          }
+        },
+        "en-AU": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Translation"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Translation"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

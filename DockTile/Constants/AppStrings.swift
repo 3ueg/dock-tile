@@ -1115,6 +1115,36 @@ enum AppStrings {
         )
     }
 
+    // MARK: - Translation (review invitation)
+
+    enum Translation {
+        static let title = NSLocalizedString(
+            "translation.title",
+            value: "Translation",
+            comment: "About: translation row label (shown only when the UI runs in a non-English language)"
+        )
+        static let reviewLine = NSLocalizedString(
+            "translation.reviewLine",
+            value: "Machine translated. Not yet checked by a native speaker.",
+            comment: "About: translation row description. Reviewers replace this in their language with who reviewed it, e.g. 'Reviewed by @handle'."
+        )
+        static let helpImprove = NSLocalizedString(
+            "translation.helpImprove",
+            value: "Help Improve…",
+            comment: "Button: opens the language's review sheet on GitHub"
+        )
+        static let inviteTitle = NSLocalizedString(
+            "translation.invite.title",
+            value: "Dock Tile now speaks your language",
+            comment: "One-time alert title on first launch in a machine-translated language"
+        )
+        static let inviteMessage = NSLocalizedString(
+            "translation.invite.message",
+            value: "This translation was made by a machine and has not yet been checked by a native speaker. If something reads wrong, you can fix it on GitHub — no coding needed.",
+            comment: "One-time alert message inviting translation review"
+        )
+    }
+
     // MARK: - Subtitles
 
     enum Subtitle {

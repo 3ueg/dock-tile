@@ -36,4 +36,10 @@ struct AboutLinksTests {
         )
         #expect(AboutLinks.feedback != AboutLinks.website)
     }
+
+    @Test("The review-sheet link opens the language's sheet on GitHub")
+    func translationSheetLink() {
+        #expect(AboutLinks.translationSheet(localization: "zh-Hans").absoluteString
+                == "https://github.com/k97/dock-tile/blob/main/docs/l10n/zh-Hans.md")
+    }
 }

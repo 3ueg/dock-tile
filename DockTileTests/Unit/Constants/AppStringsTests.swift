@@ -23,6 +23,12 @@ struct AppStringsTests {
         // App name
         #expect(!AppStrings.appName.isEmpty)
 
+        #expect(AppStrings.Translation.title == "Translation")
+        #expect(!AppStrings.Translation.reviewLine.isEmpty)
+        #expect(AppStrings.Translation.helpImprove == "Help Improve…")
+        #expect(!AppStrings.Translation.inviteTitle.isEmpty)
+        #expect(!AppStrings.Translation.inviteMessage.isEmpty)
+
         // About
         #expect(!AppStrings.About.title.isEmpty)
         #expect(!AppStrings.About.version("1.0").isEmpty)
