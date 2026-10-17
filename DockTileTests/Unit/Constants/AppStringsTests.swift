@@ -130,12 +130,15 @@ struct AppStringsTests {
         #expect(AppStrings.EmojiCategory.objects == "Objects")
         #expect(AppStrings.EmojiCategory.symbols == "Symbols")
 
-        // Symbol picker section headers (en-GB is the test host's resolution)
+        // Symbol picker section headers. Runtime values follow the test host's language, so the two
+        // keys whose en-US spelling differs are pinned through the catalog JSON below.
         #expect(AppStrings.SymbolCategory.all == "All")
         #expect(AppStrings.SymbolCategory.whatsNew == "What's New")
         #expect(AppStrings.SymbolCategory.draw == "Draw")
         #expect(AppStrings.SymbolCategory.variable == "Variable")
-        #expect(AppStrings.SymbolCategory.multicolor == "Multicolour")
+        #expect(!AppStrings.SymbolCategory.multicolor.isEmpty)
+        #expect(localizedString(for: "symbolCategory.multicolor", locale: "en-GB") == "Multicolour")
+        #expect(localizedString(for: "symbolCategory.multicolor", locale: "en-US") == "Multicolor")
         #expect(AppStrings.SymbolCategory.communication == "Communication")
         #expect(AppStrings.SymbolCategory.weather == "Weather")
         #expect(AppStrings.SymbolCategory.maps == "Maps")
@@ -162,7 +165,9 @@ struct AppStringsTests {
         #expect(AppStrings.SymbolCategory.shapes == "Shapes")
         #expect(AppStrings.SymbolCategory.arrows == "Arrows")
         #expect(AppStrings.SymbolCategory.indices == "Indices")
-        #expect(AppStrings.SymbolCategory.math == "Maths")
+        #expect(!AppStrings.SymbolCategory.math.isEmpty)
+        #expect(localizedString(for: "symbolCategory.math", locale: "en-GB") == "Maths")
+        #expect(localizedString(for: "symbolCategory.math", locale: "en-US") == "Math")
 
         // Menu items
         #expect(!AppStrings.Menu.configure.isEmpty)
