@@ -190,7 +190,9 @@ keep `%@`/`%d` placeholders, keep `…`, keep ⌘ glyphs, keep SF Symbol names u
 2. `gh label create translation`; one umbrella issue + one issue per language from the bodies in
    `docs/l10n/issues/`.
 3. Paste `docs/l10n/release-announcement.md` (one paragraph per language, in that language) into
-   the GitHub release notes; the website and Sparkle read them from there.
+   the GitHub release notes; the website reads them from there. Sparkle's update prompt shows no
+   notes (the appcast carries none), so existing users learn about the new languages from the
+   in-app invitation instead.
 4. Merge reviewer PRs; run `l10n.py import <lang>`; commit; the next release ships it.
 
 ## Out of scope

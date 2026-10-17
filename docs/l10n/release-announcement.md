@@ -1,7 +1,8 @@
 # Release-notes paragraphs for the localization release
 
 Paste each paragraph into the GitHub release notes under a `### Now in your language` heading.
-The website and Sparkle read release notes from GitHub.
+The website reads release notes from GitHub. Sparkle's update prompt shows no notes (the appcast
+carries none), so existing users learn about the new languages from the in-app invitation instead.
 
 **English.** Dock Tile now speaks 简体中文, 日本語, Deutsch, Русский and Français. These
 translations were made by a machine and have not yet been checked by native speakers. If you read
