@@ -22,6 +22,10 @@ enum UserDefaultsKeys {
     /// refused ignores this — a broken location must keep asking until the app is moved.
     static let relocationPromptSuppressed = "relocationPromptSuppressed"
 
+    /// The one-time "Dock Tile now speaks your language" review invitation has been shown. Main-app
+    /// domain; stamped BEFORE the alert appears so a crash in the alert can never loop it.
+    static let translationInviteShown = "translationInviteShown"
+
     /// "Smart Add" — suggest ready-made tiles when the user presses +. Opt-out, default ON
     /// (absent/true = ON). Main-app domain only: the suggestion flow runs solely in the main app,
     /// so helper bundles never read it. When OFF, + always creates a blank tile.

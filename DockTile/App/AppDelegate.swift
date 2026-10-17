@@ -141,6 +141,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             // where it can't copy itself to build helper tiles. Deferred so a window exists to sit
             // the prompt above. Main-app only, suppressible, and skipped when already installed.
             AppRelocationManager.shared.checkOnLaunch()
+
+            // Invite native speakers to review a machine-first translation: one alert, once, only
+            // when the UI runs in a non-English localization. After the relocation nudge on purpose.
+            TranslationInviteManager.shared.checkOnLaunch()
         }
 
         // Check if first launch

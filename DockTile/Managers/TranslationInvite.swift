@@ -24,3 +24,34 @@ enum TranslationInvite {
         !alreadyShown && showsTranslationRow(localization: localization)
     }
 }
+
+@MainActor
+final class TranslationInviteManager {
+    static let shared = TranslationInviteManager()
+    private init() {}
+
+    /// Main-app only; the caller (`configureAsMainApp`) already skips it under tests. Runs after the
+    /// relocation nudge so a Downloads-run Mac sees the move prompt first.
+    func checkOnLaunch() {
+        guard !AppEnvironment.isHelper else { return }
+        let localization = TranslationInvite.runningLocalization
+        let shown = UserDefaults.standard.bool(forKey: UserDefaultsKeys.translationInviteShown)
+        guard TranslationInvite.shouldInvite(localization: localization, alreadyShown: shown) else { return }
+        UserDefaults.standard.set(true, forKey: UserDefaultsKeys.translationInviteShown)
+        let language = localization ?? "unknown"
+        DiagnosticsLog.shared.log("translation", "Inviting review of the \(language) translation")
+        AnalyticsService.shared.log(.translationInviteShown, ["ui_language": language])
+
+        let alert = NSAlert()
+        alert.messageText = AppStrings.Translation.inviteTitle
+        alert.informativeText = AppStrings.Translation.inviteMessage
+        alert.alertStyle = .informational
+        alert.addButton(withTitle: AppStrings.Translation.helpImprove)
+        alert.addButton(withTitle: AppStrings.Button.notNow)
+        // App-modal like the relocation nudge: it fires from the launch block, before any sheet host.
+        guard alert.runModal() == .alertFirstButtonReturn else { return }
+        DiagnosticsLog.shared.ui("Translation invite → Help Improve")
+        AnalyticsService.shared.log(.translationHelpTapped, ["source": "alert", "ui_language": language])
+        NSWorkspace.shared.open(AboutLinks.translationSheet(localization: language))
+    }
+}

@@ -14,4 +14,17 @@ struct TranslationInviteTests {
     func nilLocalization() {
         #expect(TranslationInvite.showsTranslationRow(localization: nil) == false)
     }
+
+    @Test("Invite once, and only where the row shows",
+          arguments: [("zh-Hans", false, true), ("zh-Hans", true, false), ("en-GB", false, false),
+                      ("ja", false, true), ("ja", true, false)])
+    func inviteDecision(localization: String, alreadyShown: Bool, invites: Bool) {
+        #expect(TranslationInvite.shouldInvite(localization: localization, alreadyShown: alreadyShown) == invites)
+    }
+
+    @Test("A Mac the app does not localize (Korean resolves to en-GB) is never invited")
+    func unsupportedLanguageResolvesToEnglish() {
+        #expect(TranslationInvite.shouldInvite(localization: "en-GB", alreadyShown: false) == false)
+        #expect(TranslationInvite.shouldInvite(localization: nil, alreadyShown: false) == false)
+    }
 }
