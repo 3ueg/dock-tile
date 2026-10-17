@@ -41,6 +41,15 @@ struct AppStringsTests {
         #expect(!AppStrings.Alert.restartDockTitle.isEmpty)
         #expect(!AppStrings.Alert.restartDockMessage.isEmpty)
         #expect(!AppStrings.Alert.restartDockCheckbox.isEmpty)
+        #expect(!AppStrings.Alert.deleteTileMessage.isEmpty)
+        #expect(!AppStrings.Menu.noAppsConfigured.isEmpty)
+        #expect(!AppStrings.Menu.noConfiguration.isEmpty)
+        #expect(AppStrings.SmartAdd.identityBrowse == "Browse")
+        #expect(AppStrings.SmartAdd.identityWatch == "Watch")
+        #expect(AppStrings.SmartAdd.identityShip == "Ship")
+        #expect(AppStrings.SmartAdd.identityChat == "Chat")
+        #expect(AppStrings.SmartAdd.identityWork == "Work")
+        #expect(AppStrings.SmartAdd.identityTogether == "Together")
 
         // Buttons
         #expect(!AppStrings.Button.add.isEmpty)

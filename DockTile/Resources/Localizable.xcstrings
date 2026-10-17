@@ -49,6 +49,30 @@
         }
       }
     },
+    "alert.deleteTile.message": {
+      "comment": "Delete-tile confirmation message",
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This will permanently delete the tile and remove it from the dock."
+          }
+        },
+        "en-AU": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This will permanently delete the tile and remove it from the dock."
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This will permanently delete the tile and remove it from the dock."
+          }
+        }
+      }
+    },
     "alert.missingApps.message": {
       "comment": "Alert message offering to remove uninstalled apps from tiles",
       "extractionState": "manual",
@@ -2785,6 +2809,54 @@
         }
       }
     },
+    "menu.noAppsConfigured": {
+      "comment": "Dock menu: disabled row when the tile has no apps",
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No apps configured"
+          }
+        },
+        "en-AU": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No apps configured"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No apps configured"
+          }
+        }
+      }
+    },
+    "menu.noConfiguration": {
+      "comment": "Dock menu: disabled row when the tile's config cannot be found",
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No configuration"
+          }
+        },
+        "en-AU": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No configuration"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No configuration"
+          }
+        }
+      }
+    },
     "menu.openInFinder": {
       "comment": "Menu item to open in Finder",
       "extractionState": "manual",
@@ -3933,6 +4005,150 @@
           "stringUnit": {
             "state": "translated",
             "value": "Dock Tile"
+          }
+        }
+      }
+    },
+    "smartAdd.identity.browse": {
+      "comment": "Smart Add: suggested tile name for browsers",
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Browse"
+          }
+        },
+        "en-AU": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Browse"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Browse"
+          }
+        }
+      }
+    },
+    "smartAdd.identity.chat": {
+      "comment": "Smart Add: suggested tile name for social apps",
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chat"
+          }
+        },
+        "en-AU": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chat"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chat"
+          }
+        }
+      }
+    },
+    "smartAdd.identity.ship": {
+      "comment": "Smart Add: suggested tile name for developer tools",
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ship"
+          }
+        },
+        "en-AU": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ship"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ship"
+          }
+        }
+      }
+    },
+    "smartAdd.identity.together": {
+      "comment": "Smart Add: suggested tile name for apps opened together",
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Together"
+          }
+        },
+        "en-AU": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Together"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Together"
+          }
+        }
+      }
+    },
+    "smartAdd.identity.watch": {
+      "comment": "Smart Add: suggested tile name for video apps",
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Watch"
+          }
+        },
+        "en-AU": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Watch"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Watch"
+          }
+        }
+      }
+    },
+    "smartAdd.identity.work": {
+      "comment": "Smart Add: suggested tile name for productivity apps",
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Work"
+          }
+        },
+        "en-AU": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Work"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Work"
           }
         }
       }

@@ -174,7 +174,7 @@ struct DockTileDetailView: View {
                 deleteTile()
             }
         } message: {
-            Text("This will permanently delete the tile and remove it from the dock.")
+            Text(AppStrings.Alert.deleteTileMessage)
         }
         .onChange(of: showDockRestartConsent) { _, newValue in
             if newValue {

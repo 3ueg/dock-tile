@@ -348,7 +348,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
 
         // "Configure..." option (opens main app if helper, or brings to front if main app)
         menu.addItem(NSMenuItem(
-            title: "Configure...",
+            title: AppStrings.Menu.configure,
             action: #selector(openConfigurator),
             keyEquivalent: ""
         ))
@@ -359,7 +359,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         if let config = getCurrentConfiguration() {
             if config.appItems.isEmpty {
                 let item = NSMenuItem(
-                    title: "No apps configured",
+                    title: AppStrings.Menu.noAppsConfigured,
                     action: nil,
                     keyEquivalent: ""
                 )
@@ -380,7 +380,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         } else {
             // No configuration found
             let item = NSMenuItem(
-                title: "No configuration",
+                title: AppStrings.Menu.noConfiguration,
                 action: nil,
                 keyEquivalent: ""
             )

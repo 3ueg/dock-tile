@@ -46,6 +46,11 @@ enum AppStrings {
     // MARK: - Alert Messages
 
     enum Alert {
+        static let deleteTileMessage = NSLocalizedString(
+            "alert.deleteTile.message",
+            value: "This will permanently delete the tile and remove it from the dock.",
+            comment: "Delete-tile confirmation message"
+        )
         static let restartDockTitle = NSLocalizedString(
             "alert.restartDock.title",
             value: "Dock Restart Required",
@@ -891,6 +896,16 @@ enum AppStrings {
     // MARK: - Menu Items
 
     enum Menu {
+        static let noAppsConfigured = NSLocalizedString(
+            "menu.noAppsConfigured",
+            value: "No apps configured",
+            comment: "Dock menu: disabled row when the tile has no apps"
+        )
+        static let noConfiguration = NSLocalizedString(
+            "menu.noConfiguration",
+            value: "No configuration",
+            comment: "Dock menu: disabled row when the tile's config cannot be found"
+        )
         static let configure = NSLocalizedString(
             "menu.configure",
             value: "Configure...",
@@ -1014,6 +1029,13 @@ enum AppStrings {
     /// Strings for the "Smart Add" sheet and its provenance banner. Grouped app usage is computed
     /// entirely on-device (see `SmartAddEngine`); the privacy footnote states this explicitly.
     enum SmartAdd {
+        // Suggested tile names. They become the Dock tile's label, so they are localized.
+        static let identityBrowse = NSLocalizedString("smartAdd.identity.browse", value: "Browse", comment: "Smart Add: suggested tile name for browsers")
+        static let identityWatch = NSLocalizedString("smartAdd.identity.watch", value: "Watch", comment: "Smart Add: suggested tile name for video apps")
+        static let identityShip = NSLocalizedString("smartAdd.identity.ship", value: "Ship", comment: "Smart Add: suggested tile name for developer tools")
+        static let identityChat = NSLocalizedString("smartAdd.identity.chat", value: "Chat", comment: "Smart Add: suggested tile name for social apps")
+        static let identityWork = NSLocalizedString("smartAdd.identity.work", value: "Work", comment: "Smart Add: suggested tile name for productivity apps")
+        static let identityTogether = NSLocalizedString("smartAdd.identity.together", value: "Together", comment: "Smart Add: suggested tile name for apps opened together")
         static let title = NSLocalizedString(
             "smartAdd.title",
             value: "Add a Tile",

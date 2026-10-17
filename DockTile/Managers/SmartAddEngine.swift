@@ -98,24 +98,24 @@ enum SmartAddCategory: String, CaseIterable {
         /// `LSApplicationCategoryType`; Figma is `graphics-design`, which we don't cluster on), or
         /// that category's identity already belongs to another card. Deliberately distinct from
         /// every category identity in name, symbol AND tint so two cards can never look alike.
-        static let coLaunch = Identity(name: "Together", symbol: "link", tint: .orange)
+        static let coLaunch = Identity(name: AppStrings.SmartAdd.identityTogether, symbol: "link", tint: .orange)
     }
 
     /// The tile identity for this category. Indigo has no preset, so it uses the system-indigo hex.
     var identity: Identity {
         switch self {
         case .browsers:
-            return Identity(name: "Browse", symbol: "globe", tint: .blue)
+            return Identity(name: AppStrings.SmartAdd.identityBrowse, symbol: "globe", tint: .blue)
         case .video:
-            return Identity(name: "Watch", symbol: "play.fill", tint: .pink)
+            return Identity(name: AppStrings.SmartAdd.identityWatch, symbol: "play.fill", tint: .pink)
         case .developerTools:
-            return Identity(name: "Ship",
+            return Identity(name: AppStrings.SmartAdd.identityShip,
                             symbol: "chevron.left.forwardslash.chevron.right",
                             tint: .custom("#5E5CE6"))
         case .social:
-            return Identity(name: "Chat", symbol: "bubble.left.and.bubble.right", tint: .green)
+            return Identity(name: AppStrings.SmartAdd.identityChat, symbol: "bubble.left.and.bubble.right", tint: .green)
         case .productivity:
-            return Identity(name: "Work", symbol: "folder", tint: .blue)
+            return Identity(name: AppStrings.SmartAdd.identityWork, symbol: "folder", tint: .blue)
         }
     }
 }

@@ -361,7 +361,7 @@ final class HelperAppDelegate: NSObject, NSApplicationDelegate {
             }
         } else {
             let item = NSMenuItem(
-                title: "No configuration",
+                title: AppStrings.Menu.noConfiguration,
                 action: nil,
                 keyEquivalent: ""
             )
