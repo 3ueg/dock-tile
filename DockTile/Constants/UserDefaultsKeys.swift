@@ -43,6 +43,9 @@ enum UserDefaultsKeys {
     /// Anchor display persisted by its stable UUID (`CGDisplayCreateUUIDFromDisplayID`) so the
     /// user's choice survives reboots, sleep/wake, and unplug/replug. Absent = "Default".
     static let dockLockAnchorUUID = "dockLockAnchorUUID"
+    /// HELPER domain: where this tile was last clicked in the Dock, `[x, y]` in screen points. A ⌘Tab
+    /// popover anchors here, and it must outlive the helper process (login, Update) — issue #15.
+    static let lastDockClickPoint = "lastDockClickPoint"
 
     /// Analytics & Crashlytics consent (opt-out, default ON).
     /// Stored in the SHARED suite below — NOT the per-app default domain — because helper

@@ -670,9 +670,12 @@ struct StackAppItem: View {
                 // The padding sits INSIDE the fixed width on purpose: the cell still occupies its
                 // full `cellWidth` column, but the name truncates a little earlier, so a long one
                 // ends with a margin inside the selection instead of running to its very edge.
+                // White on the accent keyboard selection, like the list row and AppKit's own pair
+                // (`alternateSelectedControlTextColor` on `selectedContentBackgroundColor`): the
+                // primary label colour is black in Light mode and unreadable on the blue fill.
                 Text(app.name)
                     .font(.system(size: 11, weight: .regular))
-                    .foregroundStyle(.primary)
+                    .foregroundStyle(isSelected ? Color.white : Color.primary)
                     .lineLimit(1)
                     .truncationMode(.middle)
                     .padding(.horizontal, Self.labelInset)

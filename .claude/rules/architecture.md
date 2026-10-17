@@ -78,6 +78,19 @@ magnification collapses; only its tail tracks, which nothing public can replicat
 - Mouse coordinate only for the axis parallel to the Dock (best icon-centre estimate without
   AX — which helpers can't get: per-binary TCC grants, regenerated bundles). NSPopover slides
   its arrow within the preferred edge near screen corners; no lateral compensation needed.
+- **⌘Tab (App mode) has no click, so never the mouse (issue #15)**: a keyboard show anchors at
+  the tile's last Dock click (`FloatingPanel.keyboardAnchorPoint`, guarded by
+  `FloatingPanelKeyboardAnchorTests`), else the centre of the primary screen. The click is
+  saved in the helper's own defaults (`lastDockClickPoint`) so a restart doesn't lose it. No
+  public, permission-free API gives a tile its own icon's position (the Dock's only window spans
+  the screen), and the click can drift about half a tile when the Dock re-centres. A cold launch
+  from Spotlight/Finder saves a non-icon point; the next Dock click corrects it.
+- **⌘Tab activation can be followed by a reopen (issue #15)**: macOS 26 always sent one ~100 ms
+  after the activation that already showed the popover; macOS 27 sometimes does (16 ms,
+  observed). The reopen toggled the popover straight back off. `applicationDidBecomeActive`
+  stamps `autoShownAt`, so `shouldSwallowReopen` treats it like the cold-launch trailing reopen
+  (issue #12). Replay it on any macOS by activating the helper, then opening its bundle via
+  `NSWorkspace.openApplication` ~100 ms later.
 - **One `NSPopover` per helper, for its whole life (critical)**: `FloatingPanel.popover` is a `let`.
   On macOS 26 every `NSPopover` INSTANCE leaks its Liquid Glass backdrop (AppKit bug, 3–5 MB per
   open); a new popover per click shipped through 2.0.1. Fresh *content* is attached per open and
