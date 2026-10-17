@@ -36,3 +36,24 @@ ones `translated`. Both ship. A reviewer's pull request leaves a sheet *ahead* o
 you import it — CI's `check` is green in that state and red only on a stale export, an unknown
 key, a lost placeholder or a dropped glossary term. `InfoPlist.xcstrings` is deliberately not in
 the app target: a localized `InfoPlist.strings` would override every helper tile's name.
+
+### One-time setup before the first localized release
+
+```bash
+# GA4: register the ui_language event parameter (forward-only; do it BEFORE tagging)
+TOKEN=$(gcloud auth print-access-token --account=ga4-fetch@dock-tile.iam.gserviceaccount.com \
+  --scopes=https://www.googleapis.com/auth/analytics.edit)
+curl -s -X POST -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+  https://analyticsadmin.googleapis.com/v1beta/properties/542196919/customDimensions \
+  -d '{"parameterName":"ui_language","displayName":"UI language","description":"Localization the app UI was running in","scope":"EVENT"}'
+
+# GitHub: label + umbrella issue + one issue per language
+gh label create translation --color 0E8A16 --description "Translation review"
+gh issue create --title "Translations: help review the machine-first languages" \
+  --label translation,"help wanted" --body-file docs/l10n/issues/umbrella.md
+for pair in "简体中文:zh-Hans" "日本語:ja" "Deutsch:de" "Русский:ru" "Français:fr"; do
+  lang=${pair%%:*}; code=${pair##*:}
+  sed -e "s/LANG/$lang/g" -e "s/CODE/$code/g" docs/l10n/issues/language.md > /tmp/body.md
+  gh issue create --title "Review the $lang translation" --label translation,"help wanted" --body-file /tmp/body.md
+done
+```

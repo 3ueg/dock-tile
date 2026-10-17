@@ -42,7 +42,7 @@ Controlled via Info.plist variables (`DTEnvironment`, `DTHelperPrefix`, `DTPrefs
 - [Testing](/.claude/rules/testing.md) — Swift Testing framework, commands, coverage targets
 - [Driving the Dev Build](/.claude/rules/driving-the-dev-build.md) — capture by window ID not screen rect (privacy), AX single-`to` form, test host = dev app
 - [CI & Release](/.claude/rules/ci-release.md) — GitHub Actions, Sparkle updates, code signing
-- [Localization](/.claude/rules/localization-macos.md) — String Catalogs, US/UK/AU English
+- [Localization](/.claude/rules/localization-macos.md) — String Catalogs, en-GB source + en-US/en-AU, machine-first zh-Hans/ja/de/ru/fr reviewed via `docs/l10n/` sheets, `Scripts/l10n/l10n.py` round trip
 - [Icon System](/.claude/rules/icon-system.md) — Declarative per-tile `Assets.car` on macOS 26+, legacy `.icns` bake as pre-26 fallback, icon styles, Icon Composer format
 - [Icon Style Detection](/.claude/rules/icon-style-detection.md) — Pre-macOS-26 fallback only: event-driven (no timer), KVO-primary, unresolved→no-op, seal re-signing, launch self-heal
 - [Analytics](/.claude/rules/analytics.md) — Firebase Analytics + Crashlytics, consent gating, dSYM upload

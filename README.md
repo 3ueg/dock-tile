@@ -92,6 +92,12 @@ Dock Tile creates lightweight helper applications for each tile you configure. T
 ### Icon not updating
 If a tile's icon doesn't update after customisation, toggle "Show Tile" off and on to regenerate the helper bundle.
 
+## Translations
+
+Dock Tile ships in English, 简体中文, 日本語, Deutsch, Русский and Français. The non-English
+translations are machine-first and reviewed by native speakers. Spotted a mistake? Fixing it takes
+five minutes in the browser — see [docs/l10n/README.md](docs/l10n/README.md).
+
 ## Development
 
 See [CLAUDE.md](CLAUDE.md) for detailed development documentation.
