@@ -70,3 +70,9 @@ channel with timestamps. Two wrong conclusions in one day ("helpers inflate GA4 
 "oscillation reproduced") were both overturned by comparing against the probe's record of what the
 OS actually emitted at the same millisecond. Dock Tile's own logs show what the app did, never
 whether the input was real.
+
+Issue #22 (2026-10-15) added two more:
+- **Measure inside the shipping process.** A CLI probe got the style KVO in about 100 ms, while
+  the GUI app got it 1.4 s to 8 min late or never. A CLI result says nothing about the app.
+- **Give a hand-driven probe a long window.** Two ~2-minute recorders caught nothing because the
+  user switched styles outside them. Record for 15 minutes, and log every switch with its time.
