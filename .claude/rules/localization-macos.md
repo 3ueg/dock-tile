@@ -19,8 +19,9 @@ cohort above 10 users. Adding a language costs one `export --lang`, one machine 
   Services, and every helper is a copy with `CFBundleName` rewritten to the tile's name, so shipping it
   would make every tile read "Dock Tile" in ⌘Tab and Finder (`catalogShipsAndInfoPlistStringsDoesNot`).
 - **Development region is `en-GB`** (= the catalog's `sourceLanguage`), not a nonexistent `en.lproj`.
-  A Mac set to an unshipped language resolves to one of the English localizations (a probe resolved
-  it to en-US, not en-GB), which is why the invitation test is "not `en*`".
+  The real bundle with `AppleLanguages (ko)` resolves to **en-GB** ("Customise"; verified in the
+  running dev app 2026-10-18 — an earlier synthetic `preferredLocalizations` probe said en-US and
+  was wrong). The invitation test stays "not `en*`" so it holds whichever English is picked.
 - **Accessors**: `DockTile/Constants/AppStrings.swift`, always `NSLocalizedString(key, value:, comment:)`
   in that three-argument shape — `Scripts/l10n/l10n.py` parses it and refuses any other shape.
 - **The catalog is the runtime source; the review sheets `docs/l10n/<lang>.md` are derived.**
