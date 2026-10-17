@@ -21,6 +21,14 @@ screencapture -x -o -l"$WID" out.png
 
 `Scripts/dev-capture.sh` does this. Delete any mis-capture immediately and never read it.
 
+## Never bring the app frontmost while the owner may be typing
+
+`Scripts/dev-capture.sh` sets the dev app frontmost. On 2026-10-17 that moved the owner's live
+keystrokes into the focused tile-name field (they did not save, luckily). A window-ID capture
+does not need the app in front: select sidebar rows through AX (`set selected of row N …`) and
+capture by `CGWindowID` with the app in the background. Bring it forward only when the owner
+says they are away from the keyboard.
+
 ## AX: use the single-`to` form
 
 System Events answers `tell application "System Events" to tell (first process whose unix id is N)

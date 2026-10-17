@@ -84,6 +84,10 @@ A stale artifact from an earlier build masks this perfectly — delete it before
   each build at ship time: copies **≤ 1.8.8** poll the old host and always will, builds from
   2026-08-30 poll `docktile.app`. Detaching either host silently strands those users on their last
   version — no error they would ever see. (Full reasoning: website/.claude/rules/seo-geo.md.)
+- **The update prompt shows no release notes.** Appcast items carry no `<description>` or
+  `sparkle:releaseNotesLink` (`generate-appcast-entry.sh`; the only `<description>` is the
+  channel's), so text written into GitHub release notes reaches the website's changelog, never an
+  existing user's update dialog. A plan once assumed otherwise; reach existing users in the app.
 - Helper bundles have Sparkle keys stripped to prevent update conflicts
 - `UpdateController.swift` wraps SPUUpdater with error-handling delegate; publishes `canCheckForUpdates`
   (KVO via Combine) so the Settings → General **Check for Updates…** button disables mid-session

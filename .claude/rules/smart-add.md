@@ -40,7 +40,11 @@ The regression-prone decisions are `nonisolated static` functions taking plain v
   **Identities are unique across cards (critical)**: a second pass assigns identities — a surviving
   category group always owns its category identity (rank order never strips it); a co-launch cluster
   borrows its dominant category only when no surviving category group is that category, else it takes
-  `Identity.coLaunch`; a group that can't get a free identity is dropped. `dominantCategory` returns
+  `Identity.coLaunch`; a group that can't get a free identity is dropped. Identity names are
+  **localized** (`AppStrings.SmartAdd.identity*`) and the de-dup keys on that localized name, so two
+  translations that collide silently drop a card — `l10n.py`'s lint refuses a colliding sheet
+  (see localization-macos.md). `SmartAddEngineTests` assert the English names, so they pass only on
+  an English test host. `dominantCategory` returns
   `nil` when no member has a mapped category — it used to fall back to `.productivity`, so every
   uncategorised cluster (Chrome has no `LSApplicationCategoryType`) became a second "Work"/folder card
   beside the real productivity group.

@@ -8,7 +8,7 @@ Users create Helper Bundles (copies of main app) stored in `~/Library/Applicatio
 
 **Creation** (`HelperBundleManager.installHelper`):
 1. Copies main DockTile.app as template
-2. **Removes `Assets.car`** — prevents main app icon overriding custom icons (macOS prioritises asset catalogs over `CFBundleIconFile`)
+2. **Removes `Assets.car`** — prevents main app icon overriding custom icons (macOS prioritises asset catalogs over `CFBundleIconFile`). The copy also carries every `.lproj` (helpers localize to the system language). It must never carry an `InfoPlist.strings`: that overrides the rewritten `CFBundleName`, so every tile would read "Dock Tile" (see localization-macos.md)
 3. Updates Info.plist (unique bundle ID, name, LSUIElement based on mode)
 4. Generates `.icns` icon for all 4 style variants
 5. Code signs with ad-hoc signature

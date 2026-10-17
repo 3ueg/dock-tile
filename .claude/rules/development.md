@@ -77,3 +77,7 @@ Before using platform-specific APIs:
 Emails, screenshots and reply drafts from users live in `docs/feedback/`, which is gitignored.
 This repo is public: never commit them, and never put a reporter's name or address in a tracked
 file or a commit message. Describe the report instead ("a macOS 15.6 user reported…").
+
+The author is named only by GitHub username, **`k97`**, in every tracked file (LICENSE, copyright
+strings, docs, release notes). Never a personal name: an unrecognised surname sat in
+`InfoPlist.xcstrings` from 2026-02-05 until 2026-10-17 and nearly propagated into the LICENSE.
