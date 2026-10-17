@@ -25,7 +25,7 @@ struct LocalizationCatalogTests {
     }
 
     /// Every localization the app ships. Pinned so dropping or adding one is a deliberate edit here.
-    static let languages: Set<String> = ["en-AU", "en-GB", "en-US"]
+    static let languages: Set<String> = ["en-AU", "en-GB", "en-US", "zh-Hans", "ja", "de", "ru", "fr"]
     static let source = "en-GB"
 
     static let repoRoot: String = {

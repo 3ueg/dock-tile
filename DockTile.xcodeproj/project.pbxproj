@@ -530,6 +530,11 @@
 				"en-GB",
 				"en-AU",
 				"en-US",
+				"zh-Hans",
+				ja,
+				de,
+				ru,
+				fr,
 			);
 			mainGroup = AA0011;
 			minimizedProjectReferenceProxies = 1;
