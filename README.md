@@ -122,6 +122,13 @@ Or in Xcode: Press **Cmd+U** to run all tests.
 
 Tests are automatically run on every push via GitHub Actions CI.
 
+## License
+
+Dock Tile's source code is released under the [MIT License](LICENSE). The Dock Tile name, logo
+and app icon are not licensed for use by other software — see [TRADEMARKS.md](TRADEMARKS.md). The
+vendored icon compiler under `Vendor/actool/` declares MIT in its `Cargo.toml` (upstream ships no
+LICENSE file; see `Vendor/actool/DOCKTILE-README.md`).
+
 ---
 
 Made with care for macOS
