@@ -263,8 +263,8 @@ Keep `%@`-style placeholders exactly as they are. `\n` means a line break, `\|` 
 | `label.editorHint` | Hover to remove · Drag to reorder | Наведите для удаления · Перетащите для сортировки | machine | Tile Detail: apps section caption |
 | `tooltip.deleteTile` | Delete Tile | Удалить плитку | machine | Tile Detail: trash button tooltip |
 | `smartAdd.blankTitle` | Create a blank tile | Создать пустую плитку | machine | Add a Tile: blank row title |
-| `smartAdd.blankSubtitle` | Name it, pick an icon and add apps yourself. | Задайте название, выберите значок и добавьте приложения сами. | machine | Add a Tile: blank row subtitle |
-| `smartAdd.orStartFrom` | or start from what you use | или начните с того, чем пользуетесь | machine | Add a Tile: rule between blank row and suggestions |
+| `smartAdd.blankSubtitle` | Name it, pick an icon and add apps yourself. | Выберите название, значок и приложения. | machine | Add a Tile: blank row subtitle |
+| `smartAdd.orStartFrom` | or start from what you use | или начните с ваших приложений | machine | Add a Tile: rule between blank row and suggestions |
 | `smartAdd.noSuggestions` | No suggestions yet — Dock Tile learns from the apps you open. You can turn this off in General. | Пока нет предложений — Dock Tile учится на приложениях, которые вы открываете. Это можно отключить в разделе «Основные». | machine | Add a Tile: empty suggestions note |
 | `label.addAppsTooltip` | Add apps or folders to this tile | Добавить приложения или папки в эту плитку | machine | Tooltip on the + Add button above the tile editor's popover preview. |
 | `empty.createFirstTileDescription` | Group apps and folders behind one Dock icon. Start blank, or from a tile suggested from the apps you use. | Объедините приложения и папки под одним значком в Dock. Начните с пустой плитки или с плитки, предложенной на основе ваших приложений. | machine | Zero-tiles description |
