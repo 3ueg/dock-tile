@@ -16,3 +16,7 @@ DOCKTILE_ENVIRONMENT = RELEASE
 DOCKTILE_HELPER_PREFIX = com.docktile
 DOCKTILE_PREFS_FILENAME = com.docktile.configs.json
 DOCKTILE_SUPPORT_FOLDER = DockTile
+
+// Ship only this build's start-at-login launcher plist (the Copy Files phase lists both).
+// Guarded by LoginLauncherBundleTests (configExcludesOtherPlist reads this line).
+EXCLUDED_SOURCE_FILE_NAMES = com.docktile.dev.app.tilelauncher.plist

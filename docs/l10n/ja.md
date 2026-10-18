@@ -194,7 +194,7 @@ Keep `%@`-style placeholders exactly as they are. `\n` means a line break, `\|` 
 | `smartAdd.identity.watch` | Watch | 視聴 | machine | Smart Add: suggested tile name for video apps |
 | `smartAdd.identity.work` | Work | 仕事 | machine | Smart Add: suggested tile name for productivity apps |
 | `smartAdd.privacyFootnote` | Learned on your Mac. Never leaves your device. | このMac上で学習します。データがデバイスの外に出ることはありません。 | machine | Footer note stating Smart Add suggestions are computed on-device only |
-| `smartAdd.provenanceBanner` | Created by Smart Add from your recent apps. Rename it, restyle it or edit the apps — then add it to your Dock. | スマート追加が最近使用したアプリから作成しました。名前やスタイル、アプリを編集してから、Dockに追加してください。 | machine | Banner shown atop Tile Detail when a tile was just created by Smart Add |
+| `smartAdd.provenanceBanner` | Created by Smart Add from your recent apps. Rename it, restyle it or edit the apps — then add it to your Dock. | 最近使用したアプリをもとに、スマート追加で作成されたタイルです。名前やスタイル、アプリを編集してから、Dockに追加してください。 | machine | Banner shown atop Tile Detail when a tile was just created by Smart Add |
 | `smartAdd.reason.byCategory` | By category | カテゴリ別 | machine | Reason chip — apps grouped by their app category |
 | `smartAdd.reason.mostUsed` | Most used this week | 今週よく使用 | machine | Reason chip — the most-used cluster this week |
 | `smartAdd.reason.openedTogether` | Opened together | よく一緒に開く | machine | Reason chip — apps repeatedly opened in the same session |

@@ -29,6 +29,14 @@ does not need the app in front: select sidebar rows through AX (`set selected of
 capture by `CGWindowID` with the app in the background. Bring it forward only when the owner
 says they are away from the keyboard.
 
+## Press NSAlert buttons by name, never by index
+
+An NSAlert with long button titles stacks its buttons vertically, and the accessibility order
+changes with it: the invitation alert lists Later first in Chinese/Japanese (side by side) but
+"Help Improve" first in German/Russian/French (stacked). A capture script that pressed
+`button 1 of window 1` opened GitHub in the owner's browser three times on 2026-10-18. Read
+`name of every button of window 1` and click the one you mean by its localized name.
+
 ## AX: use the single-`to` form
 
 System Events answers `tell application "System Events" to tell (first process whose unix id is N)
