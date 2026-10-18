@@ -27,8 +27,8 @@ https://github.com/k97/dock-tile/blob/main/docs/l10n/README.md. Wer prüft, wird
 Имена проверяющих указываются в приложении.
 
 **Français.** Dock Tile parle désormais 简体中文, 日本語, Deutsch, Русский et Français. Ces
-traductions ont été réalisées automatiquement et n’ont pas encore été vérifiées par des personnes
-de langue maternelle. Si vous lisez l’une de ces langues et que quelque chose vous semble
+traductions ont été réalisées automatiquement et n’ont pas encore été vérifiées par des locuteurs
+natifs. Si vous lisez l’une de ces langues et que quelque chose vous semble
 incorrect, vous pouvez le corriger en cinq minutes dans votre navigateur, sans aucune connaissance
 en programmation, à l’adresse https://github.com/k97/dock-tile/blob/main/docs/l10n/README.md. Les
 personnes qui relisent sont créditées dans l’app.
