@@ -68,7 +68,8 @@ default-only key events, site in a separate property). Compare against it after 
   2.1.0's `action` / `is_folder` (2026-10-13). The `background` parameter (`colour`/`mono`) on
   `tile_added_to_dock` / `tile_updated` (added 2026-10-14, Mono tile background) was registered the
   same way on 2026-10-14 ("Tile background", EVENT scope) — register any new param before the
-  release that ships it, since registration is forward-only.
+  release that ships it, since registration is forward-only. 2026-10-18: `ui_language` (2.3.0) and
+  `result` / `choice` (the update events, 2.3.1) registered the same way.
 - API reads need the `ga4-fetch@dock-tile.iam.gserviceaccount.com` service account
   (`gcloud auth print-access-token --account=… --scopes=…analytics.readonly`); user-credential ADC
   is blocked by Google for the analytics scope. Property ID is recoverable without analytics scope

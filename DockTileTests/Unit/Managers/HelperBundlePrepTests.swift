@@ -28,6 +28,7 @@ struct HelperInfoPlistTests {
             "SUPublicEDKey": "abc123",
             "SUEnableAutomaticChecks": true,
             "SUScheduledCheckInterval": 86400,
+            "SUAutomaticallyUpdate": true,
             "CFBundleURLTypes": [["CFBundleURLSchemes": ["docktile"]]]
         ]
     }
@@ -84,6 +85,7 @@ struct HelperInfoPlistTests {
         #expect(out["SUPublicEDKey"] == nil)
         #expect(out["SUEnableAutomaticChecks"] == nil)
         #expect(out["SUScheduledCheckInterval"] == nil)
+        #expect(out["SUAutomaticallyUpdate"] == nil)
         #expect(out["CFBundleURLTypes"] == nil)
         // A key we never touch must come through unchanged.
         #expect(out["CFBundleVersion"] as? String == "42")

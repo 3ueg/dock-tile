@@ -88,6 +88,12 @@ A stale artifact from an earlier build masks this perfectly — delete it before
   `sparkle:releaseNotesLink` (`generate-appcast-entry.sh`; the only `<description>` is the
   channel's), so text written into GitHub release notes reaches the website's changelog, never an
   existing user's update dialog. A plan once assumed otherwise; reach existing users in the app.
+- **Updates install silently** (`SUAutomaticallyUpdate` true since 2.3.1): Sparkle downloads in the
+  background and installs when the main app quits. Added because most actives sat on 1.8.x/2.0.x
+  with every check enabled (GA4, 2026-10-18). Sparkle still runs only in the MAIN app, so a user
+  who never reopens Dock Tile is still never checked. `update_check` (`result`: found/none/declined/error),
+  `update_choice` (`choice`) and `update_installing` measure this; Sparkle also reports "no update"
+  as abort error 1001, which `UpdateAnalytics.abortResult` excludes (`UpdateAnalyticsTests`).
 - Helper bundles have Sparkle keys stripped to prevent update conflicts
 - `UpdateController.swift` wraps SPUUpdater with error-handling delegate; publishes `canCheckForUpdates`
   (KVO via Combine) so the Settings → General **Check for Updates…** button disables mid-session

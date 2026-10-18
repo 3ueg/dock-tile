@@ -1112,6 +1112,7 @@ final class HelperBundleManager {
         plist.removeValue(forKey: "SUPublicEDKey")
         plist.removeValue(forKey: "SUEnableAutomaticChecks")
         plist.removeValue(forKey: "SUScheduledCheckInterval")
+        plist.removeValue(forKey: "SUAutomaticallyUpdate")
 
         // Only the main app should claim the docktile:// URL scheme.
         plist.removeValue(forKey: "CFBundleURLTypes")

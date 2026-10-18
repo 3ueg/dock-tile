@@ -57,6 +57,8 @@
 	<true/>
 	<key>SUScheduledCheckInterval</key>
 	<integer>86400</integer>
+	<key>SUAutomaticallyUpdate</key>
+	<true/>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
 	<!-- Firebase is configured manually in main.swift (AppKit, no UIApplication).

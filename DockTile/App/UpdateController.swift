@@ -45,9 +45,45 @@ final class UpdateController: NSObject, ObservableObject {
     }
 }
 
+// MARK: - Update analytics (pure mapping, guarded by UpdateAnalyticsTests)
+
+/// Maps Sparkle callbacks to the `update_check` / `update_choice` analytics values. Added
+/// 2026-10-18 to learn why most users stay on old versions: are checks running, are updates
+/// found, and what do people do with the prompt.
+enum UpdateAnalytics {
+    /// `update_check` result for an aborted update cycle, or nil when the abort is Sparkle's
+    /// routine "no update found" (SUNoUpdateError, 1001), which `updaterDidNotFindUpdate` has
+    /// already counted as "none". A declined or deferred install authorization (4007 / 4008 —
+    /// likely under silent installs when the app's folder needs an admin password) is "declined".
+    nonisolated static func abortResult(for error: Error) -> String? {
+        let ns = error as NSError
+        guard ns.domain == SUSparkleErrorDomain else { return "error" }
+        switch ns.code {
+        case 1001: return nil
+        case 4007, 4008: return "declined"
+        default: return "error"
+        }
+    }
+
+    nonisolated static func choiceValue(_ choice: SPUUserUpdateChoice) -> String {
+        switch choice {
+        case .install: return "install"
+        case .skip: return "skip"
+        case .dismiss: return "dismiss"
+        @unknown default: return "unknown"
+        }
+    }
+}
+
 // MARK: - Updater Delegate
 
 private final class UpdaterDelegate: NSObject, SPUUpdaterDelegate {
+    /// Sparkle's SPUUpdater is main-thread only and calls its delegate there, so the main-actor
+    /// AnalyticsService can be reached synchronously (same pattern as the Quick Look controller).
+    private func track(_ event: AnalyticsEvent, _ parameters: [String: Any] = [:]) {
+        MainActor.assumeIsolated { AnalyticsService.shared.log(event, parameters) }
+    }
+
     func updater(_ updater: SPUUpdater, didFinishLoading appcast: SUAppcast) {
         DiagnosticsLog.shared.log("update", "Loaded appcast (\(appcast.items.count) item(s))")
     }
@@ -57,14 +93,24 @@ private final class UpdaterDelegate: NSObject, SPUUpdaterDelegate {
         // a 404 / wrong host here is exactly what breaks "downloading the update".
         let url = item.fileURL?.absoluteString ?? "nil"
         DiagnosticsLog.shared.log("update", "Found update \(item.displayVersionString) — download URL: \(url)")
+        track(.updateCheck, ["result": "found"])
     }
 
     func updaterDidNotFindUpdate(_ updater: SPUUpdater) {
         DiagnosticsLog.shared.log("update", "No update found (already up to date)")
+        track(.updateCheck, ["result": "none"])
+    }
+
+    func updater(_ updater: SPUUpdater, userDidMake choice: SPUUserUpdateChoice,
+                 forUpdate updateItem: SUAppcastItem, state: SPUUserUpdateState) {
+        let value = UpdateAnalytics.choiceValue(choice)
+        DiagnosticsLog.shared.log("update", "User chose '\(value)' for \(updateItem.displayVersionString)")
+        track(.updateChoice, ["choice": value])
     }
 
     func updater(_ updater: SPUUpdater, willInstallUpdate item: SUAppcastItem) {
         DiagnosticsLog.shared.log("update", "Will install update \(item.displayVersionString)")
+        track(.updateInstalling)
     }
 
     func updater(_ updater: SPUUpdater, didAbortWithError error: any Error) {
@@ -77,6 +123,9 @@ private final class UpdaterDelegate: NSObject, SPUUpdaterDelegate {
             detail += " | url: \(failingURL)"
         }
         DiagnosticsLog.shared.log("update", "Update aborted: \(detail)")
+        if let result = UpdateAnalytics.abortResult(for: error) {
+            track(.updateCheck, ["result": result])
+        }
 
         #if DEBUG
         print("[Sparkle] Update aborted (expected in dev builds): \(error.localizedDescription)")

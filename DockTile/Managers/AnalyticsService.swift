@@ -52,6 +52,9 @@ enum AnalyticsEvent: String, CaseIterable {
     case relocationMoveFailed = "relocation_move_failed"
     case translationInviteShown = "translation_invite_shown"
     case translationHelpTapped = "translation_help_tapped"
+    case updateCheck = "update_check"
+    case updateChoice = "update_choice"
+    case updateInstalling = "update_installing"
 }
 
 @MainActor
