@@ -6974,49 +6974,49 @@
         "de": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Dock Tile erstellen"
+            "value": "Neue Kachel"
           }
         },
         "en-AU": {
           "stringUnit": {
             "state": "translated",
-            "value": "New Dock Tile"
+            "value": "New Tile"
           }
         },
         "en-GB": {
           "stringUnit": {
             "state": "translated",
-            "value": "New Dock Tile"
+            "value": "New Tile"
           }
         },
         "en-US": {
           "stringUnit": {
             "state": "translated",
-            "value": "New Dock Tile"
+            "value": "New Tile"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Nouveau Dock Tile"
+            "value": "Nouvelle tuile"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "新規Dock Tile"
+            "value": "新規タイル"
           }
         },
         "ru": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Новая плитка Dock Tile"
+            "value": "Новая плитка"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "新建Dock Tile"
+            "value": "新建磁贴"
           }
         }
       }

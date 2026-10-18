@@ -172,6 +172,11 @@ struct AppStringsTests {
         // Menu items
         #expect(!AppStrings.Menu.configure.isEmpty)
         #expect(!AppStrings.Menu.newTile.isEmpty)
+        // ⌘N reads "New Tile", not "New Dock Tile": the product name would otherwise be forced
+        // untranslated into every language (the lint protects "Dock Tile").
+        #expect(localizedString(for: "menu.newTile", locale: "en-GB") == "New Tile")
+        #expect(localizedString(for: "menu.newTile", locale: "en-US") == "New Tile")
+        #expect(localizedString(for: "menu.newTile", locale: "zh-Hans") == localizedString(for: "button.newTile", locale: "zh-Hans"))
         #expect(!AppStrings.Menu.openInFinder.isEmpty)
         #expect(AppStrings.ItemMenu.open == "Open")
         #expect(AppStrings.ItemMenu.showInFinder == "Show in Finder")

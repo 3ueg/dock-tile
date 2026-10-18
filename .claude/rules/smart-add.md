@@ -63,7 +63,7 @@ all: the + creates the blank tile directly (a sheet holding only the blank row w
 extra step — 2026-09-02 feedback, superseding v2's "dialog always opens").
 `SmartAddEngine.suggestionsForAddFlow(enabled:computed:)` still filters what an opened dialog
 shows; its disabled branch is a pure-seam back-stop, no longer a reachable UI state. The sheet's
-Return default is **Create New Tile** (blank); *Use This Tile* pre-fills Tile Detail. ⌘N *New Dock
+Return default is **Create New Tile** (blank); *Use This Tile* pre-fills Tile Detail. ⌘N *New
 Tile* still creates a blank tile directly. Nothing in the dialog docks a tile.
 
 - **`.sheet(item:)`, NOT `.sheet(isPresented:)` (critical)**: the suggestions ride *inside* the

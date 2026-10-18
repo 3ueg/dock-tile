@@ -15,7 +15,7 @@ This document contains all user-facing strings that need localization.
 - Copyright notice
 
 ### 2. Menu Items
-- "New Dock Tile" (menu item)
+- "New Tile" (menu item, ⌘N)
 
 ### 3. Sidebar
 - "Dock Tile" (navigation title)

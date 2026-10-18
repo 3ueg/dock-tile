@@ -136,7 +136,7 @@ Keep `%@`-style placeholders exactly as they are. `\n` means a line break, `\|` 
 | `menu.configure` | Configure... | 配置… | machine | Menu item to configure tile (opens main app) |
 | `menu.configureTile` | Configure Tile | 配置磁贴 | machine | Tooltip for gear icon in popover |
 | `menu.copyDiagnostics` | Copy Diagnostics | 拷贝诊断信息 | machine | File menu item that copies recent diagnostic logs to the clipboard |
-| `menu.newTile` | New Dock Tile | 新建Dock Tile | machine | Menu item to create a new tile |
+| `menu.newTile` | New Tile | 新建磁贴 | machine | Menu item to create a new tile |
 | `menu.noAppsConfigured` | No apps configured | 未配置App | machine | Dock menu: disabled row when the tile has no apps |
 | `menu.noConfiguration` | No configuration | 无配置 | machine | Dock menu: disabled row when the tile's config cannot be found |
 | `menu.openInFinder` | Open in Finder | 在访达中打开 | machine | Menu item to open in Finder |

@@ -1025,7 +1025,7 @@ enum AppStrings {
 
         static let newTile = NSLocalizedString(
             "menu.newTile",
-            value: "New Dock Tile",
+            value: "New Tile",
             comment: "Menu item to create a new tile"
         )
 

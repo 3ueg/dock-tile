@@ -70,9 +70,9 @@ Categories: `Button.*`, `Label.*`, `Menu.*`, `Navigation.*`, `Section.*`, `Empty
   de-duplicates cards by the *localized* name (`usedIdentityNames`), so two `smartAdd.identity.*`
   translations that collide silently drop a card. The machine pass checked this; reviewers must
   keep it.
-- **`menu.newTile` ("New Dock Tile") keeps "Dock Tile" verbatim in every language**, because the
-  lint protects the product name. `button.newTile` ("New Tile") exists if the menu's English ever
-  changes to it.
+- **Don't put the product name in copy that means "a tile"**: the lint keeps "Dock Tile" verbatim, so
+  the ⌘N item "New Dock Tile" came out as 新建Dock Tile / „Dock Tile erstellen“. It reads "New Tile"
+  since 2026-10-18, translated like `button.newTile` (pinned in `AppStringsTests`).
 
 ## Glossary caveats
 

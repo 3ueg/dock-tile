@@ -136,7 +136,7 @@ Keep `%@`-style placeholders exactly as they are. `\n` means a line break, `\|` 
 | `menu.configure` | Configure... | タイルを設定… | machine | Menu item to configure tile (opens main app) |
 | `menu.configureTile` | Configure Tile | タイルを設定 | machine | Tooltip for gear icon in popover |
 | `menu.copyDiagnostics` | Copy Diagnostics | 診断情報をコピー | machine | File menu item that copies recent diagnostic logs to the clipboard |
-| `menu.newTile` | New Dock Tile | 新規Dock Tile | machine | Menu item to create a new tile |
+| `menu.newTile` | New Tile | 新規タイル | machine | Menu item to create a new tile |
 | `menu.noAppsConfigured` | No apps configured | アプリが設定されていません | machine | Dock menu: disabled row when the tile has no apps |
 | `menu.noConfiguration` | No configuration | 設定が見つかりません | machine | Dock menu: disabled row when the tile's config cannot be found |
 | `menu.openInFinder` | Open in Finder | Finderで開く | machine | Menu item to open in Finder |
