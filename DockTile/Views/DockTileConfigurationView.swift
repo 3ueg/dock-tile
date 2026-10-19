@@ -54,8 +54,8 @@ struct DockTileConfigurationView: View {
     /// selection (the rest of the app still reads `selectedConfigId`) via `onChange` below.
     @State private var selection: SidebarSelection?
 
-    // Fixed window dimensions (System Settings style)
-    private let windowWidth: CGFloat = 768
+    // Window width range lives on AppDelegate (min/max); this is the ideal width
+    private let windowWidth: CGFloat = AppDelegate.minWindowWidth
     private let minWindowHeight: CGFloat = 500
 
     var body: some View {
@@ -74,11 +74,11 @@ struct DockTileConfigurationView: View {
         // placement proven to work; the copies here and on this column were redundant.
         .toolbar(removing: .title)
         .toolbarBackground(.hidden, for: .windowToolbar)
-        // Strict frame enforcement: fixed width, flexible height
+        // Width resizable within the allowed range, flexible height
         .frame(
             minWidth: windowWidth,
             idealWidth: windowWidth,
-            maxWidth: windowWidth,
+            maxWidth: AppDelegate.maxWindowWidth,
             minHeight: minWindowHeight,
             maxHeight: .infinity
         )
@@ -268,7 +268,6 @@ struct DockTileConfigurationView: View {
 private struct WindowAccessor: NSViewRepresentable {
     let isCustomising: Bool
 
-    private let fixedWidth: CGFloat = 768
     private let defaultMinHeight: CGFloat = 500
     private let customiseMinHeight: CGFloat = 700
 
@@ -302,17 +301,17 @@ private struct WindowAccessor: NSViewRepresentable {
 
         let minHeight = isCustomising ? customiseMinHeight : defaultMinHeight
 
-        // Lock horizontal size, allow vertical resize
-        window.contentMinSize = NSSize(width: fixedWidth, height: minHeight)
-        window.contentMaxSize = NSSize(width: fixedWidth, height: CGFloat.greatestFiniteMagnitude)
+        // Bound horizontal size to the allowed range, allow vertical resize
+        window.contentMinSize = NSSize(width: AppDelegate.minWindowWidth, height: minHeight)
+        window.contentMaxSize = NSSize(width: AppDelegate.maxWindowWidth, height: CGFloat.greatestFiniteMagnitude)
 
         // Set current size if needed
         var frame = window.frame
         var needsResize = false
 
-        // Fix width if incorrect
-        if frame.width != fixedWidth {
-            frame.size.width = fixedWidth
+        // Clamp width into the allowed range
+        if frame.width != AppDelegate.clampedWindowWidth(frame.width) {
+            frame.size.width = AppDelegate.clampedWindowWidth(frame.width)
             needsResize = true
         }
 

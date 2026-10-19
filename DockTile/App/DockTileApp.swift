@@ -19,8 +19,8 @@ struct DockTileApp: App {
     @StateObject private var configManager = ConfigurationManager()
     @StateObject private var updateController = UpdateController()
 
-    // Fixed window dimensions (System Settings style)
-    private let windowWidth: CGFloat = 768
+    // Default window size (width resizable within AppDelegate.minWindowWidth…maxWindowWidth)
+    private let windowWidth: CGFloat = AppDelegate.minWindowWidth
     private let minWindowHeight: CGFloat = 500
 
     /// Routes an app-menu command to an inline Settings pane. The pane notification is only

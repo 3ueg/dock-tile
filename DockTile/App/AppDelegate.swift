@@ -25,8 +25,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     /// window when it has been fully closed while the app stayed resident (e.g. Dock Lock on).
     var openConfigurationWindow: (() -> Void)?
 
-    // Fixed window dimensions (System Settings style)
-    private let fixedWindowWidth: CGFloat = 768
+    // Window width range: horizontally resizable, height unbounded
+    nonisolated static let minWindowWidth: CGFloat = 782
+    nonisolated static let maxWindowWidth: CGFloat = 1200
+
+    /// Pure clamp into the allowed window width range (shared by every width fix-up site).
+    nonisolated static func clampedWindowWidth(_ width: CGFloat) -> CGFloat {
+        min(max(width, minWindowWidth), maxWindowWidth)
+    }
+
     private let minWindowHeight: CGFloat = 500
 
     // MARK: - Runtime Detection
@@ -168,25 +175,25 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         // Set ourselves as delegate for resize control
         window.delegate = self
 
-        // Lock horizontal size, allow vertical resize
-        window.contentMinSize = NSSize(width: fixedWindowWidth, height: minWindowHeight)
-        window.contentMaxSize = NSSize(width: fixedWindowWidth, height: CGFloat.greatestFiniteMagnitude)
+        // Bound horizontal size to the allowed range, allow vertical resize
+        window.contentMinSize = NSSize(width: Self.minWindowWidth, height: minWindowHeight)
+        window.contentMaxSize = NSSize(width: Self.maxWindowWidth, height: CGFloat.greatestFiniteMagnitude)
 
         // Ensure current frame has correct width
         var frame = window.frame
-        if frame.width != fixedWindowWidth {
-            frame.size.width = fixedWindowWidth
+        if frame.width != Self.clampedWindowWidth(frame.width) {
+            frame.size.width = Self.clampedWindowWidth(frame.width)
             window.setFrame(frame, display: true, animate: false)
         }
 
-        print("✓ Window sizing configured: \(fixedWindowWidth)x\(minWindowHeight)+")
+        print("✓ Window sizing configured: \(Self.minWindowWidth)…\(Self.maxWindowWidth)x\(minWindowHeight)+")
     }
 
     // MARK: - NSWindowDelegate
 
     func windowWillResize(_ sender: NSWindow, to frameSize: NSSize) -> NSSize {
-        // Enforce fixed width during resize
-        return NSSize(width: fixedWindowWidth, height: max(frameSize.height, minWindowHeight))
+        // Clamp width into the allowed range during resize
+        return NSSize(width: Self.clampedWindowWidth(frameSize.width), height: max(frameSize.height, minWindowHeight))
     }
 
     /// Reopen decision for the single main configuration window (Dock-icon click /
