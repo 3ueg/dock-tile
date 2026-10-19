@@ -7,6 +7,54 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.4.0] - 2026-10-19
+
+Existing tiles keep their symbol or emoji. App Grid is the starting look for new tiles, and any
+tile can switch to it in Customise Tile.
+
+### Added
+
+- **tiles:** Add the App Grid tile face: the Dock icon shows the tile's own apps in a folder-style grid on the system glass, like an iOS folder. One app fills the tile, two to four sit in a 2 × 2 grid, and five or more in a 3 × 3 grid of the first nine installed apps ([1473405](https://github.com/k97/dock-tile/commit/1473405))
+- **tiles:** Show each app in an App Grid tile the way macOS draws that app in the current icon style (Default, Dark, Clear or Tinted), instead of its colour icon in every style ([bc53fb7](https://github.com/k97/dock-tile/commit/bc53fb7))
+- **customise:** Redesign Customise Tile as a large preview beside an inspector, with an App Grid / Symbol / Emoji style picker whose options follow the chosen style ([be80f55](https://github.com/k97/dock-tile/commit/be80f55))
+- **customise:** Remember a tile's last symbol and last emoji, with their icon sizes, so switching between the Symbol and Emoji styles no longer resets your choice ([fa7b988](https://github.com/k97/dock-tile/commit/fa7b988))
+- **window:** Make the main window resizable between 782 and 1200 points wide ([1452c9c](https://github.com/k97/dock-tile/commit/1452c9c))
+
+### Fixed
+
+- **tiles:** Fix tiles in the sidebar and on Tile Detail looking different from the Dock under the Clear icon style; they now show the Dock's own rendering once the tile is updated ([bc53fb7](https://github.com/k97/dock-tile/commit/bc53fb7))
+- **icons:** Fix an app installed as a link, such as Safari on macOS 27, drawing its icon with an alias arrow ([cabb11b](https://github.com/k97/dock-tile/commit/cabb11b))
+- **login:** Fix the app carrying the development build's login item alongside its own; each build now ships only its own ([ee67b4c](https://github.com/k97/dock-tile/commit/ee67b4c))
+- **localization:** Fix the wording of the Japanese Smart Add banner and the Russian Dock Lock note ([ee67b4c](https://github.com/k97/dock-tile/commit/ee67b4c))
+
+## [2.3.1] - 2026-10-18
+
+See the [GitHub release](https://github.com/k97/dock-tile/releases/tag/v2.3.1).
+
+## [2.3.0] - 2026-10-18
+
+See the [GitHub release](https://github.com/k97/dock-tile/releases/tag/v2.3.0).
+
+## [2.2.2] - 2026-10-17
+
+See the [GitHub release](https://github.com/k97/dock-tile/releases/tag/v2.2.2).
+
+## [2.2.1] - 2026-10-17
+
+See the [GitHub release](https://github.com/k97/dock-tile/releases/tag/v2.2.1).
+
+## [2.2.0] - 2026-10-14
+
+See the [GitHub release](https://github.com/k97/dock-tile/releases/tag/v2.2.0).
+
+## [2.1.0] - 2026-10-13
+
+See the [GitHub release](https://github.com/k97/dock-tile/releases/tag/v2.1.0).
+
+## [2.0.3] - 2026-10-03
+
+See the [GitHub release](https://github.com/k97/dock-tile/releases/tag/v2.0.3).
+
 ## [2.0.2] - 2026-09-21
 
 Your existing tiles are rebuilt automatically the first time 2.0.2 launches, with one Dock restart,
@@ -33,5 +81,13 @@ so every fix below reaches them without any action from you.
 - **customise:** Fix Customise overwriting a tile's Dock visibility with the value from when the editor was opened ([eaa93c6](https://github.com/k97/dock-tile/commit/eaa93c6))
 - **diagnostics:** Fix multi-line entries in Copy Diagnostics surviving the one-hour trim forever ([1e5a6a9](https://github.com/k97/dock-tile/commit/1e5a6a9))
 
-[Unreleased]: https://github.com/k97/dock-tile/compare/v2.0.2...HEAD
+[Unreleased]: https://github.com/k97/dock-tile/compare/v2.4.0...HEAD
+[2.4.0]: https://github.com/k97/dock-tile/compare/v2.3.1...v2.4.0
+[2.3.1]: https://github.com/k97/dock-tile/compare/v2.3.0...v2.3.1
+[2.3.0]: https://github.com/k97/dock-tile/compare/v2.2.2...v2.3.0
+[2.2.2]: https://github.com/k97/dock-tile/compare/v2.2.1...v2.2.2
+[2.2.1]: https://github.com/k97/dock-tile/compare/v2.2.0...v2.2.1
+[2.2.0]: https://github.com/k97/dock-tile/compare/v2.1.0...v2.2.0
+[2.1.0]: https://github.com/k97/dock-tile/compare/v2.0.3...v2.1.0
+[2.0.3]: https://github.com/k97/dock-tile/compare/v2.0.2...v2.0.3
 [2.0.2]: https://github.com/k97/dock-tile/compare/v2.0.1...v2.0.2
