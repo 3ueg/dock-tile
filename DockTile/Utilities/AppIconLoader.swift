@@ -269,6 +269,12 @@ enum AppInstallChecker {
         let resolvedPath: String?
     }
 
+    /// The Apps face's one install rule: what the tile preview draws, what the Customise Apps card
+    /// counts and what the helper bake shows.
+    static func isInstalled(_ item: AppItem) -> Bool {
+        resolve(item).status == .installed
+    }
+
     /// Resolve an item's install status against the live system.
     static func resolve(_ item: AppItem) -> Resolution {
         // Folders are validated purely by their stored path.

@@ -473,7 +473,7 @@ enum AppStrings {
         }
         static let appsNoteNone = NSLocalizedString(
             "label.apps.note.none",
-            value: "No apps yet — add some in Tile Detail.",
+            value: "No apps yet — choose some with Select Apps.",
             comment: "Customise Tile: Apps caption when the tile has no apps (builder copy, not in the handoff)"
         )
         static let appsGlass = NSLocalizedString(

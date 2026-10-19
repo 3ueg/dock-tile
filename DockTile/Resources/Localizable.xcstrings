@@ -4058,7 +4058,7 @@
         "de": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Ein Glasordner, der sich „Hell“ und „Dunkel“ anpasst."
+            "value": "Ein Glasordner, der sich an „Hell“ und „Dunkel“ anpasst."
           }
         },
         "en-GB": {
@@ -4274,49 +4274,49 @@
         "de": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Noch keine Apps – füge welche in „Kacheldetails“ hinzu."
+            "value": "Noch keine Apps – wähle welche mit „Apps wählen“."
           }
         },
         "en-GB": {
           "stringUnit": {
             "state": "translated",
-            "value": "No apps yet — add some in Tile Detail."
+            "value": "No apps yet — choose some with Select Apps."
           }
         },
         "en-AU": {
           "stringUnit": {
             "state": "translated",
-            "value": "No apps yet — add some in Tile Detail."
+            "value": "No apps yet — choose some with Select Apps."
           }
         },
         "en-US": {
           "stringUnit": {
             "state": "translated",
-            "value": "No apps yet — add some in Tile Detail."
+            "value": "No apps yet — choose some with Select Apps."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Aucune app pour l’instant — ajoutez-en dans « Détails de la tuile »."
+            "value": "Aucune app pour l’instant — choisissez-en avec « Choisir les apps »."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "まだアプリがありません。「タイルの詳細」で追加してください。"
+            "value": "まだアプリがありません。「アプリを選択」から選んでください。"
           }
         },
         "ru": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Приложений пока нет — добавьте их в разделе «Сведения о плитке»."
+            "value": "Приложений пока нет — выберите их кнопкой «Выбрать приложения»."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "还没有App——请在“磁贴详情”中添加。"
+            "value": "还没有App——请通过“选择App”添加。"
           }
         }
       }

@@ -185,6 +185,12 @@ struct CustomiseTileView: View {
         return AppsSummary(shown: shown, arrangement: arrangement, note: note)
     }
 
+    /// The Apps card for the items the face actually draws: missing items are skipped, exactly as
+    /// `AppsFaceGrid.select` skips them for the preview and the helper bake.
+    nonisolated static func appsSummary(items: [AppItem], isInstalled: (AppItem) -> Bool) -> AppsSummary {
+        appsSummary(count: items.count - AppsFaceGrid.select(items: items, isInstalled: isInstalled).skipped)
+    }
+
     enum ColourRowState: Equatable {
         case fillsTile, deepened, toned, emojiLocked
         var isDisabled: Bool { self == .emojiLocked }
@@ -260,7 +266,8 @@ struct CustomiseTileView: View {
             selectAppsPill
                 .padding(12)
         }
-        .frame(minWidth: 250, maxWidth: .infinity, maxHeight: .infinity)
+        // 200, not the handoff's 250: a 280 pt sidebar in a 782 pt window leaves ~502 pt for the pane.
+        .frame(minWidth: 200, maxWidth: .infinity, maxHeight: .infinity)
     }
 
     private func canvasSurface(_ styles: [IconStyle?]) -> some View {
@@ -451,7 +458,7 @@ struct CustomiseTileView: View {
     // MARK: Apps
 
     private var appsSection: some View {
-        let summary = Self.appsSummary(count: editedConfig.appItems.count)
+        let summary = Self.appsSummary(items: editedConfig.appItems) { AppInstallChecker.isInstalled($0) }
         return VStack(alignment: .leading, spacing: 8) {
             groupHeader(AppStrings.Label.appsHeader)
             VStack(spacing: 0) {

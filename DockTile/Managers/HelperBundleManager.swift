@@ -942,7 +942,7 @@ final class HelperBundleManager {
     /// The installed items an Apps-face tile draws, resolved to images. An item whose icon
     /// cannot be loaded counts as skipped, like a missing one.
     func appsFaceMinis(for config: DockTileConfiguration) -> (minis: [IconGenerator.AppsFaceMini], skipped: Int) {
-        let picked = AppsFaceGrid.select(items: config.appItems) { AppInstallChecker.resolve($0).status == .installed }
+        let picked = AppsFaceGrid.select(items: config.appItems) { AppInstallChecker.isInstalled($0) }
         var skipped = picked.skipped
         var minis: [IconGenerator.AppsFaceMini] = []
         for item in picked.selected {

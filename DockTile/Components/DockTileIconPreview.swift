@@ -192,7 +192,7 @@ struct DockTileIconPreview: View {
 
     /// Installed Apps-face items in tile order; empty means the glyph face draws.
     private var appsFaceMinis: [AppItem] {
-        AppsFaceGrid.select(items: appsFaceItems) { AppInstallChecker.resolve($0).status == .installed }.selected
+        AppsFaceGrid.select(items: appsFaceItems) { AppInstallChecker.isInstalled($0) }.selected
     }
 
     @ViewBuilder
