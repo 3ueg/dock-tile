@@ -10,6 +10,7 @@
 //
 
 import AppKit
+import CoreImage
 import SwiftUI
 
 @MainActor
@@ -1221,6 +1222,94 @@ extension IconGenerator {
         switch appearance {
         case .light, .tinted: return .defaultStyle
         case .dark:           return .dark
+        }
+    }
+}
+
+// MARK: - Apps face
+
+extension IconGenerator {
+
+    /// One mini in the Apps face: an app icon (or a folder glyph) already resolved to an image.
+    struct AppsFaceMini {
+        let image: NSImage
+        let isFolder: Bool
+    }
+
+    /// The Apps face's single composite layer: a grid of mini app icons on a transparent canvas.
+    ///
+    /// No squircle, stroke or sheen: the system draws the tile shape and the glass, and flat
+    /// minis are what iOS folders show. Each mini does carry a soft CONTACT shadow, because a
+    /// light icon would otherwise vanish on near-white glass. An empty `minis` yields a fully
+    /// transparent layer (the caller falls back to the glyph face).
+    static func generateAppsLayerPNG(minis: [AppsFaceMini], canvas: Int = 1024) throws -> Data {
+        let side = CGFloat(canvas)
+        let size = CGSize(width: side, height: side)
+
+        guard let bitmapRep = NSBitmapImageRep(
+            bitmapDataPlanes: nil,
+            pixelsWide: canvas,
+            pixelsHigh: canvas,
+            bitsPerSample: 8,
+            samplesPerPixel: 4,
+            hasAlpha: true,
+            isPlanar: false,
+            colorSpaceName: .deviceRGB,
+            bytesPerRow: 0,
+            bitsPerPixel: 0
+        ), let graphicsContext = NSGraphicsContext(bitmapImageRep: bitmapRep) else {
+            throw IconGeneratorError.imageConversionFailed
+        }
+        bitmapRep.size = size
+
+        NSGraphicsContext.saveGraphicsState()
+        NSGraphicsContext.current = graphicsContext
+        graphicsContext.cgContext.clear(CGRect(origin: .zero, size: size))
+
+        let inset = side * IconDepthMetrics.contentInsetRatio
+        let shape = CGRect(origin: .zero, size: size).insetBy(dx: inset, dy: inset)
+        drawAppsGrid(minis: minis, shape: shape, nominalSize: side, desaturate: false,
+                     in: graphicsContext.cgContext)
+
+        NSGraphicsContext.restoreGraphicsState()
+
+        guard let pngData = bitmapRep.representation(using: .png, properties: [:]) else {
+            throw IconGeneratorError.pngExportFailed
+        }
+        return pngData
+    }
+
+    /// Draws up to `AppsFaceGrid.maxItems` minis into their cells. `desaturate` is wired in Task 6.
+    private static func drawAppsGrid(
+        minis: [AppsFaceMini],
+        shape: CGRect,
+        nominalSize: CGFloat,
+        desaturate: Bool,
+        in context: CGContext
+    ) {
+        let shown = Array(minis.prefix(AppsFaceGrid.maxItems))
+        let cells = AppsFaceGrid.cells(count: shown.count)
+        let shadow = AppsFaceGrid.miniShadow(nominalSize: nominalSize)
+
+        for (mini, cell) in zip(shown, cells) {
+            let box = AppsFaceGrid.rect(
+                AppsFaceGrid.drawBox(for: cell, isFolder: mini.isFolder), in: shape, yUp: true
+            )
+            context.saveGState()
+            if let shadow {
+                context.setShadow(
+                    offset: CGSize(width: 0, height: -shadow.offset),
+                    blur: shadow.blur,
+                    color: NSColor.black.withAlphaComponent(shadow.blackAlpha).cgColor
+                )
+            }
+            // Copy so resizing never mutates the caller's image; `size` makes draw(in:) scale
+            // the whole bitmap into the box.
+            let image = (mini.image.copy() as? NSImage) ?? mini.image
+            image.size = box.size
+            image.draw(in: box, from: .zero, operation: .sourceOver, fraction: 1,
+                       respectFlipped: true, hints: [.interpolation: NSImageInterpolation.high])
+            context.restoreGState()
         }
     }
 }
