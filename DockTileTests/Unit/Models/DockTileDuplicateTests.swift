@@ -30,6 +30,7 @@ struct DockTileDuplicateTests {
         iconScale: 18,
         iconWeight: .bold,
         background: .mono,
+        iconFace: .glyph,
         layoutMode: .list,
         appItems: [AppItem(bundleIdentifier: "com.apple.TV", name: "TV", lastKnownPath: "/System/Applications/TV.app")],
         isVisibleInDock: true,

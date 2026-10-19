@@ -33,7 +33,7 @@ struct TileFaceTests {
 
     @Test("Fields that don't reach the Dock icon leave the signature alone")
     func nonIconFieldsIgnored() {
-        let base = DockTileConfiguration(name: "Dev")
+        let base = DockTileConfiguration(name: "Dev", iconFace: .glyph)
         var other = base
         other.name = "Renamed"
         other.layoutMode = .list
@@ -45,11 +45,37 @@ struct TileFaceTests {
 
     @Test("Two tiles with the same look share a signature (stable, not per-instance)")
     func sameLookSameSignature() {
-        let a = DockTileConfiguration(name: "A", tintColor: .custom("#FF5733"), iconValue: "bolt")
-        let b = DockTileConfiguration(name: "B", tintColor: .custom("#FF5733"), iconValue: "bolt")
+        let a = DockTileConfiguration(name: "A", tintColor: .custom("#FF5733"), iconValue: "bolt", iconFace: .glyph)
+        let b = DockTileConfiguration(name: "B", tintColor: .custom("#FF5733"), iconValue: "bolt", iconFace: .glyph)
         #expect(a.id != b.id)
         #expect(a.iconSignature == b.iconSignature)
         #expect(a.iconSignature == "#FF5733|sfSymbol|bolt|\(a.iconScale)|\(a.iconWeight.rawValue)|colour")
+    }
+
+    @Test("The glyph face leaves existing signatures byte-identical; Apps appends the face and the first nine identities")
+    func appsFaceJoinsTheSignature() {
+        let items = (1...10).map { AppItem(bundleIdentifier: "com.example.app\($0)", name: "App \($0)") }
+        var glyph = DockTileConfiguration(name: "Work", tintColor: .custom("#FF5733"), iconValue: "bolt", iconFace: .glyph, appItems: items)
+        let glyphSignature = glyph.iconSignature
+        #expect(glyphSignature == "#FF5733|sfSymbol|bolt|\(glyph.iconScale)|medium|colour")
+
+        glyph.iconFace = .apps
+        let nine = (1...9).map { "com.example.app\($0)" }.joined(separator: ",")
+        #expect(glyph.iconSignature == glyphSignature + "|apps|" + nine)
+        #expect(glyph.appsFaceIdentities.count == 9)
+    }
+
+    @Test("On the Apps face the list order, a removal and a folder path all move the signature")
+    func appsFaceListChangesMoveTheSignature() {
+        let a = AppItem(bundleIdentifier: "com.example.a", name: "A")
+        let b = AppItem(bundleIdentifier: "com.example.b", name: "B")
+        let folder = AppItem(bundleIdentifier: "folder.1", name: "Docs", isFolder: true, folderPath: "/Users/x/Docs")
+        let base = DockTileConfiguration(name: "Work", iconFace: .apps, appItems: [a, b, folder])
+        var reordered = base; reordered.appItems = [b, a, folder]
+        var removed = base; removed.appItems = [a, folder]
+        var moved = base; moved.appItems = [a, b, AppItem(bundleIdentifier: "folder.1", name: "Docs", isFolder: true, folderPath: "/Users/x/Docs2")]
+        #expect(Set([base, reordered, removed, moved].map(\.iconSignature)).count == 4)
+        #expect(base.iconSignature.hasSuffix("|apps|com.example.a,com.example.b,/Users/x/Docs"))
     }
 
     // MARK: - Helper Info.plist stamp

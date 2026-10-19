@@ -129,6 +129,10 @@ struct DockActionResolutionTests {
         var appsRemoved = base
         appsRemoved.appItems.removeLast()
         #expect(DockTileDetailView.contentSignature(of: appsRemoved) != baseSignature)
+
+        var refaced = base                       // makeConfig() is an App Preview tile (the new default)
+        refaced.iconFace = .glyph
+        #expect(DockTileDetailView.contentSignature(of: refaced) != baseSignature)
     }
 
     /// Bookkeeping written back by performDockAction after a successful action must NOT count

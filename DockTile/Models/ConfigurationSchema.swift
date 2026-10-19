@@ -35,6 +35,9 @@ enum ConfigurationDefaults {
     // v9: Tile background — existing tiles stay Colour
     static let background: TileBackground = .colour
 
+    // v10: Tile face — App Preview for NEW tiles; the decoder keeps an existing tile's glyph
+    static let iconFace: IconFace = .apps
+
     // Visibility
     static let isVisibleInDock = true  // Show in Dock by default
     static let showInAppSwitcher = false  // Hidden from Cmd+Tab by default

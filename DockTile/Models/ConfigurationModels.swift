@@ -23,6 +23,7 @@ struct DockTileConfiguration: Identifiable, Codable, Hashable {
     var iconScale: Int  // v4: Icon size scale (10-20 range, affects symbol/emoji size)
     var iconWeight: IconWeight  // v7: SF Symbol stroke weight (ignored for emojis)
     var background: TileBackground  // v9: Colour fill or Mono (white/near-black)
+    var iconFace: IconFace  // v10: glyph (symbol/emoji) or the Apps grid
     var layoutMode: LayoutMode
     var appItems: [AppItem]
     var isVisibleInDock: Bool
@@ -52,8 +53,14 @@ struct DockTileConfiguration: Identifiable, Codable, Hashable {
         case .preset(let preset): tint = preset.rawValue
         case .custom(let hex): tint = hex
         }
-        return [tint, iconType.rawValue, iconValue, String(iconScale), iconWeight.rawValue, background.rawValue]
+        let base = [tint, iconType.rawValue, iconValue, String(iconScale), iconWeight.rawValue, background.rawValue]
             .joined(separator: "|")
+        return iconFace == .glyph ? base : base + "|apps|" + appsFaceIdentities.joined(separator: ",")
+    }
+
+    /// Identities of the first `AppsFaceGrid.maxItems` items as the Apps face would draw them.
+    var appsFaceIdentities: [String] {
+        appItems.prefix(9).map { $0.isFolder ? ($0.folderPath ?? $0.name) : $0.bundleIdentifier }
     }
 
     // MARK: - Duplicate
@@ -74,6 +81,7 @@ struct DockTileConfiguration: Identifiable, Codable, Hashable {
             iconScale: iconScale,
             iconWeight: iconWeight,
             background: background,
+            iconFace: iconFace,
             layoutMode: layoutMode,
             appItems: appItems,
             isVisibleInDock: false,
@@ -93,6 +101,7 @@ struct DockTileConfiguration: Identifiable, Codable, Hashable {
         iconScale: Int = ConfigurationDefaults.iconScale,
         iconWeight: IconWeight = ConfigurationDefaults.iconWeight,
         background: TileBackground = ConfigurationDefaults.background,
+        iconFace: IconFace = ConfigurationDefaults.iconFace,
         layoutMode: LayoutMode = ConfigurationDefaults.layoutMode,
         appItems: [AppItem] = [],
         isVisibleInDock: Bool = ConfigurationDefaults.isVisibleInDock,
@@ -110,6 +119,7 @@ struct DockTileConfiguration: Identifiable, Codable, Hashable {
         self.iconScale = iconScale
         self.iconWeight = iconWeight
         self.background = background
+        self.iconFace = iconFace
         self.layoutMode = layoutMode
         self.appItems = appItems
         self.isVisibleInDock = isVisibleInDock
@@ -161,6 +171,10 @@ struct DockTileConfiguration: Identifiable, Codable, Hashable {
         background = try container.decodeIfPresent(TileBackground.self, forKey: .background)
             ?? ConfigurationDefaults.background
 
+        // v10 fields - tile face. The missing-key fallback is the LITERAL .glyph, not
+        // ConfigurationDefaults.iconFace (.apps, for NEW tiles): existing tiles must not change on upgrade.
+        iconFace = try container.decodeIfPresent(IconFace.self, forKey: .iconFace) ?? .glyph
+
         // v5 fields - last Dock position
         lastDockIndex = try container.decodeIfPresent(Int.self, forKey: .lastDockIndex)
 
@@ -184,6 +198,8 @@ struct DockTileConfiguration: Identifiable, Codable, Hashable {
         case iconWeight
         // v9 fields
         case background
+        // v10 fields
+        case iconFace
         // v5 fields
         case lastDockIndex
         // v6 fields
@@ -276,6 +292,21 @@ enum TileBackground: String, Codable, CaseIterable, Hashable {
     init(from decoder: Decoder) throws {
         let raw = try decoder.singleValueContainer().decode(String.self)
         self = TileBackground(rawValue: raw) ?? .colour
+    }
+}
+
+// MARK: - Icon Face
+
+/// What a tile's Dock icon shows (v10): its glyph (SF Symbol / emoji) or the Apps grid. A separate
+/// field rather than an `IconType` case because `IconType` decodes strictly; this one decodes
+/// tolerantly like `TileBackground`, so an unknown value never fails the whole configuration.
+enum IconFace: String, Codable, CaseIterable, Hashable {
+    case glyph
+    case apps
+
+    init(from decoder: Decoder) throws {
+        let raw = try decoder.singleValueContainer().decode(String.self)
+        self = IconFace(rawValue: raw) ?? .glyph
     }
 }
 
