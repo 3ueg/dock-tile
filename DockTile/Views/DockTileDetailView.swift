@@ -69,6 +69,19 @@ struct DockTileDetailView: View {
         }
     }
 
+    /// Parameters for `tile_added_to_dock` / `tile_updated`. Pure so the event's shape is guarded
+    /// by a unit test: GA4 drops any parameter not registered as a custom dimension, so a
+    /// renamed or dropped key silently disappears from reports.
+    nonisolated static func dockActionParameters(for config: DockTileConfiguration) -> [String: Any] {
+        [
+            "layout": config.layoutMode.rawValue,
+            "app_count": config.appItems.count,
+            "show_in_app_switcher": config.showInAppSwitcher,
+            "background": config.background.rawValue,
+            "face": config.iconFace.rawValue
+        ]
+    }
+
     /// Cheap fingerprint of the user-editable content. Deliberately EXCLUDES bookkeeping that
     /// `performDockAction` writes back after a successful action (`lastDockIndex`,
     /// `helperAppVersion`) — including those would immediately re-dirty the button — and
@@ -591,12 +604,8 @@ struct DockTileDetailView: View {
                     configToSave.lastDockIndex = nil  // Clear saved position
                     configToSave.helperAppVersion = HelperBundleManager.currentAppVersion
 
-                    AnalyticsService.shared.log(wasInDock ? .tileUpdated : .tileAddedToDock, [
-                        "layout": configToSave.layoutMode.rawValue,
-                        "app_count": configToSave.appItems.count,
-                        "show_in_app_switcher": configToSave.showInAppSwitcher,
-                        "background": configToSave.background.rawValue
-                    ])
+                    AnalyticsService.shared.log(wasInDock ? .tileUpdated : .tileAddedToDock,
+                                                Self.dockActionParameters(for: configToSave))
                     print("✅ Helper installed: \(configToSave.name)")
                     print("   User can open it from: ~/Library/Application Support/DockTile/")
                     DiagnosticsLog.shared.log("dock", "\(wasInDock ? "Updated" : "Added") tile \(configToSave.diagnosticName) in Dock")

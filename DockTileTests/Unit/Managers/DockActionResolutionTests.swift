@@ -178,4 +178,25 @@ struct DockActionResolutionTests {
         mono.background = .mono
         #expect(DockTileDetailView.contentSignature(of: colour) != DockTileDetailView.contentSignature(of: mono))
     }
+
+    // MARK: - dockActionParameters
+
+    @Test("Dock action analytics carry layout, app_count, show_in_app_switcher, background and face")
+    func dockActionParameters() {
+        var config = makeConfig()
+        config.iconFace = .apps
+        config.background = .mono
+        config.layoutMode = .list
+        config.showInAppSwitcher = true
+        let params = DockTileDetailView.dockActionParameters(for: config)
+        #expect(params["face"] as? String == "apps")
+        #expect(params["background"] as? String == "mono")
+        #expect(params["layout"] as? String == "list")
+        #expect(params["app_count"] as? Int == 2)
+        #expect(params["show_in_app_switcher"] as? Bool == true)
+        #expect(Set(params.keys) == ["layout", "app_count", "show_in_app_switcher", "background", "face"])
+        #expect(DockTileDetailView.dockActionParameters(for: makeConfig())["face"] as? String == "apps")   // memberwise default = new-tile default
+        var glyph = makeConfig(); glyph.iconFace = .glyph
+        #expect(DockTileDetailView.dockActionParameters(for: glyph)["face"] as? String == "glyph")
+    }
 }
