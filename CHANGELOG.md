@@ -17,7 +17,7 @@ tile can switch to it in Customise Tile.
 - **tiles:** Add the App Grid tile face: the Dock icon shows the tile's own apps in a folder-style grid on the system glass, like an iOS folder. One app fills the tile, two to four sit in a 2 × 2 grid, and five or more in a 3 × 3 grid of the first nine installed apps ([1473405](https://github.com/k97/dock-tile/commit/1473405))
 - **tiles:** Show each app in an App Grid tile the way macOS draws that app in the current icon style (Default, Dark, Clear or Tinted), instead of its colour icon in every style ([bc53fb7](https://github.com/k97/dock-tile/commit/bc53fb7))
 - **customise:** Redesign Customise Tile as a large preview beside an inspector, with an App Grid / Symbol / Emoji style picker whose options follow the chosen style ([be80f55](https://github.com/k97/dock-tile/commit/be80f55))
-- **customise:** Remember a tile's last symbol and last emoji, with their icon sizes, so switching between the Symbol and Emoji styles no longer resets your choice ([fa7b988](https://github.com/k97/dock-tile/commit/fa7b988))
+- **customise:** Keep the Symbol and Emoji styles' settings separate: each remembers its own symbol or emoji, icon size, Colour or Mono background and colour, so switching between them no longer resets your choices ([fa7b988](https://github.com/k97/dock-tile/commit/fa7b988))
 - **window:** Make the main window resizable between 782 and 1200 points wide ([1452c9c](https://github.com/k97/dock-tile/commit/1452c9c))
 
 ### Fixed
