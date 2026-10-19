@@ -91,12 +91,13 @@ struct CustomiseStyleTests {
         #expect(CustomiseTileView.applyStyle(.emoji, to: symbol).tintColor == .custom("#FF8800"))
     }
 
-    @Test("A saved glyph without a background (saved before this field) keeps the current background")
+    @Test("A saved glyph without background/colour (saved before those fields) keeps the current ones")
     func savedGlyphWithoutBackground() {
-        let emojiTile = DockTileConfiguration(name: "E", iconType: .emoji, iconValue: "🎬", background: .mono,
-                                              iconFace: .glyph, savedSymbol: SavedGlyph(value: "bolt", scale: 12))
+        let emojiTile = DockTileConfiguration(name: "E", tintColor: .preset(.purple), iconType: .emoji, iconValue: "🎬",
+                                              background: .mono, iconFace: .glyph,
+                                              savedSymbol: SavedGlyph(value: "bolt", scale: 12))
         let symbol = CustomiseTileView.applyStyle(.symbol, to: emojiTile)
-        #expect(symbol.iconValue == "bolt" && symbol.background == .mono)
+        #expect(symbol.iconValue == "bolt" && symbol.background == .mono && symbol.tintColor == .preset(.purple))
     }
 
     @Test("App Grid in between keeps both memories: Emoji → App Grid → Symbol restores the saved symbol")

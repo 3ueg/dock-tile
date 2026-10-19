@@ -807,7 +807,7 @@ private struct InspectorCard: ViewModifier {
         content
             .background(NSColorBackgroundView.formGroup)
             .clipShape(shape)
-            .overlay(shape.strokeBorder(Color.accentColor, lineWidth: 2).opacity(isSelected ? 1 : 0))
+            .overlay { if isSelected { shape.strokeBorder(Color.accentColor, lineWidth: 2) } }
     }
 }
 

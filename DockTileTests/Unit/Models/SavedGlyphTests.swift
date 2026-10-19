@@ -36,11 +36,16 @@ struct SavedGlyphTests {
 
     @Test("Both memories round-trip through JSON")
     func roundTrips() throws {
-        let config = DockTileConfiguration(name: "W", savedSymbol: SavedGlyph(value: "bolt", scale: 16),
-                                           savedEmoji: SavedGlyph(value: "🎬", scale: 20))
+        let symbol = SavedGlyph(value: "bolt", scale: 16, background: .mono, tint: .custom("#FF8800"))
+        let emoji = SavedGlyph(value: "🎬", scale: 20, background: .colour, tint: .preset(.blue))
+        let config = DockTileConfiguration(name: "W", savedSymbol: symbol, savedEmoji: emoji)
         let back = try decode(try encoded(config))
-        #expect(back.savedSymbol == SavedGlyph(value: "bolt", scale: 16))
-        #expect(back.savedEmoji == SavedGlyph(value: "🎬", scale: 20))
+        #expect(back.savedSymbol == symbol)
+        #expect(back.savedEmoji == emoji)
+        // A glyph saved before background/tint existed still decodes, with both nil.
+        var dict = try encoded(config)
+        dict["savedSymbol"] = ["value": "bolt", "scale": 16]
+        #expect(try decode(dict).savedSymbol == SavedGlyph(value: "bolt", scale: 16))
     }
 
     @Test("The memory is not part of the Dock icon's signature")
