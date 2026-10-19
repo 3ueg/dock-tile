@@ -9,7 +9,13 @@ import Testing
 @Suite("Apps face rendering")
 struct AppsFaceRenderTests {
     static let canvas = 1024
+    /// The tile shape in a FLAT bake (fallback .icns, macOS 15 variants): the canvas inset by the
+    /// icon-grid margin, because a flat icon must carry its own margin.
     static let shape = CGRect(x: 100, y: 100, width: 824, height: 824)   // 1024 inset by 25/256
+    /// The tile shape in the compiled .icon LAYER: the whole canvas. In an Icon Composer document
+    /// the 1024 canvas IS the tile — the system adds the icon-grid margin when it renders — so
+    /// insetting the layer as well shrank every mini by 0.805 (measured in the Dock, 2026-10-19).
+    static let layerShape = CGRect(x: 0, y: 0, width: 1024, height: 1024)
 
     /// A stand-in app icon: an opaque squircle on Apple's icon grid (transparent margin) — or
     /// full-bleed, which is what a Finder folder glyph's bounds look like to the renderer.
@@ -31,8 +37,9 @@ struct AppsFaceRenderTests {
 
     static func bitmap(_ png: Data) throws -> NSBitmapImageRep { try #require(NSBitmapImageRep(data: png)) }
 
-    /// Centre of cell `i` for `count` items, in y-down pixel coordinates of the 1024 canvas.
-    static func centre(_ i: Int, count: Int) -> (x: Int, y: Int) {
+    /// Centre of cell `i` for `count` items, in y-down pixel coordinates of the 1024 canvas, on
+    /// the flat-bake shape by default or the given one (`layerShape` for the .icon layer).
+    static func centre(_ i: Int, count: Int, in shape: CGRect = shape) -> (x: Int, y: Int) {
         let r = AppsFaceGrid.rect(AppsFaceGrid.cells(count: count)[i], in: shape, yUp: false)
         return (Int(r.midX), Int(r.midY))
     }
@@ -50,37 +57,41 @@ struct AppsFaceRenderTests {
         return x - start
     }
 
-    @Test("oneAppIsCentredAtSixtyPercent: one app is one centred icon at 0.60 of the shape; the canvas is 1024² with transparent margin")
+    @Test("oneAppIsCentredAtSixtyPercent: one app is one centred icon at 0.60 of the WHOLE layer canvas (the canvas is the tile)")
     func oneAppIsCentredAtSixtyPercent() throws {
         let rep = try Self.bitmap(try IconGenerator.generateAppsLayerPNG(
             minis: [.init(image: Self.mini(.systemBlue), isFolder: false)]))
         #expect(rep.pixelsWide == Self.canvas && rep.pixelsHigh == Self.canvas)
-        for (x, y) in [(2, 2), (1021, 2), (2, 1021), (1021, 1021), (512, 104), (104, 512), (358, 230)] {
-            #expect(Self.alpha(rep, x, y) == 0, "(\(x),\(y)) painted")   // (358,230) = where a 2×2 cell 0 would start
+        for (x, y) in [(2, 2), (1021, 2), (2, 1021), (1021, 1021), (512, 104), (104, 512)] {
+            #expect(Self.alpha(rep, x, y) == 0, "(\(x),\(y)) painted")
         }
         #expect(Self.alpha(rep, 512, 512) == 1)
-        let c0 = Self.centre(0, count: 1)
+        // Independent pin of the regression: x 215 is inside a 0.60 × 1024 squircle (205…819) but
+        // outside the old, doubly-inset one (265…759).
+        #expect(Self.alpha(rep, 215, 512) == 1, "the mini is still drawn inside the icon-grid margin")
+        let c0 = Self.centre(0, count: 1, in: Self.layerShape)
         #expect(c0.x == 512 && c0.y == 512)                     // independent pin: centred
         let run = Self.opaqueRun(rep, y: 512, fromX: 0)
-        #expect(abs(run - 494) <= 4, "visible squircle is \(run) px, 0.60 of 824 is 494")
+        #expect(abs(run - 614) <= 4, "visible squircle is \(run) px, 0.60 of 1024 is 614")
     }
 
     @Test("Two apps paint the top row of a 2×2 and leave the bottom row glass")
     func twoAppsPaintTheTopRow() throws {
         let rep = try Self.bitmap(try IconGenerator.generateAppsLayerPNG(
             minis: (0..<2).map { _ in .init(image: Self.mini(.systemBlue), isFolder: false) }))
-        for i in 0...1 { let c = Self.centre(i, count: 2); #expect(Self.alpha(rep, c.x, c.y) == 1, "cell \(i) empty") }
-        for i in 2...3 { let c = Self.centre(i, count: 4); #expect(Self.alpha(rep, c.x, c.y) == 0, "cell \(i) is not empty glass") }
-        let c0 = Self.centre(0, count: 2)
-        #expect(c0.x == 358 && c0.y == 358)                     // independent pin of the 2×2 origin
+        for i in 0...1 { let c = Self.centre(i, count: 2, in: Self.layerShape); #expect(Self.alpha(rep, c.x, c.y) == 1, "cell \(i) empty") }
+        for i in 2...3 { let c = Self.centre(i, count: 4, in: Self.layerShape); #expect(Self.alpha(rep, c.x, c.y) == 0, "cell \(i) is not empty glass") }
+        let c0 = Self.centre(0, count: 2, in: Self.layerShape)
+        #expect(c0.x == 298 && c0.y == 298)                     // independent pin of the 2×2 origin: (0.10 + 0.3825/2) × 1024
     }
 
     @Test("The visible squircle lands on the cell: an app's margin is absorbed by the ÷0.805 box")
     func appSquircleFillsItsCell() throws {
         let rep = try Self.bitmap(try IconGenerator.generateAppsLayerPNG(
             minis: (0..<2).map { _ in .init(image: Self.mini(.systemRed), isFolder: false) }))
-        let c0 = Self.centre(0, count: 2)
-        let expected = Int(AppsFaceGrid.cellRatio(columns: 2) * Self.shape.width)   // 269
+        let c0 = Self.centre(0, count: 2, in: Self.layerShape)
+        let expected = Int(AppsFaceGrid.cellRatio(columns: 2) * Self.layerShape.width)   // 391
+        #expect(expected == 391)
         let run = Self.opaqueRun(rep, y: c0.y, fromX: 0)
         #expect(abs(run - expected) <= 4, "visible squircle is \(run) px, cell is \(expected)")
     }
@@ -90,7 +101,7 @@ struct AppsFaceRenderTests {
         let rep = try Self.bitmap(try IconGenerator.generateAppsLayerPNG(
             minis: [.init(image: Self.mini(.systemOrange, fullBleed: true), isFolder: true)]))
         let run = Self.opaqueRun(rep, y: 512, fromX: 0)
-        #expect(abs(run - 494) <= 4, "folder drew \(run) px; fitted to the 494 px cell, not the 614 px app box")
+        #expect(abs(run - 614) <= 4, "folder drew \(run) px; fitted to the 614 px cell, not the 763 px app box")
     }
 
     @Test("Nine apps fill a 3×3; a tenth is dropped; adjacent minis do not touch")
@@ -98,13 +109,13 @@ struct AppsFaceRenderTests {
         let minis = (0..<10).map { _ in IconGenerator.AppsFaceMini(image: Self.mini(.systemGreen), isFolder: false) }
         let rep = try Self.bitmap(try IconGenerator.generateAppsLayerPNG(minis: minis))
         for i in 0..<9 {
-            let c = Self.centre(i, count: 9)
+            let c = Self.centre(i, count: 9, in: Self.layerShape)
             #expect(Self.alpha(rep, c.x, c.y) == 1, "cell \(i) empty")
         }
         // The gap between cell 0 and cell 1 (midpoint of the gap, on the cells' centre row) is glass:
-        // a mini body is alpha 1; only the two 0.35-alpha shadows can feather into the 38 px gap.
-        let a = AppsFaceGrid.rect(AppsFaceGrid.cells(count: 9)[0], in: Self.shape, yUp: false)
-        let b = AppsFaceGrid.rect(AppsFaceGrid.cells(count: 9)[1], in: Self.shape, yUp: false)
+        // a mini body is alpha 1; only the two 0.35-alpha shadows can feather into the 36 px gap.
+        let a = AppsFaceGrid.rect(AppsFaceGrid.cells(count: 9)[0], in: Self.layerShape, yUp: false)
+        let b = AppsFaceGrid.rect(AppsFaceGrid.cells(count: 9)[1], in: Self.layerShape, yUp: false)
         #expect(Self.alpha(rep, Int((a.maxX + b.minX) / 2), Int(a.midY)) < 0.3)
     }
 
@@ -112,15 +123,15 @@ struct AppsFaceRenderTests {
     func fiveAppsAreAnL() throws {
         let minis = (0..<5).map { _ in IconGenerator.AppsFaceMini(image: Self.mini(.systemIndigo), isFolder: false) }
         let rep = try Self.bitmap(try IconGenerator.generateAppsLayerPNG(minis: minis))
-        for i in 0..<5 { let c = Self.centre(i, count: 9); #expect(Self.alpha(rep, c.x, c.y) == 1) }
-        for i in 5..<9 { let c = Self.centre(i, count: 9); #expect(Self.alpha(rep, c.x, c.y) == 0) }
+        for i in 0..<5 { let c = Self.centre(i, count: 9, in: Self.layerShape); #expect(Self.alpha(rep, c.x, c.y) == 1) }
+        for i in 5..<9 { let c = Self.centre(i, count: 9, in: Self.layerShape); #expect(Self.alpha(rep, c.x, c.y) == 0) }
     }
 
     @Test("miniCastsAContactShadow: soft shadow below a mini, none above it")
     func miniCastsAContactShadow() throws {
         let rep = try Self.bitmap(try IconGenerator.generateAppsLayerPNG(
             minis: [.init(image: Self.mini(.white, fullBleed: true), isFolder: true)]))   // full-bleed: the body reaches the cell edge
-        let cell = AppsFaceGrid.rect(AppsFaceGrid.cells(count: 1)[0], in: Self.shape, yUp: false)
+        let cell = AppsFaceGrid.rect(AppsFaceGrid.cells(count: 1)[0], in: Self.layerShape, yUp: false)
         let below = Self.alpha(rep, Int(cell.midX), Int(cell.maxY) + 5)
         let above = Self.alpha(rep, Int(cell.midX), Int(cell.minY) - 5)
         #expect(below > 0.05 && below < 0.4, "shadow below: \(below)")
@@ -134,7 +145,7 @@ struct AppsFaceRenderTests {
     @Test("No minis → an entirely transparent layer (the caller must have fallen back to the glyph face)")
     func emptyLayerIsTransparent() throws {
         let rep = try Self.bitmap(try IconGenerator.generateAppsLayerPNG(minis: []))
-        #expect(Self.alpha(rep, 512, 512) == 0 && Self.alpha(rep, 358, 358) == 0)
+        #expect(Self.alpha(rep, 512, 512) == 0 && Self.alpha(rep, 298, 298) == 0)
     }
     // MARK: - Fallback .icns and the legacy bake (same renderer, four styles)
 

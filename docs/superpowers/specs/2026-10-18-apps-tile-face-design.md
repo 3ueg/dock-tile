@@ -130,9 +130,12 @@ Apps face. A test pins both.
 One `nonisolated static` value-in/value-out seam (name to the builder; lives beside
 `IconDepthMetrics`), consumed by **all four** renderers:
 
-- Constants: block 0.70 of the shape, gap 0.047; columns = 2 when `count ≤ 4`, else 3 → cell
-  0.326 (2 columns) or 0.202 (3 columns) of the shape; the shape is `1 − 2 × IconDepthMetrics.contentInsetRatio` of the canvas (compiled icon, fallback
-  `.icns`, legacy bake) and the full frame in UI slots (`DockTileIconPreview` does not inset —
+- Constants: block 0.80 of the shape, gap 0.035 (revised 2026-10-19 from the measured 0.70 / 0.047,
+  which read small and crowded in the Dock); columns = 2 when `count ≤ 4`, else 3 → cell
+  0.3825 (2 columns) or 0.243 (3 columns) of the shape; the shape is `1 − 2 × IconDepthMetrics.contentInsetRatio` of the canvas in FLAT bakes (fallback
+  `.icns`, legacy bake), and the full canvas in the compiled `.icon` layer (the system adds the
+  icon-grid margin to an Icon Composer document itself — corrected 2026-10-19, the first build
+  inset twice) and the full frame in UI slots (`DockTileIconPreview` does not inset —
   existing rule).
 - `columns(count:)` → 1, 2 or 3; `cells(count:)` → one centred rect of 0.60 of the shape, or up
   to four or nine unit-space rects, row-major from the top-left on that grid; `count` clamps at
@@ -141,7 +144,7 @@ One `nonisolated static` value-in/value-out seam (name to the builder; lives bes
   own transparent margin; the visible squircle must land on the 0.202 cell.
 - Tests: 1 → one centred cell of 0.60; 2 → top row of a 2×2; 3 → three cells of a 2×2 (two on
   top, one bottom-left); 4 → full 2×2; 5 → 3×3 with five filled; 9 → full 3×3; 10 → nine; cells
-  never overlap, the block spans exactly 0.70 on both grids, the 1→2 and 4→5 column flips and the
+  never overlap, the block spans exactly 0.80 on both grids, the 1→2 and 4→5 column flips and the
   row-major order are pinned.
 
 ## Renderers

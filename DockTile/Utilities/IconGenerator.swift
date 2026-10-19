@@ -1266,8 +1266,11 @@ extension IconGenerator {
         NSGraphicsContext.current = graphicsContext
         graphicsContext.cgContext.clear(CGRect(origin: .zero, size: size))
 
-        let inset = side * IconDepthMetrics.contentInsetRatio
-        let shape = CGRect(origin: .zero, size: size).insetBy(dx: inset, dy: inset)
+        // The whole canvas is the tile: in an Icon Composer document the system adds the
+        // icon-grid margin itself when it renders, so this layer must NOT inset by
+        // `contentInsetRatio` (that shrank every mini by 0.805 in the Dock). Flat bakes
+        // (`appsIcon`) still inset — a flat icon carries its own margin.
+        let shape = CGRect(origin: .zero, size: size)
         drawAppsGrid(minis: minis, shape: shape, nominalSize: side, desaturate: false,
                      in: graphicsContext.cgContext)
 

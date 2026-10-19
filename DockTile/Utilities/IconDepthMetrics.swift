@@ -305,15 +305,15 @@ enum IconDepthMetrics {
 ///
 /// WHY ONE SEAM: four renderers (the baked fallback `.icns`, the declarative glyph layers, the
 /// live preview and the legacy bake) draw this face, so every number they share lives here and
-/// they cannot drift. Block 0.70 and gap 0.047 were measured from the iOS 26 screenshot and the
-/// App Library reference (spec "Research findings"). A single item fills the tile with one 0.60
-/// icon (the handoff's "Fills the Tile"). `TilePalette` is deliberately not involved: the face
-/// uses system grays, not the tile's tint. Only Foundation/CoreGraphics, so it is unit-testable.
+/// they cannot drift. Block 0.80 and gap 0.035 (was 0.70 / 0.047, from the iOS 26 screenshot):
+/// widened 2026-10-19 because the 3×3 minis read small and crowded to the centre in the Dock.
+/// A single item fills the tile with one 0.60 icon (the handoff's "Fills the Tile"). `TilePalette`
+/// is deliberately not involved: the face uses system grays, not the tile's tint. Only Foundation/CoreGraphics, so it is unit-testable.
 enum AppsFaceGrid {
     /// Side of the mini-icon block, as a fraction of the shape.
-    static let blockRatio: CGFloat = 0.70
+    static let blockRatio: CGFloat = 0.80
     /// Gap between adjacent minis, as a fraction of the shape.
-    static let gapRatio: CGFloat = 0.047
+    static let gapRatio: CGFloat = 0.035
     static let maxItems = 9
     /// Fraction of an app icon's canvas that its visible shape occupies (the icon-grid margin).
     static let appIconContentRatio: CGFloat = 1 - 2 * IconDepthMetrics.contentInsetRatio

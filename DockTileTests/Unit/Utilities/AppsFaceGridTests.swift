@@ -21,8 +21,8 @@ struct AppsFaceGridTests {
     @Test("Cell sizes: 0.60 single, then the iOS folder / App Library minis")
     func cellSizes() {
         close(AppsFaceGrid.cellRatio(columns: 1), 0.60)
-        close(AppsFaceGrid.cellRatio(columns: 2), 0.3265, 1e-4)   // (0.70 − 0.047) / 2
-        close(AppsFaceGrid.cellRatio(columns: 3), 0.2020, 1e-4)   // (0.70 − 2 × 0.047) / 3
+        close(AppsFaceGrid.cellRatio(columns: 2), 0.3825, 1e-4)   // (0.80 − 0.035) / 2
+        close(AppsFaceGrid.cellRatio(columns: 3), 0.2433, 1e-4)   // (0.80 − 2 × 0.035) / 3
         close(AppsFaceGrid.appIconContentRatio, 206.0 / 256.0)
     }
 
@@ -34,7 +34,7 @@ struct AppsFaceGridTests {
 
         let two = AppsFaceGrid.cells(count: 2)
         #expect(two.count == 2)
-        close(two[0].minX, 0.15); close(two[0].width, AppsFaceGrid.cellRatio(columns: 2))
+        close(two[0].minX, 0.10); close(two[0].width, AppsFaceGrid.cellRatio(columns: 2))
         close(two[1].minY, two[0].minY)                  // the top row of a 2×2
 
         let three = AppsFaceGrid.cells(count: 3)
@@ -46,17 +46,17 @@ struct AppsFaceGridTests {
 
         let four = AppsFaceGrid.cells(count: 4)
         #expect(four.count == 4)
-        close(four[3].maxX, 0.85); close(four[3].maxY, 0.85)   // the block spans exactly 0.70
+        close(four[3].maxX, 0.90); close(four[3].maxY, 0.90)   // the block spans exactly 0.80
 
         let five = AppsFaceGrid.cells(count: 5)
         #expect(five.count == 5)
         close(five[0].width, AppsFaceGrid.cellRatio(columns: 3))
-        close(five[2].maxX, 0.85)                         // third column exists
-        close(five[3].minX, 0.15); #expect(five[3].minY > five[2].minY)   // row-major wrap
+        close(five[2].maxX, 0.90)                         // third column exists
+        close(five[3].minX, 0.10); #expect(five[3].minY > five[2].minY)   // row-major wrap
 
         let nine = AppsFaceGrid.cells(count: 9)
         #expect(nine.count == 9)
-        close(nine[8].maxX, 0.85); close(nine[8].maxY, 0.85)
+        close(nine[8].maxX, 0.90); close(nine[8].maxY, 0.90)
 
         #expect(AppsFaceGrid.cells(count: 10).count == 9)
         #expect(AppsFaceGrid.cells(count: 0).isEmpty)
@@ -81,17 +81,17 @@ struct AppsFaceGridTests {
         #expect(AppsFaceGrid.drawBox(for: cell, isFolder: true) == cell)
     }
 
-    @Test("folderBoxIsTheCell: a 2×2 app box is 334 px on the 824 px shape, the folder box 269 px; single: 614 vs 494")
+    @Test("folderBoxIsTheCell: a 2×2 app box is 392 px on the 824 px shape, the folder box 315 px; single: 614 vs 494")
     func folderBoxIsTheCell() {
         let shape = CGRect(x: 100, y: 100, width: 824, height: 824)
         let cell = AppsFaceGrid.cells(count: 2)[0]
         let appBox = AppsFaceGrid.rect(AppsFaceGrid.drawBox(for: cell, isFolder: false), in: shape, yUp: false)
         let folderBox = AppsFaceGrid.rect(AppsFaceGrid.drawBox(for: cell, isFolder: true), in: shape, yUp: false)
-        close(appBox.width, 334, 1.0)
-        close(folderBox.width, 269, 1.0)
+        close(appBox.width, 391.7, 1.0)
+        close(folderBox.width, 315.2, 1.0)
         // Independent pins, not derived from the seam: the first cell of a 2×2, and the single
         // centred cell, on a 1024 canvas.
-        close(folderBox.minX, 223.6, 0.5); close(folderBox.minY, 223.6, 0.5)
+        close(folderBox.minX, 182.4, 0.5); close(folderBox.minY, 182.4, 0.5)
         let single = AppsFaceGrid.cells(count: 1)[0]
         let singleFolder = AppsFaceGrid.rect(AppsFaceGrid.drawBox(for: single, isFolder: true), in: shape, yUp: false)
         let singleApp = AppsFaceGrid.rect(AppsFaceGrid.drawBox(for: single, isFolder: false), in: shape, yUp: false)
