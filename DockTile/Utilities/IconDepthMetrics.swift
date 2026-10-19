@@ -23,6 +23,7 @@
 //
 
 import CoreGraphics
+import Foundation
 
 enum IconDepthMetrics {
 
@@ -294,5 +295,118 @@ enum IconDepthMetrics {
         case .clear:        return 0.08
         case .tinted:       return 0.10
         }
+    }
+}
+
+// MARK: - Apps face grid
+
+/// Geometry, material and item selection for the Apps tile face: a tile showing its own apps as
+/// a folder-style mini grid, like an iOS 26 folder / App Library cluster.
+///
+/// WHY ONE SEAM: four renderers (the baked fallback `.icns`, the declarative glyph layers, the
+/// live preview and the legacy bake) draw this face, so every number they share lives here and
+/// they cannot drift. Block 0.70 and gap 0.047 were measured from the iOS 26 screenshot and the
+/// App Library reference (spec "Research findings"). A single item fills the tile with one 0.60
+/// icon (the handoff's "Fills the Tile"). `TilePalette` is deliberately not involved: the face
+/// uses system grays, not the tile's tint. Only Foundation/CoreGraphics, so it is unit-testable.
+enum AppsFaceGrid {
+    /// Side of the mini-icon block, as a fraction of the shape.
+    static let blockRatio: CGFloat = 0.70
+    /// Gap between adjacent minis, as a fraction of the shape.
+    static let gapRatio: CGFloat = 0.047
+    static let maxItems = 9
+    /// Fraction of an app icon's canvas that its visible shape occupies (the icon-grid margin).
+    static let appIconContentRatio: CGFloat = 1 - 2 * IconDepthMetrics.contentInsetRatio
+    /// Side of the one centred icon when there is a single item.
+    static let singleRatio: CGFloat = 0.60
+
+    static func columns(count: Int) -> Int {
+        switch count {
+        case ...1: return 1
+        case 2...4: return 2
+        default: return 3
+        }
+    }
+
+    static func cellRatio(columns: Int) -> CGFloat {
+        guard columns > 1 else { return singleRatio }
+        return (blockRatio - CGFloat(columns - 1) * gapRatio) / CGFloat(columns)
+    }
+
+    /// Cell rects in the unit space of the SHAPE: origin top-left, y-down.
+    static func cells(count: Int) -> [CGRect] {
+        let n = min(max(count, 0), maxItems)
+        guard n > 0 else { return [] }
+        if n == 1 {
+            let origin = (1 - singleRatio) / 2
+            return [CGRect(x: origin, y: origin, width: singleRatio, height: singleRatio)]
+        }
+        let cols = columns(count: n)
+        let cell = cellRatio(columns: cols)
+        let origin = (1 - blockRatio) / 2
+        return (0..<n).map { i in
+            CGRect(x: origin + CGFloat(i % cols) * (cell + gapRatio),
+                   y: origin + CGFloat(i / cols) * (cell + gapRatio),
+                   width: cell, height: cell)
+        }
+    }
+
+    /// Where to draw an item's icon so its VISIBLE shape fills the cell: an app icon carries the
+    /// icon-grid margin, so its canvas is the cell scaled up about its centre; a folder is the cell.
+    static func drawBox(for cell: CGRect, isFolder: Bool) -> CGRect {
+        guard !isFolder else { return cell }
+        let side = cell.width / appIconContentRatio
+        let h = cell.height / appIconContentRatio
+        return CGRect(x: cell.midX - side / 2, y: cell.midY - h / 2, width: side, height: h)
+    }
+
+    /// Maps a unit rect onto `shape`. `yUp` flips vertically for AppKit's non-flipped bitmaps.
+    static func rect(_ unit: CGRect, in shape: CGRect, yUp: Bool) -> CGRect {
+        let w = unit.width * shape.width
+        let h = unit.height * shape.height
+        let x = shape.minX + unit.minX * shape.width
+        let y = yUp
+            ? shape.maxY - (unit.minY + unit.height) * shape.height
+            : shape.minY + unit.minY * shape.height
+        return CGRect(x: x, y: y, width: w, height: h)
+    }
+
+    /// Contact shadow under each mini; `nil` below the detail gate.
+    static func miniShadow(nominalSize: CGFloat) -> IconDepthMetrics.GlyphShadow? {
+        guard IconDepthMetrics.showsDepth(nominalSize: nominalSize) else { return nil }
+        return IconDepthMetrics.GlyphShadow(blackAlpha: 0.35,
+                                            offset: nominalSize * 6 / 1024,
+                                            blur: nominalSize * 12 / 1024)
+    }
+
+    // MARK: Material (system grays, top then bottom)
+
+    static let lightGrays: (top: CGFloat, bottom: CGFloat) = (1.0, 0.925)
+    static let darkGrays: (top: CGFloat, bottom: CGFloat) = (0.192, 0.078)
+
+    static func fillGrays(style: IconStyle) -> (top: CGFloat, bottom: CGFloat) {
+        style == .dark ? darkGrays : lightGrays
+    }
+
+    /// Clear and Tinted are grayscale styles, so the minis lose their colour too.
+    static func desaturatesMinis(style: IconStyle) -> Bool {
+        style == .clear || style == .tinted
+    }
+
+    // MARK: Selection
+
+    /// Installed items in tile order, at most `maxItems`; `skipped` counts missing items in the
+    /// whole list so the next installed one takes a skipped item's cell.
+    static func select(items: [AppItem], isInstalled: (AppItem) -> Bool) -> (selected: [AppItem], skipped: Int) {
+        var selected: [AppItem] = []
+        var skipped = 0
+        for item in items {
+            if isInstalled(item) {
+                if selected.count < maxItems { selected.append(item) }
+            } else {
+                skipped += 1
+            }
+        }
+        return (selected, skipped)
     }
 }

@@ -60,7 +60,7 @@ struct DockTileConfiguration: Identifiable, Codable, Hashable {
 
     /// Identities of the first `AppsFaceGrid.maxItems` items as the Apps face would draw them.
     var appsFaceIdentities: [String] {
-        appItems.prefix(9).map { $0.isFolder ? ($0.folderPath ?? $0.name) : $0.bundleIdentifier }
+        appItems.prefix(AppsFaceGrid.maxItems).map { $0.isFolder ? ($0.folderPath ?? $0.name) : $0.bundleIdentifier }
     }
 
     // MARK: - Duplicate
