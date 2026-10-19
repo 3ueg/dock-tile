@@ -113,8 +113,9 @@ Every role (fill top/bottom, glyph) per background x style x icon type is derive
   NOT follow the system icon style on macOS 27 (inside the running app it does — `TileFace` relies
   on that). `AppleIconAppearanceTheme` IS written on macOS 27 with the documented values (an
   earlier note here said it was absent; issue #22 measured it).
-- **Not adopted**: Apple's `system-light`/`system-dark` fills — their values are unpublished, so
-  contrast cannot be computed against them.
+- **Not adopted for glyph tiles**: Apple's `system-light`/`system-dark` fills — their values are
+  unpublished, so the 3:1 contrast promise cannot be computed against them. The Apps face DOES use
+  them (see the "Apps tile face" section).
 - Existing Colour tiles change look on update (saturated gradient start; sub-3:1 colours deepen).
 
 ## Apps tile face (`iconFace`, v10)

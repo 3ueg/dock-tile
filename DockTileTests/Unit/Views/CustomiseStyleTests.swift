@@ -12,6 +12,13 @@ struct CustomiseStyleTests {
         #expect(CustomiseTileView.TileStyle.allCases == [.apps, .symbol, .emoji])
     }
 
+    @Test("App Preview caption: the glass sentence only where the icon follows Light and Dark")
+    func appsCaption() {
+        let note = "Shows 3 apps."
+        #expect(CustomiseTileView.appsCaption(note: note, followsAppearance: true) == note + " " + AppStrings.Label.appsGlass)
+        #expect(CustomiseTileView.appsCaption(note: note, followsAppearance: false) == note)
+    }
+
     @Test("applyStyle: App Preview keeps the glyph behind it; Symbol/Emoji switch the glyph and clear the face")
     func applyStyle() {
         let items = [AppItem(bundleIdentifier: "com.apple.Safari", name: "Safari")]

@@ -467,8 +467,14 @@ struct CustomiseTileView: View {
                 valueRow(AppStrings.Label.appsArrangement, value: summary.arrangement)
             }
             .modifier(InspectorCard())
-            caption(summary.note + " " + AppStrings.Label.appsGlass)
+            caption(Self.appsCaption(note: summary.note, followsAppearance: monoFollowsAppearance))
         }
+    }
+
+    /// The glass sentence promises Light/Dark, so it is shown only where the compiled icon follows
+    /// the appearance (macOS 15's legacy bake is always the light variant).
+    nonisolated static func appsCaption(note: String, followsAppearance: Bool) -> String {
+        followsAppearance ? note + " " + AppStrings.Label.appsGlass : note
     }
 
     private func valueRow(_ title: String, value: String) -> some View {

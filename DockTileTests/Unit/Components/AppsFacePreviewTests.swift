@@ -61,7 +61,7 @@ struct AppsFacePreviewTests {
         }.max() ?? 0
     }
 
-    @Test("One installed app: light glass fills the frame, the mini sits top-left, the other cells are glass")
+    @Test("One installed app: light glass fills the frame, the single mini is centred, the other cells are glass")
     func oneAppOnLightGlass() throws {
         let rep = try render(items: [Self.finder], style: .defaultStyle)
         let top = try srgb(rep, 128, 4)                      // full-frame shape, no icon-grid margin
@@ -70,7 +70,7 @@ struct AppsFacePreviewTests {
         #expect(abs(bottom.redComponent - 0.925) < 0.03)
         let cell0 = Self.cell(0, count: 1)                 // the single centred 0.60 cell (51…205 px)
         #expect(abs(cell0.midX - 128) < 1)
-        #expect(try maxSaturation(rep, in: cell0) > 0.3, "the centred cell shows glass, not Finder")
+        #expect(try maxSaturation(rep, in: cell0) > 0.3, "the centred cell shows no Finder colour")
         // Inside the shape, left of the mini's draw box (33…223 px): empty glass.
         let glass = try srgb(rep, 20, 128)
         #expect(glass.saturationComponent < 0.03 && glass.redComponent > 0.9, "beside the mini is not empty glass: \(glass)")
