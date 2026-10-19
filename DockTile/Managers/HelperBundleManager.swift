@@ -867,6 +867,47 @@ final class HelperBundleManager {
     private func installTileIcons(for config: DockTileConfiguration, at helperPath: URL) async throws {
         let resourcesPath = helperPath.appendingPathComponent("Contents/Resources")
 
+        // Apps face: bake the tile's installed apps instead of its symbol/emoji. An empty set
+        // falls through to the glyph path below, which is otherwise untouched.
+        if config.iconFace == .apps {
+            let face = appsFaceMinis(for: config)
+            if face.minis.isEmpty {
+                DiagnosticsLog.shared.log("tile", "Apps face for \(config.diagnosticName): no installed items — baking the glyph face")
+            } else {
+                if face.skipped > 0 {
+                    DiagnosticsLog.shared.log("tile", "Apps face for \(config.diagnosticName): skipped \(face.skipped) missing item(s)")
+                }
+                if IconPipeline.isDeclarative {
+                    try await installCompiledIcon(
+                        json: IconDocumentBuilder.appsFaceIconJSON(),
+                        layerPNGs: [IconDocumentBuilder.appsFaceImageName: try IconGenerator.generateAppsLayerPNG(minis: face.minis)],
+                        resourcesPath: resourcesPath
+                    )
+                    try IconGenerator.generateAppsFallbackIcns(
+                        minis: face.minis,
+                        outputURL: resourcesPath.appendingPathComponent("AppIcon.icns")
+                    )
+                    print("   ✓ Compiled Apps-face icon (Assets.car + fallback AppIcon.icns)")
+                } else {
+                    for style in IconStyle.allCases {
+                        try IconGenerator.generateAppsIcns(
+                            minis: face.minis,
+                            outputURL: iconPath(for: style, in: resourcesPath),
+                            iconStyle: style
+                        )
+                        print("   ✓ Generated \(style.rawValue) style Apps-face icon")
+                    }
+                    let currentStyle = IconStyle.current
+                    let sourceIconPath = iconPath(for: currentStyle, in: resourcesPath)
+                    let iconDestPath = resourcesPath.appendingPathComponent("AppIcon.icns")
+                    try? FileManager.default.removeItem(at: iconDestPath)
+                    try FileManager.default.copyItem(at: sourceIconPath, to: iconDestPath)
+                    print("   ✓ Set active icon (style: \(currentStyle.rawValue))")
+                }
+                return
+            }
+        }
+
         guard IconPipeline.isDeclarative else {
             // LEGACY (pre-macOS-26): bake all four style variants upfront so the runtime style
             // switch is a file copy, and seed the live icon from the style in effect right now.
@@ -896,6 +937,19 @@ final class HelperBundleManager {
 
         try await installDeclarativeIcon(for: config, resourcesPath: resourcesPath)
         print("   ✓ Compiled declarative icon (Assets.car + fallback AppIcon.icns)")
+    }
+
+    /// The installed items an Apps-face tile draws, resolved to images. An item whose icon
+    /// cannot be loaded counts as skipped, like a missing one.
+    func appsFaceMinis(for config: DockTileConfiguration) -> (minis: [IconGenerator.AppsFaceMini], skipped: Int) {
+        let picked = AppsFaceGrid.select(items: config.appItems) { AppInstallChecker.resolve($0).status == .installed }
+        var skipped = picked.skipped
+        var minis: [IconGenerator.AppsFaceMini] = []
+        for item in picked.selected {
+            guard let image = AppIconLoader.icon(for: item) else { skipped += 1; continue }
+            minis.append(IconGenerator.AppsFaceMini(image: image, isFolder: item.isFolder))
+        }
+        return (minis, skipped)
     }
 
     struct DeclarativeFills {
@@ -935,6 +989,23 @@ final class HelperBundleManager {
             layers: specs
         )
 
+        try await installCompiledIcon(json: json, layerPNGs: pngs, resourcesPath: resourcesPath)
+
+        // ONE fallback `.icns` (not four variants) for the contexts that read `CFBundleIconFile`.
+        try IconGenerator.generateFallbackIcns(
+            tintColor: config.tintColor,
+            background: config.background,
+            iconType: config.iconType,
+            iconValue: config.iconValue,
+            iconScale: config.iconScale,
+            iconWeight: config.iconWeight,
+            outputURL: resourcesPath.appendingPathComponent("AppIcon.icns")
+        )
+    }
+
+    /// Writes `json` + layer PNGs as an `.icon` document in scratch, compiles it, and installs
+    /// the resulting `Assets.car` into the helper's Resources.
+    private func installCompiledIcon(json: [String: Any], layerPNGs pngs: [String: Data], resourcesPath: URL) async throws {
         // Scratch lives in the TEMP dir with `defer` cleanup — never inside the helper bundle.
         // A process killed mid-generation must not leave a stray `.icon`/`Assets.car` staging
         // directory sealed into a tile (the killed-mid-generation damage class the self-heal
@@ -959,17 +1030,6 @@ final class HelperBundleManager {
         let carDestination = resourcesPath.appendingPathComponent("Assets.car")
         try? FileManager.default.removeItem(at: carDestination)
         try FileManager.default.copyItem(at: car, to: carDestination)
-
-        // ONE fallback `.icns` (not four variants) for the contexts that read `CFBundleIconFile`.
-        try IconGenerator.generateFallbackIcns(
-            tintColor: config.tintColor,
-            background: config.background,
-            iconType: config.iconType,
-            iconValue: config.iconValue,
-            iconScale: config.iconScale,
-            iconWeight: config.iconWeight,
-            outputURL: resourcesPath.appendingPathComponent("AppIcon.icns")
-        )
     }
 
     /// The glyph layers of this tile's `.icon` document, with their rendered PNGs.
