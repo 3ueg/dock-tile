@@ -139,17 +139,22 @@ struct AppsFaceRenderTests {
     // MARK: - Fallback .icns and the legacy bake (same renderer, four styles)
 
     static func gray(_ rep: NSBitmapImageRep, _ x: Int, _ y: Int) throws -> CGFloat {
-        // A rep read back from an .icns is sRGB-tagged, and on macOS 27 its `colorAt` comes back
-        // labelled calibrated, so converting it to sRGB lifts 0.192 to 0.251. Read the bytes.
-        if rep.colorSpace == .sRGB, rep.bitsPerPixel == 32, let data = rep.bitmapData {
-            let o = y * rep.bytesPerRow + x * 4
-            #expect(data[o] == data[o + 1] && data[o + 1] == data[o + 2], "not gray at (\(x),\(y))")
-            return CGFloat(data[o]) / 255
+        // One colour-managed read for every rep: draw it into an sRGB RGBA context and read the
+        // byte, which is what the Dock sees. `colorAt` is not used: it goes through the rep's
+        // `colorSpaceName`, which mislabels a file-decoded rep and shifts the gray.
+        let cg = try #require(rep.cgImage)
+        let space = try #require(CGColorSpace(name: CGColorSpace.sRGB))
+        var px = [UInt8](repeating: 0, count: 4)
+        try px.withUnsafeMutableBytes { buf in
+            let ctx = try #require(CGContext(data: buf.baseAddress, width: 1, height: 1, bitsPerComponent: 8,
+                                             bytesPerRow: 4, space: space,
+                                             bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue))
+            ctx.interpolationQuality = .none
+            ctx.draw(cg, in: CGRect(x: -x, y: -(cg.height - 1 - y), width: cg.width, height: cg.height))
         }
-        let c = try #require(rep.colorAt(x: x, y: y)?.usingColorSpace(.sRGB))
-        #expect(abs(c.redComponent - c.greenComponent) < 0.01 && abs(c.greenComponent - c.blueComponent) < 0.01,
-                "not gray at (\(x),\(y)): \(c)")
-        return c.redComponent
+        #expect(abs(Int(px[0]) - Int(px[1])) <= 1 && abs(Int(px[1]) - Int(px[2])) <= 1,
+                "not gray at (\(x),\(y)): \(px)")
+        return CGFloat(px[0]) / 255
     }
 
     static func bake(_ style: IconStyle, minis: [IconGenerator.AppsFaceMini]) throws -> NSBitmapImageRep {
@@ -217,5 +222,51 @@ struct AppsFaceRenderTests {
         let image = try #require(NSImage(contentsOf: out))
         let rep = try #require(image.representations.compactMap { $0 as? NSBitmapImageRep }.max(by: { $0.pixelsWide < $1.pixelsWide }))
         #expect(abs(try Self.gray(rep, 512, 106) - 0.192) < 0.02)
+    }
+
+    /// Like a real `NSWorkspace.icon(forFile:)` result: small point size, large detailed rep.
+    static func stripedMini(rep pixels: Int = 512, stripe: Int = 4) -> NSImage {
+        let rep = NSBitmapImageRep(bitmapDataPlanes: nil, pixelsWide: pixels, pixelsHigh: pixels, bitsPerSample: 8,
+                                   samplesPerPixel: 4, hasAlpha: true, isPlanar: false,
+                                   colorSpaceName: .deviceRGB, bytesPerRow: 0, bitsPerPixel: 0)!
+        rep.size = CGSize(width: pixels, height: pixels)
+        let ctx = NSGraphicsContext(bitmapImageRep: rep)!
+        ctx.cgContext.setFillColor(NSColor.white.cgColor)
+        ctx.cgContext.fill(CGRect(x: 0, y: 0, width: pixels, height: pixels))
+        ctx.cgContext.setFillColor(NSColor.systemRed.cgColor)
+        var x = 0
+        while x < pixels { ctx.cgContext.fill(CGRect(x: x, y: 0, width: stripe, height: pixels)); x += stripe * 2 }
+        let image = NSImage(size: CGSize(width: 32, height: 32))   // points, as IconServices returns
+        // Low-res reps (plain white) like the 1x/2x ones IconServices attaches: a rasterise at the
+        // image's point size picks one of these; only the destination-sized draw reaches `rep`.
+        for px in [32, 64] {
+            let small = NSBitmapImageRep(bitmapDataPlanes: nil, pixelsWide: px, pixelsHigh: px, bitsPerSample: 8,
+                                         samplesPerPixel: 4, hasAlpha: true, isPlanar: false,
+                                         colorSpaceName: .deviceRGB, bytesPerRow: 0, bitsPerPixel: 0)!
+            small.size = CGSize(width: 32, height: 32)
+            let sctx = NSGraphicsContext(bitmapImageRep: small)!
+            sctx.cgContext.setFillColor(NSColor.white.cgColor)
+            sctx.cgContext.fill(CGRect(x: 0, y: 0, width: px, height: px))
+            image.addRepresentation(small)
+        }
+        rep.size = CGSize(width: 32, height: 32)
+        image.addRepresentation(rep)
+        return image
+    }
+
+    @Test("desaturated minis keep the detail of a small-point-size, large-bitmap icon")
+    func desaturatedMiniIsNotBlurry() throws {
+        let rep = try Self.bake(.clear, minis: [.init(image: Self.stripedMini(), isFolder: true)])
+        let c = Self.centre(0, count: 1)
+        // Walk 300 px across the box centre; every 4-px stripe (8 px at 1024) must still alternate.
+        var flips = 0
+        var previousDark: Bool?
+        for x in (c.x - 150)..<(c.x + 150) {
+            let v = try #require(rep.colorAt(x: x, y: c.y)?.usingColorSpace(.sRGB)).redComponent
+            let dark = v < 0.65   // red stripes in gray ~0.3-0.4, white 1.0, blur ~0.7
+            if let p = previousDark, p != dark { flips += 1 }
+            previousDark = dark
+        }
+        #expect(flips >= 30, "stripes smeared: only \(flips) edges across 300 px")
     }
 }

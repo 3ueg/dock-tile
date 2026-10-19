@@ -1306,7 +1306,7 @@ extension IconGenerator {
             }
             // Copy so resizing never mutates the caller's image; `size` makes draw(in:) scale
             // the whole bitmap into the box.
-            let source = desaturate ? desaturated(mini.image) : mini.image
+            let source = desaturate ? desaturated(mini.image, pixelSize: box.size) : mini.image
             let image = (source.copy() as? NSImage) ?? source
             image.size = box.size
             image.draw(in: box, from: .zero, operation: .sourceOver, fraction: 1,
@@ -1374,9 +1374,11 @@ extension IconGenerator {
     }
 
     /// Grayscale copy via `CIColorControls` (saturation 0), rendered into an explicit-pixel
-    /// bitmap. Returns `image` untouched if any step fails.
-    private static func desaturated(_ image: NSImage) -> NSImage {
-        var proposed = CGRect(origin: .zero, size: image.size)
+    /// bitmap. Rasterised for `pixelSize` (the destination box), not the image's point size:
+    /// IconServices icons are ~32 pt with many reps, and a point-size raster would pick a
+    /// small one and be stretched blurry. Returns `image` untouched if any step fails.
+    private static func desaturated(_ image: NSImage, pixelSize: CGSize) -> NSImage {
+        var proposed = CGRect(origin: .zero, size: pixelSize)
         guard let cg = image.cgImage(forProposedRect: &proposed, context: nil, hints: nil),
               let filter = CIFilter(name: "CIColorControls") else { return image }
         filter.setValue(CIImage(cgImage: cg), forKey: kCIInputImageKey)
