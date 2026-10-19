@@ -230,9 +230,10 @@ struct DockTileIconPreview: View {
                     contentStamp: TileIconRasterCache.contentStamp(
                         for: item, resolvedPath: AppInstallChecker.resolve(item).resolvedPath)
                 ) {
-                    Image(decorative: cg, scale: displayScale)
+                    // Drained as a bitmap, like the bake — not a `.saturation` filter, which a
+                    // renderer can skip (the CI runner's did).
+                    Image(decorative: desaturate ? (IconGenerator.desaturated(cg) ?? cg) : cg, scale: displayScale)
                         .resizable()
-                        .saturation(desaturate ? 0 : 1)
                         .frame(width: box.width, height: box.height)
                         .shadow(color: shadow.map { Color.black.opacity($0.blackAlpha) } ?? .clear,
                                 radius: shadow?.blur ?? 0, y: shadow?.offset ?? 0)

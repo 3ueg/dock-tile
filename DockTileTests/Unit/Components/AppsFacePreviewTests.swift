@@ -92,8 +92,10 @@ struct AppsFacePreviewTests {
         for style in [IconStyle.clear, .tinted] {
             let rep = try render(items: [Self.finder], style: style)
             #expect(try srgb(rep, 128, 4).redComponent > 0.97, "\(style)")
-            // The saturation filter is a layer filter that cacheDisplay does not apply, so the
-            // colour scan goes through ImageRenderer (equal-channel greys survive its PQ output).
+            // The mini's BITMAP is drained, so every renderer shows grey — both the window path
+            // (cacheDisplay) and ImageRenderer. A SwiftUI `.saturation` filter was skipped by the
+            // CI runner's renderer and by cacheDisplay; this pins that it is not relied on.
+            #expect(try maxSaturation(rep, in: Self.cell(0, count: 1)) < 0.05, "\(style) cacheDisplay")
             let drained = try renderWithImageRenderer(items: [Self.finder], style: style)
             #expect(try maxSaturation(drained, in: Self.cell(0, count: 1)) < 0.05, "\(style)")
         }

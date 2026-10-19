@@ -1383,7 +1383,18 @@ extension IconGenerator {
     private static func desaturated(_ image: NSImage, pixelSize: CGSize) -> NSImage {
         var proposed = CGRect(origin: .zero, size: pixelSize)
         guard let cg = image.cgImage(forProposedRect: &proposed, context: nil, hints: nil),
-              let filter = CIFilter(name: "CIColorControls") else { return image }
+              let gray = desaturated(cg) else { return image }
+        let result = NSImage(size: NSSize(width: gray.width, height: gray.height))
+        result.addRepresentation(NSBitmapImageRep(cgImage: gray))
+        return result
+    }
+
+    /// The bitmap form, shared by the bake and the in-app preview so both drain a mini the same
+    /// way. The preview used SwiftUI's `.saturation(0)` filter, which the CI runner's renderer did
+    /// not apply (minis stayed coloured under Clear/Tinted, 2026-10-20); a drained bitmap does not
+    /// depend on the renderer. Nil if any step fails.
+    static func desaturated(_ cg: CGImage) -> CGImage? {
+        guard let filter = CIFilter(name: "CIColorControls") else { return nil }
         filter.setValue(CIImage(cgImage: cg), forKey: kCIInputImageKey)
         filter.setValue(0, forKey: kCIInputSaturationKey)
         guard let output = filter.outputImage,
@@ -1399,12 +1410,10 @@ extension IconGenerator {
                 bytesPerRow: 0,
                 bitsPerPixel: 0
               ),
-              let ctx = NSGraphicsContext(bitmapImageRep: rep) else { return image }
+              let ctx = NSGraphicsContext(bitmapImageRep: rep) else { return nil }
         let extent = CGRect(x: 0, y: 0, width: cg.width, height: cg.height)
         CIContext(cgContext: ctx.cgContext, options: nil).draw(output, in: extent, from: output.extent)
-        let result = NSImage(size: NSSize(width: cg.width, height: cg.height))
-        result.addRepresentation(rep)
-        return result
+        return rep.cgImage
     }
 }
 
