@@ -192,23 +192,43 @@ jobs:
             exit 1
           fi
 
-      # A hung test (2026-10-19: six hours, cancelled at the job limit, no test named — xcpretty hides
-      # Swift Testing's per-test lines) must fail fast and leave its raw log behind.
+      # A hung test run (2026-10-19: six hours, then 30 min, with NO test output — the test host app
+      # never started running tests) must fail fast and leave evidence: if xcodebuild is still running
+      # after 15 minutes (a healthy run takes a few), sample every Dock Tile process and xctest,
+      # keep the app's diagnostics log, then fail.
       - name: Run Unit Tests
         timeout-minutes: 30
         run: |
           set -o pipefail
-          xcodebuild test \
-            -project $PROJECT \
-            -scheme $SCHEME \
-            -configuration Debug \
-            -destination 'platform=macOS' \
-            -derivedDataPath ./build \
-            -enableCodeCoverage YES \
-            -only-testing:DockTileTests \
-            CODE_SIGNING_ALLOWED='NO' \
-            ENABLE_TESTABILITY=YES \
-            2>&1 | tee test.log | xcpretty --color || (cat test.log && exit 1)
+          ( xcodebuild test \
+              -project $PROJECT \
+              -scheme $SCHEME \
+              -configuration Debug \
+              -destination 'platform=macOS' \
+              -derivedDataPath ./build \
+              -enableCodeCoverage YES \
+              -only-testing:DockTileTests \
+              CODE_SIGNING_ALLOWED='NO' \
+              ENABLE_TESTABILITY=YES \
+              2>&1 | tee test.log | xcpretty --color ) &
+          TESTS=$!
+          for _ in $(seq 1 90); do
+            kill -0 "$TESTS" 2>/dev/null || break
+            sleep 10
+          done
+          if kill -0 "$TESTS" 2>/dev/null; then
+            echo "::error::Unit tests still running after 15 minutes — sampling the processes"
+            mkdir -p hang
+            ps -axo pid,etime,%cpu,stat,command | grep -E "Dock Tile|xctest|XCTest|DockTile" | grep -v grep | tee hang/processes.txt
+            for pid in $(pgrep -f "Dock Tile Dev|xctest"); do
+              sample "$pid" 5 -file "hang/sample-$pid.txt" || true
+            done
+            cp "$HOME/Library/Application Support/DockTile-Dev/diagnostics.log" hang/ 2>/dev/null || true
+            kill "$TESTS" 2>/dev/null || true
+            pkill -f "Dock Tile Dev" || true
+            exit 1
+          fi
+          wait "$TESTS" || (cat test.log && exit 1)
 
       - name: Upload Build Log
         if: failure() || cancelled()
@@ -218,6 +238,7 @@ jobs:
           path: |
             build.log
             test.log
+            hang/
 
       - name: Upload build artifact
         if: success()
