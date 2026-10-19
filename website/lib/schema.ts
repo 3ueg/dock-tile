@@ -32,6 +32,7 @@ export const softwareApplicationSchema = {
   url: siteConfig.siteUrl,
   applicationCategory: "UtilitiesApplication",
   operatingSystem: "macOS 15.0 or later",
+  processorRequirements: "Apple silicon (arm64)",
   softwareVersion: siteConfig.latestVersion,
   downloadUrl: siteConfig.downloadUrl,
   releaseNotes: `${siteConfig.siteUrl}/release-notes`,

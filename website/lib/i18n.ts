@@ -18,7 +18,7 @@ export function slugify(text: string): string {
 
 // v2 marketing copy — only spelling-sensitive strings vary by locale
 const marketingBase = {
-  heroEyebrow: "For macOS 15+",
+  heroEyebrow: "Apple silicon · macOS 15+",
   heroHeadlineA: "Group your apps.",
   heroHeadlineB: "Declutter your Dock.",
   heroSub:
@@ -50,6 +50,7 @@ const marketingBase = {
   ctaTitle: "Get organised today.",
   ctaButton: "Download Dock Tile",
   ctaMetaOpenSource: "Open source",
+  metaAppleSilicon: "Apple silicon",
   spadesLead: "Also available:",
   spadesButton: "Spades Audio — per-app volume control",
 } as const;
@@ -142,7 +143,7 @@ export const localisedContent = {
     description:
       "Create custom app icons for your apps and folders, with one-click access. A smarter take on iOS Home Screen folders.",
     downloadButton: "Download for macOS",
-    systemRequirements: "Requires macOS 15 or later",
+    systemRequirements: "Requires macOS 15 or later on a Mac with Apple silicon",
 
     // Features
     featuresTitle: "Made for your Dock",
@@ -169,7 +170,7 @@ export const localisedContent = {
     faq: [
       {
         question: "What macOS version do I need?",
-        answer: "Dock Tile runs on macOS 15 (Sequoia) and later. On macOS 26 (Tahoe) and later, tile icons are drawn by the system's Liquid Glass icon pipeline and follow its Icon and widget style automatically.",
+        answer: "Dock Tile runs on macOS 15 (Sequoia) and later, on any Mac with Apple silicon (M1 or newer). Intel Macs aren't supported. On macOS 26 (Tahoe) and later, tile icons are drawn by the system's Liquid Glass icon pipeline and follow its Icon and widget style automatically.",
       },
       {
         question: "Is it available on the App Store?",
@@ -247,7 +248,7 @@ export const localisedContent = {
     description:
       "Create custom app icons for your apps and folders, with one-click access. A smarter take on iOS Home Screen folders.",
     downloadButton: "Download for macOS",
-    systemRequirements: "Requires macOS 15 or later",
+    systemRequirements: "Requires macOS 15 or later on a Mac with Apple silicon",
 
     // Features
     featuresTitle: "Made for your Dock",
@@ -274,7 +275,7 @@ export const localisedContent = {
     faq: [
       {
         question: "What macOS version do I need?",
-        answer: "Dock Tile runs on macOS 15 (Sequoia) and later. On macOS 26 (Tahoe) and later, tile icons are drawn by the system's Liquid Glass icon pipeline and follow its Icon and widget style automatically.",
+        answer: "Dock Tile runs on macOS 15 (Sequoia) and later, on any Mac with Apple silicon (M1 or newer). Intel Macs aren't supported. On macOS 26 (Tahoe) and later, tile icons are drawn by the system's Liquid Glass icon pipeline and follow its Icon and widget style automatically.",
       },
       {
         question: "Is it available on the App Store?",
@@ -352,7 +353,7 @@ export const localisedContent = {
     description:
       "Create custom app icons for your apps and folders, with one-click access. A smarter take on iOS Home Screen folders.",
     downloadButton: "Download for macOS",
-    systemRequirements: "Requires macOS 15 or later",
+    systemRequirements: "Requires macOS 15 or later on a Mac with Apple silicon",
 
     // Features
     featuresTitle: "Made for your Dock",
@@ -379,7 +380,7 @@ export const localisedContent = {
     faq: [
       {
         question: "What macOS version do I need?",
-        answer: "Dock Tile runs on macOS 15 (Sequoia) and later. On macOS 26 (Tahoe) and later, tile icons are drawn by the system's Liquid Glass icon pipeline and follow its Icon and widget style automatically.",
+        answer: "Dock Tile runs on macOS 15 (Sequoia) and later, on any Mac with Apple silicon (M1 or newer). Intel Macs aren't supported. On macOS 26 (Tahoe) and later, tile icons are drawn by the system's Liquid Glass icon pipeline and follow its Icon and widget style automatically.",
       },
       {
         question: "Is it available on the App Store?",
