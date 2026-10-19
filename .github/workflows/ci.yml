@@ -192,7 +192,10 @@ jobs:
             exit 1
           fi
 
+      # A hung test (2026-10-19: six hours, cancelled at the job limit, no test named — xcpretty hides
+      # Swift Testing's per-test lines) must fail fast and leave its raw log behind.
       - name: Run Unit Tests
+        timeout-minutes: 30
         run: |
           set -o pipefail
           xcodebuild test \
@@ -208,7 +211,7 @@ jobs:
             2>&1 | tee test.log | xcpretty --color || (cat test.log && exit 1)
 
       - name: Upload Build Log
-        if: failure()
+        if: failure() || cancelled()
         uses: actions/upload-artifact@v5
         with:
           name: build-logs
@@ -286,6 +289,7 @@ jobs:
           ls Products/*.xctestrun
 
       - name: Run Unit Tests (without building)
+        timeout-minutes: 30
         run: |
           set -o pipefail
           xcodebuild test-without-building \
@@ -307,7 +311,7 @@ jobs:
           fi
 
       - name: Upload Test Log
-        if: failure()
+        if: failure() || cancelled()
         uses: actions/upload-artifact@v5
         with:
           name: test-logs-macos-15
