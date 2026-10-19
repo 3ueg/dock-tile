@@ -164,7 +164,7 @@ detail column, so navigation invariants matter.
 
 **v2 chrome**: the window has no title (`.toolbar(removing: .title)` on
 `DockTileConfigurationView`) — the 52pt title band IS the page header (`paneTitleBand`, see "Tile
-editor" below), and it carries the pane's **title text only, no pane icon**. `paneTitleBand(_:subtitle:)` takes an optional subtitle rendered in the same title `ToolbarItem` — used only by Customise Tile (tile name + "Customise Tile"). The sidebar keeps the
+editor" below), and it carries the pane's **title text only, no pane icon**. The sidebar keeps the
 **standard macOS header pair — the collapse toggle and `+`** (as in Notes/Reminders); v2 briefly
 removed the toggle via `.toolbar(removing: .sidebarToggle)` and that was **deliberately reverted**,
 so do not re-add it. The sidebar is three **static** sections — **Tiles · Settings (General,
@@ -216,6 +216,23 @@ Popover, Dock Lock) · Dock Tile (About)** — the old accordion `@AppStorage` e
   label typography too, so it would shrink those panes' title and description text. Verify a
   change by reading the AX frame (`size of every checkbox …`), not by eye.
 
+- **The window is resizable, 782…1200 pt wide** (it was fixed at 768): `AppDelegate.minWindowWidth` /
+  `maxWindowWidth` are the one definition (`DockTileApp`, `DockTileConfigurationView` and
+  `WindowAccessor` read them) and the pure `AppDelegate.clampedWindowWidth(_:)` clamps `windowWillResize`
+  and a restored saved frame. Guarded by `MainWindowWidthTests`.
+- **Customise Tile is the one pane WITHOUT a title band.** Its canvas runs under the 52 pt toolbar
+  strip (`.ignoresSafeArea(edges: .top)`); a floating **‹ Select Apps** glass pill returns to Tile
+  Detail. The pill sits just BELOW the strip, in the safe area: inside it the window-drag toolbar
+  region would swallow the clicks. The inspector `ScrollView` stays in the safe area with
+  `paneScrollEdgeEffect()`. There is no `paneTitleBand(_:subtitle:)` subtitle option any more and no
+  Back button. Layout: canvas `minWidth` 200 + a 260 pt inspector. 200, not the mock's 250, because the
+  sidebar may be dragged to its 280 pt max while the window is at its 782 pt min, which leaves the
+  canvas about 214 pt. Design handoff: `docs/design_handoff_customise_tile/README.md`.
+- **Two defaults for the tile face (critical)**: a NEW tile starts on App Preview
+  (`ConfigurationDefaults.iconFace = .apps`), while a stored config missing the `iconFace` key loads as
+  `.glyph` (decoder literal) so no existing tile changes look on upgrade. Smart Add-created tiles also
+  open on App Preview; the suggestion cards keep their category identity. See icon-system.md "Apps
+  tile face".
 - **`.tilesPlaceholder` (critical)**: the "No Tiles" row is a **selectable** placeholder that routes
   to the empty-state detail. Without it, once the user opened a Settings pane at zero tiles there was
   no selectable tile row to click back to, stranding them in Settings. First launch and

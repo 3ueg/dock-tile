@@ -264,7 +264,7 @@ struct DockTileConfigurationView: View {
 // MARK: - Window Accessor (AppKit Bridge)
 
 /// NSViewRepresentable that configures the window at the AppKit level
-/// This is the "secret sauce" that prevents horizontal resize cursor
+/// Configures the unified title bar and the width range (AppDelegate.minWindowWidth...maxWindowWidth)
 private struct WindowAccessor: NSViewRepresentable {
     let isCustomising: Bool
 

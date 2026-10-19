@@ -87,8 +87,9 @@ enum IconDocumentBuilder {
     ///
     /// The flat look is written explicitly (`specular` off, `translucency` off, `shadow` none,
     /// layer `glass` false): Apple's `actool` defaults are specular on, translucency 0.3 and shadow
-    /// 0.5, which wash out real app icons. The vendored compiler ignores these keys, so spelling
-    /// them out makes the document mean the same under both compilers. Proven shape:
+    /// 0.5, which wash out real app icons. The vendored compiler parses these keys but does not need
+    /// them (it has no such defaults); spelling them out makes the document mean the same under both
+    /// compilers. Proven shape:
     /// `docs/icon-spike-fixtures/appgrid-systemfill.icon`.
     nonisolated static func appsFaceIconJSON() -> [String: Any] {
         let layer = layerDict(

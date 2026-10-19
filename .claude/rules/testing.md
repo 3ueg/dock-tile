@@ -63,6 +63,13 @@ it, and unit-test the seam so a broken rule fails loudly. Existing seams: `resol
 `ConfigurationDefaults.iconValue` (new tiles default to the `"plus"` placeholder glyph, not a category icon),
 `DockTileConfiguration.duplicate(named:)` (a duplicate keeps every content field; only id/name/bundle id/Dock bookkeeping reset — compared through the encoded JSON, issue #21; guarded by `DockTileDuplicateTests`),
 `PopoverItemMenu.targetPath` / `.entries` / `.dismissesPopover` / `.runningMatchIndex` / `.claimsEvent` (popover item context menu — missing → no target → no menu, apps target the copy `AppLauncher` launches (lastKnownPath first), apps never get a bundle hand-off item (App Management alert), folders never get running rows, hidden app → no Hide, running match by bundle path not id, overlay claims only right-/Control-clicks so left-click launch and scrolling stay SwiftUI's; guarded by `PopoverItemMenuTests`),
+`AppsFaceGrid.columns` / `.cells` / `.drawBox` / `.miniShadow` / `.fillGrays` / `.desaturatesMinis` / `.select` (Apps face: one centred 0.60 icon for 1 → 2×2 for 2–4 → 3×3 from 5, folders fitted to the cell, missing skipped, nine max; guarded by `AppsFaceGridTests` + `AppsFaceRenderTests` + `AppsFacePreviewTests`),
+`IconDocumentBuilder.appsFaceIconJSON` (system fills + explicit flat keys; `IconDocumentBuilderTests`, compiled end-to-end in `IconCompilerTests`),
+`AppInstallChecker.isInstalled` (the one installed-predicate shared by the Apps-face bake, the preview and the Customise Apps card),
+`CustomiseTileView.TileStyle(face:iconType:)` / `.applyStyle` / `.inspectorSections` / `.appsSummary(items:isInstalled:)` / `.heroStyles(…iconFace:)` (the Style picker and the Apps card; `CustomiseStyleTests` + `CustomiseHeroStylesTests`, English host),
+`DockTileDetailView.dockActionParameters` (`tile_added_to_dock` / `tile_updated` parameters incl. `face`; `DockActionResolutionTests`),
+`AppDelegate.clampedWindowWidth` (window 782…1200 pt; `MainWindowWidthTests`),
+`IconFace` tolerant decode + the two defaults (missing key → glyph, new tile → apps; unknown value → glyph; `IconFaceTests`),
 `MacOSFloorGuardTests` (the deployment target ↔ appcast floor ↔ macOS 15 CI leg ↔ website requirement claims — read from the files, so the macOS 15 leg cannot be dropped while 15 is supported, and must be once it is not).
 
 Assertion rules: prefer `#require` over `if`-guarded `#expect`; assert exact values/magnitudes,

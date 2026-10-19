@@ -68,7 +68,14 @@ default-only key events, site in a separate property). Compare against it after 
   2.1.0's `action` / `is_folder` (2026-10-13). The `background` parameter (`colour`/`mono`) on
   `tile_added_to_dock` / `tile_updated` (added 2026-10-14, Mono tile background) was registered the
   same way on 2026-10-14 ("Tile background", EVENT scope) — register any new param before the
-  release that ships it, since registration is forward-only. 2026-10-18: `ui_language` (2.3.0) and
+  release that ships it, since registration is forward-only.
+  **`face` (`glyph` / `apps`) on `tile_added_to_dock` / `tile_updated` is NOT registered yet.** Register
+  it as "Tile face" (EVENT scope) BEFORE the release that ships the Apps face; events sent earlier are
+  invisible in GA4:
+  `TOKEN=$(gcloud auth print-access-token --account=ga4-fetch@dock-tile.iam.gserviceaccount.com --scopes=https://www.googleapis.com/auth/analytics.edit)`
+  then `curl -s -X POST -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" https://analyticsadmin.googleapis.com/v1beta/properties/542196919/customDimensions -d '{"parameterName":"face","displayName":"Tile face","description":"glyph or apps — which face the tile Dock icon shows","scope":"EVENT"}'`
+  (expect a body echoing `"parameterName": "face"`). The dictionary comes from the pure
+  `DockTileDetailView.dockActionParameters(for:)` seam. 2026-10-18: `ui_language` (2.3.0) and
   `result` / `choice` (the update events, 2.3.1) registered the same way.
 - API reads need the `ga4-fetch@dock-tile.iam.gserviceaccount.com` service account
   (`gcloud auth print-access-token --account=… --scopes=…analytics.readonly`); user-credential ADC

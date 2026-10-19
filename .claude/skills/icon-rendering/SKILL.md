@@ -50,6 +50,8 @@ Tahoe it is seeded once at launch and never refreshed, so it is readable, not li
 migration/self-heal probes (`helperIconsComplete` looks for `Assets.car` + the fallback `.icns`
 instead of the 4 variants).
 
+An Apps-face tile (`iconFace == .apps`) writes `IconDocumentBuilder.appsFaceIconJSON` (system fills, explicit flat keys) around ONE composite layer from `IconGenerator.generateAppsLayerPNG`; the legacy path bakes it via `generateAppsIcns`. Details: icon-system.md "Apps tile face".
+
 ## The seams (single sources of truth — never inline-copy their values)
 
 | Seam | Owns | Guarded by |
@@ -60,6 +62,7 @@ instead of the 4 variants).
 | `IconStyle.resolve` | style string → style; absent → Default; unrecognised string OR non-string type → nil = don't act, NEVER Default | `IconStyleResolveTests` |
 | `IconGenerator.emojiInkMetrics` + `emojiInkFit` | emoji sized by measured artwork, never font em | `EmojiInkFitRenderTests` |
 | `TilePalette.resolve` + `ToneMap.fit` | every tile colour role (fill top/bottom, glyph) per background (Colour/Mono) x style x icon type, each drawn pair >= 3:1; `TintColor`/`IconStyleManager` are adapters; replaced `liftedForDarkGlyph`/`darkenedForDarkMode` | `TilePaletteTests` |
+| `AppsFaceGrid` | Apps face geometry (block 0.70, gap 0.047, 2/3 columns, ÷0.805 app box, folders fitted, one item = one 0.60 icon), contact shadow, system gray pairs, installed-only item selection | `AppsFaceGridTests`, `AppsFaceRenderTests` |
 | `iconMatchesStyle` | launch heal decision | `HelperIconMatchTests` |
 | `replaceIconAtomically` | the only way to replace a live `AppIcon.icns` | `IconSwapAtomicityTests` |
 

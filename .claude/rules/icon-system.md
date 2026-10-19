@@ -117,6 +117,49 @@ Every role (fill top/bottom, glyph) per background x style x icon type is derive
   contrast cannot be computed against them.
 - Existing Colour tiles change look on update (saturated gradient start; sub-3:1 colours deepen).
 
+## Apps tile face (`iconFace`, v10)
+
+A tile can show its OWN apps as a folder-style mini grid on system glass instead of a glyph. Choosing
+it is the Style picker in Customise (App Preview / Symbol / Emoji).
+
+- **Model**: `DockTileConfiguration.iconFace` (`IconFace`: `.glyph` / `.apps`), a separate field, not an
+  `IconType` case, so the glyph fields (`iconType`, `iconValue`, scale, weight, tint) are retained and
+  switching back loses nothing. **Two defaults on purpose**: a stored config missing the key loads as
+  `.glyph` (existing tiles must not change on upgrade); `ConfigurationDefaults.iconFace` is `.apps` for
+  NEW tiles. Unknown values decode to `.glyph`. `iconSignature` is unchanged for glyph tiles; an Apps
+  tile appends the face plus the first nine item identities (`AppsFaceGrid.maxItems`). Guarded by
+  `IconFaceTests`.
+- **Seam `AppsFaceGrid`** ([IconDepthMetrics.swift](../../DockTile/Utilities/IconDepthMetrics.swift)):
+  one item = one centred icon at 0.60; 2-4 items = 2x2; 5+ = 3x3 (nine max). Block 0.70, gap 0.047 of
+  the shape. App icons carry the icon-grid margin, so their draw box is the cell divided by 0.805
+  (`appIconContentRatio`); folders are fitted to the cell. Contact shadow 0.35 black, offset 6 and blur
+  12 at 1024, gated by `minDetailSize`. Material = system grays, top then bottom: light 1.0 -> 0.925,
+  dark 0.192 -> 0.078. Clear and Tinted desaturate the minis. `TilePalette` is NOT consulted (the face
+  ignores the tile colour).
+- **Four renderers, one seam**: the compiled car (`IconDocumentBuilder.appsFaceIconJSON`, ONE composite
+  layer from `IconGenerator.generateAppsLayerPNG` on the `system-light` / `system-dark` fills; the
+  dark appearance is decided as `system-dark`, tinted reuses `system-light`); the fallback `.icns`
+  (`generateAppsFallbackIcns`) and the macOS 15 four-variant bake (`generateAppsIcns`), both on the
+  inset squircle with the system grays; and the live preview (`DockTileIconPreview.appsFaceBody`, full
+  frame, minis from `TileIconRasterCache`). Proven document shape (fixture):
+  `docs/icon-spike-fixtures/appgrid-systemfill.icon`.
+- **Explicit flat keys (critical)**: the `.icon` writes `specular` off, `translucency` off, `shadow`
+  none and layer `glass` false. Apple's `actool` defaults them to specular on, translucency 0.3 and
+  shadow 0.5, which wash out real app icons. The vendored compiler parses the keys but does not need
+  them; spelling them out makes the document mean the same under both.
+- **Selection is installed-only, one predicate**: `AppInstallChecker.isInstalled` feeds the bake, the
+  preview AND the Customise Apps card (Shown "N of N"), so the card, the hero and the Dock icon cannot
+  disagree. Items in tile order via `AppsFaceGrid.select`; a missing item is skipped and the next
+  installed one takes its cell; zero installed -> the tile bakes the glyph face (and the card reads
+  "0 of 0" / "-"). The bake logs skipped items on the non-verbose `tile` category.
+- **Mini icons**: `AppIconLoader.iconFromAppURL` resolves symlinks first (a symlinked app, e.g. Safari
+  on macOS 27, otherwise draws the alias badge). The desaturated minis are rasterised at the draw-box
+  PIXEL size (rendering at the image's point size picked a low-res rep and blurred them).
+- **Staleness**: the face re-bakes only on Update and on the version-bump migration. An app's own icon
+  redesign, or a later install/uninstall, stays stale in the Dock until then.
+- **Tinted / Clear on macOS 26-27: unverified.** How the system renders the minis under each Icon &
+  widget style has not been observed. Check by eye in Finder/Dock under each style before claiming it.
+
 ## Icon Generation — Legacy Path (`IconGenerator.swift`, macOS 15 fallback)
 
 Frozen: this describes the pre-Tahoe 4-variant bake, unchanged by the declarative rewrite except
