@@ -82,23 +82,52 @@ enum IconDocumentBuilder {
     nonisolated static let appsFaceLayerName = "grid"
     nonisolated static let appsFaceImageName = "grid.png"
 
+    /// The grid image for each appearance slot. Clear Light / Clear Dark / Tinted Light / Tinted
+    /// Dark all draw from the TINTED slot (measured with Apple's `ictool`), which holds the Clear
+    /// Dark renders.
+    nonisolated static func appsFaceImageName(for style: AppIconRenderStyle) -> String {
+        switch style {
+        case .standard: return appsFaceImageName
+        case .dark: return "grid-dark.png"
+        case .clearDark: return "grid-tinted.png"
+        }
+    }
+
     /// The `icon.json` for an Apps-face tile: the system's glass fill (light / dark; tinted reuses
-    /// the light fill) behind ONE composite layer that is visible in every appearance.
+    /// the light fill) behind ONE grid layer per appearance slot — Default renders for light, Dark
+    /// renders for dark, Clear Dark renders for tinted — so each mini looks like that app's own
+    /// icon in each style, not the system's clear filter run over a colour mini.
     ///
     /// The flat look is written explicitly (`specular` off, `translucency` off, `shadow` none,
     /// layer `glass` false): Apple's `actool` defaults are specular on, translucency 0.3 and shadow
     /// 0.5, which wash out real app icons. The vendored compiler parses these keys but does not need
     /// them (it has no such defaults); spelling them out makes the document mean the same under both
-    /// compilers. Proven shape:
+    /// compilers. Proven shape (single-grid version):
     /// `docs/icon-spike-fixtures/appgrid-systemfill.icon`.
+    ///
+    /// The three-way hiding is built here, not through `LayerSpec.Exclusive`: that two-case model
+    /// shows a glyph's light layer in the tinted slot ON PURPOSE, and glyph documents must not change.
     nonisolated static func appsFaceIconJSON() -> [String: Any] {
-        let layer = layerDict(
-            LayerSpec(name: appsFaceLayerName, imageName: appsFaceImageName, exclusiveTo: nil), glass: false)
+        func gridLayer(_ style: AppIconRenderStyle, name: String, hidden: [[String: Any]]) -> [String: Any] {
+            var layer = layerDict(
+                LayerSpec(name: name, imageName: appsFaceImageName(for: style), exclusiveTo: nil), glass: false)
+            layer["hidden-specializations"] = hidden
+            return layer
+        }
+        let dark = IconAppearance.dark.rawValue, tinted = IconAppearance.tinted.rawValue
+        let layers = [
+            gridLayer(.standard, name: appsFaceLayerName,
+                      hidden: [["value": false], ["appearance": dark, "value": true], ["appearance": tinted, "value": true]]),
+            gridLayer(.dark, name: "grid-dark",
+                      hidden: [["value": true], ["appearance": dark, "value": false]]),
+            gridLayer(.clearDark, name: "grid-tinted",
+                      hidden: [["value": true], ["appearance": tinted, "value": false]])
+        ]
         let group: [String: Any] = [
             "specular": false,
             "translucency": ["enabled": false, "value": 0],
             "shadow": ["kind": "none", "opacity": 0],
-            "layers": [layer]
+            "layers": layers
         ]
         return [
             "fill": systemLightFill,

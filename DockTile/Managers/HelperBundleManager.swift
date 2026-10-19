@@ -870,28 +870,42 @@ final class HelperBundleManager {
         // Apps face: bake the tile's installed apps instead of its symbol/emoji. An empty set
         // falls through to the glyph path below, which is otherwise untouched.
         if config.iconFace == .apps {
-            let face = appsFaceMinis(for: config)
-            if face.minis.isEmpty {
+            let face = appsFaceEntries(for: config)
+            if face.entries.isEmpty {
                 DiagnosticsLog.shared.log("tile", "Apps face for \(config.diagnosticName): no installed items — baking the glyph face")
             } else {
                 if face.skipped > 0 {
                     DiagnosticsLog.shared.log("tile", "Apps face for \(config.diagnosticName): skipped \(face.skipped) missing item(s)")
                 }
                 if IconPipeline.isDeclarative {
+                    // One grid per appearance slot, each app rendered in that slot's style — NOT the
+                    // style the system happens to be in during this Update. The fallback `.icns` (the
+                    // light composition) takes the Default renders for the same reason.
+                    var layerPNGs: [String: Data] = [:]
+                    var standardMinis: [IconGenerator.AppsFaceMini] = []
+                    var fallbacks = 0
+                    for style in AppIconRenderStyle.allCases {
+                        let styled = Self.styledAppsFaceMinis(face.entries, style: style)
+                        fallbacks += styled.fallbacks
+                        if style == .standard { standardMinis = styled.minis }
+                        layerPNGs[IconDocumentBuilder.appsFaceImageName(for: style)] =
+                            try IconGenerator.generateAppsLayerPNG(minis: styled.minis)
+                    }
+                    if fallbacks > 0 {
+                        DiagnosticsLog.shared.log("tile", "Apps face for \(config.diagnosticName): \(fallbacks) styled render(s) unavailable — used the current-style icon")
+                    }
                     try await installCompiledIcon(
-                        json: IconDocumentBuilder.appsFaceIconJSON(),
-                        layerPNGs: [IconDocumentBuilder.appsFaceImageName: try IconGenerator.generateAppsLayerPNG(minis: face.minis)],
-                        resourcesPath: resourcesPath
-                    )
+                        json: IconDocumentBuilder.appsFaceIconJSON(), layerPNGs: layerPNGs, resourcesPath: resourcesPath)
                     try IconGenerator.generateAppsFallbackIcns(
-                        minis: face.minis,
+                        minis: standardMinis,
                         outputURL: resourcesPath.appendingPathComponent("AppIcon.icns")
                     )
                     print("   ✓ Compiled Apps-face icon (Assets.car + fallback AppIcon.icns)")
                 } else {
+                    let minis = face.entries.map { IconGenerator.AppsFaceMini(image: $0.image, isFolder: $0.item.isFolder) }
                     for style in IconStyle.allCases {
                         try IconGenerator.generateAppsIcns(
-                            minis: face.minis,
+                            minis: minis,
                             outputURL: iconPath(for: style, in: resourcesPath),
                             iconStyle: style
                         )
@@ -939,17 +953,48 @@ final class HelperBundleManager {
         print("   ✓ Compiled declarative icon (Assets.car + fallback AppIcon.icns)")
     }
 
+    /// One item an Apps-face tile draws, with its icon from the public loader (the current system
+    /// style) — the fallback whenever a styled render is unavailable.
+    struct AppsFaceEntry {
+        let item: AppItem
+        let image: NSImage
+    }
+
     /// The installed items an Apps-face tile draws, resolved to images. An item whose icon
     /// cannot be loaded counts as skipped, like a missing one.
-    func appsFaceMinis(for config: DockTileConfiguration) -> (minis: [IconGenerator.AppsFaceMini], skipped: Int) {
+    func appsFaceEntries(for config: DockTileConfiguration) -> (entries: [AppsFaceEntry], skipped: Int) {
         let picked = AppsFaceGrid.select(items: config.appItems) { AppInstallChecker.isInstalled($0) }
         var skipped = picked.skipped
-        var minis: [IconGenerator.AppsFaceMini] = []
+        var entries: [AppsFaceEntry] = []
         for item in picked.selected {
             guard let image = AppIconLoader.icon(for: item) else { skipped += 1; continue }
-            minis.append(IconGenerator.AppsFaceMini(image: image, isFolder: item.isFolder))
+            entries.append(AppsFaceEntry(item: item, image: image))
         }
-        return (minis, skipped)
+        return (entries, skipped)
+    }
+
+    /// The minis for one `.icon` appearance slot: each app re-rendered in `style` through
+    /// `AppIconStyleRenderer`, at its draw-box size on the 1024 canvas. Folders (IconServices draws
+    /// them the same in every style) keep the public image; so does an app the private renderer
+    /// cannot draw, counted in `fallbacks`.
+    static func styledAppsFaceMinis(_ entries: [AppsFaceEntry], style: AppIconRenderStyle)
+        -> (minis: [IconGenerator.AppsFaceMini], fallbacks: Int) {
+        guard let cell = AppsFaceGrid.cells(count: entries.count).first else { return ([], 0) }
+        let pixelSize = Int((AppsFaceGrid.drawBox(for: cell, isFolder: false).width * 1024).rounded(.up))
+        var fallbacks = 0
+        let minis = entries.map { entry -> IconGenerator.AppsFaceMini in
+            guard !entry.item.isFolder else { return .init(image: entry.image, isFolder: true) }
+            guard let path = AppInstallChecker.resolve(entry.item).resolvedPath,
+                  let rendered = AppIconStyleRenderer.render(
+                    appAt: URL(fileURLWithPath: path).resolvingSymlinksInPath(), pixelSize: pixelSize, style: style)
+            else {
+                fallbacks += 1
+                return .init(image: entry.image, isFolder: false)
+            }
+            return .init(image: NSImage(cgImage: rendered, size: NSSize(width: pixelSize, height: pixelSize)),
+                         isFolder: false)
+        }
+        return (minis, fallbacks)
     }
 
     struct DeclarativeFills {

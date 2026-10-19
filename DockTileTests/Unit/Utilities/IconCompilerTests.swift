@@ -275,21 +275,46 @@ struct IconCompilerTests {
     }
 
     @MainActor
-    @Test("End-to-end: the Apps-face document compiles to a valid layered car",
+    @Test("End-to-end: the Apps-face document compiles, and each appearance stack shows only its own grid",
           .enabled(if: FileManager.default.fileExists(atPath: IconCompilerTests.builtCompilerPath)))
     func appsFaceDocumentCompilesToValidCar() throws {
         let scratch = try makeScratchDir()
         defer { try? FileManager.default.removeItem(at: scratch) }
-        let mini = AppsFaceRenderTests.mini(.systemBlue)
-        let png = try IconGenerator.generateAppsLayerPNG(
-            minis: (0..<5).map { _ in .init(image: mini, isFolder: false) })
+        var pngs: [String: Data] = [:]
+        for (style, colour) in [(AppIconRenderStyle.standard, NSColor.systemBlue), (.dark, .systemGreen), (.clearDark, .systemRed)] {
+            let mini = AppsFaceRenderTests.mini(colour)
+            pngs[IconDocumentBuilder.appsFaceImageName(for: style)] = try IconGenerator.generateAppsLayerPNG(
+                minis: (0..<5).map { _ in .init(image: mini, isFolder: false) })
+        }
         let document = try IconDocumentBuilder.writeDocument(
-            json: IconDocumentBuilder.appsFaceIconJSON(),
-            layerPNGs: [IconDocumentBuilder.appsFaceImageName: png], name: "AppIcon", parent: scratch)
+            json: IconDocumentBuilder.appsFaceIconJSON(), layerPNGs: pngs, name: "AppIcon", parent: scratch)
         let car = try IconCompiler.compile(
             document: document, outputDir: scratch.appendingPathComponent("out"),
             compilerURL: URL(fileURLWithPath: Self.builtCompilerPath))
         #expect(FileManager.default.fileExists(atPath: car.path))
+
+        // Which grid each appearance stack shows: the layer at opacity 1 in that stack's IconGroup.
+        let info = Process()
+        info.executableURL = URL(fileURLWithPath: "/usr/bin/assetutil")
+        info.arguments = ["--info", car.path]
+        let pipe = Pipe()
+        info.standardOutput = pipe
+        try info.run()
+        let data = pipe.fileHandleForReading.readDataToEndOfFile()
+        info.waitUntilExit()
+        let text = try #require(String(data: data, encoding: .utf8))
+        let jsonStart = try #require(text.firstIndex(of: "["))
+        let entries = try #require(try JSONSerialization.jsonObject(with: Data(text[jsonStart...].utf8)) as? [[String: Any]])
+        var shown: [String: [String]] = [:]
+        for entry in entries where entry["AssetType"] as? String == "IconGroup" {
+            let appearance = try #require(entry["Appearance"] as? String)
+            let layers = try #require(entry["Layers"] as? [[String: Any]])
+            shown[appearance] = layers.filter { ($0["LayerOpacity"] as? NSNumber)?.doubleValue == 1 }
+                .compactMap { ($0["Name"] as? String)?.components(separatedBy: "/").last }
+        }
+        #expect(shown["NSAppearanceNameAqua"] == ["grid"])
+        #expect(shown["NSAppearanceNameDarkAqua"] == ["grid-dark"])
+        #expect(shown["ISAppearanceTintable"] == ["grid-tinted"])
     }
 
     /// The fixture's layer is SYNTHETIC (nine flat squares from `make-appgrid-layer.swift`); its

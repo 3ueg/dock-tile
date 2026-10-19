@@ -91,20 +91,23 @@ struct TileFaceTests {
 
     // MARK: - showsSystemIcon
 
-    @Test("Tinted + helper built from this look → the system's own icon")
-    func tintedMatchShowsSystem() {
+    @Test("Tinted or Clear + helper built from this look → the system's own icon")
+    func tintedOrClearMatchShowsSystem() {
         #expect(TileFace.showsSystemIcon(style: .tinted, helperSignature: "s", tileSignature: "s"))
+        #expect(TileFace.showsSystemIcon(style: .clear, helperSignature: "s", tileSignature: "s"))
     }
 
-    @Test("Tinted but the helper is stale, unstamped or absent → our own drawing")
-    func tintedMismatchDraws() {
-        #expect(!TileFace.showsSystemIcon(style: .tinted, helperSignature: "old", tileSignature: "new"))
-        #expect(!TileFace.showsSystemIcon(style: .tinted, helperSignature: nil, tileSignature: "new"))
+    @Test("Tinted or Clear but the helper is stale, unstamped or absent → our own drawing")
+    func tintedOrClearMismatchDraws() {
+        for style in [IconStyle.tinted, .clear] {
+            #expect(!TileFace.showsSystemIcon(style: style, helperSignature: "old", tileSignature: "new"))
+            #expect(!TileFace.showsSystemIcon(style: style, helperSignature: nil, tileSignature: "new"))
+        }
     }
 
-    @Test("Every other style keeps our own drawing, even with a current helper")
+    @Test("Default and Dark keep our own drawing, even with a current helper")
     func otherStylesDraw() {
-        for style in [IconStyle.defaultStyle, .dark, .clear] {
+        for style in [IconStyle.defaultStyle, .dark] {
             #expect(!TileFace.showsSystemIcon(style: style, helperSignature: "s", tileSignature: "s"))
         }
     }

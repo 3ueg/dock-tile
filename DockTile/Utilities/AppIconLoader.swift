@@ -384,3 +384,101 @@ enum AppInstallChecker {
         ]
     }
 }
+
+// MARK: - App Icon Style Renderer
+
+/// The icon styles an App Grid bake renders each app in — one per `.icon` appearance slot.
+/// Clear Light / Clear Dark / Tinted Light / Tinted Dark all draw from the tinted slot (measured
+/// with Apple's `ictool`), and of the candidates a Clear DARK render there comes closest to the
+/// apps' own icons across those four styles.
+enum AppIconRenderStyle: CaseIterable {
+    case standard, dark, clearDark
+}
+
+/// Renders an app's icon in a NAMED icon style, whatever style the system is in right now.
+///
+/// WHY PRIVATE API: `NSWorkspace.icon(forFile:)` only ever returns the CURRENT system style (under
+/// Clear Dark, drawing it as `.aqua` and as `.darkAqua` both give Clear Dark), so a tile baked while
+/// the user is in one style froze every mini in that style, and the system's clear filter over a
+/// colour mini turned e.g. VS Code's white plate into a bright square. IconServices'
+/// `ISImageDescriptor` takes the style explicitly. Everything is resolved at runtime and guarded:
+/// any missing class or selector, or a nil image, returns nil and the caller falls back to the
+/// public loader — a future macOS can make this render nothing, never crash.
+@MainActor
+enum AppIconStyleRenderer {
+    /// IconServices' `appearance` (0 light, 1 dark) and `appearanceVariant` (0 normal, 2 tinted,
+    /// 3 clear) for each style. Measured on macOS 27; tinted is unused (it needs the system's tint
+    /// colour, which nothing exposes).
+    nonisolated static func descriptorValues(for style: AppIconRenderStyle) -> (appearance: Int, appearanceVariant: Int) {
+        switch style {
+        case .standard: return (0, 0)
+        case .dark: return (1, 0)
+        case .clearDark: return (1, 3)
+        }
+    }
+
+    // Ownership, because Swift cannot see ObjC's method families through these casts: `alloc`
+    // returns +1 and `init…` CONSUMES its receiver and returns +1 (so both are taken retained,
+    // the receiver passed unretained); `CGImageForImageDescriptor:` is not a create/copy method,
+    // so its image is +0.
+    private typealias InitWithURLFn = @convention(c) (AnyObject, Selector, AnyObject) -> Unmanaged<AnyObject>?
+    private typealias InitWithSizeFn = @convention(c) (AnyObject, Selector, CGSize, CGFloat) -> Unmanaged<AnyObject>?
+    private typealias SetIntFn = @convention(c) (AnyObject, Selector, Int) -> Void
+    private typealias PrepareFn = @convention(c) (AnyObject, Selector, AnyObject) -> Void
+    private typealias ImageFn = @convention(c) (AnyObject, Selector, AnyObject) -> Unmanaged<CGImage>?
+
+    private static let frameworkLoaded: Bool =
+        dlopen("/System/Library/PrivateFrameworks/IconServices.framework/IconServices", RTLD_NOW) != nil
+
+    /// The app bundle at `url` in `style`: a square image of at least `pixelSize` (IconServices may
+    /// return a larger backing, e.g. 2×), carrying the icon-grid margin like the public render.
+    /// Nil when the URL is not an app bundle or any part of the private API is unavailable.
+    static func render(appAt url: URL, pixelSize: Int, style: AppIconRenderStyle) -> CGImage? {
+        guard frameworkLoaded, pixelSize > 0,
+              url.pathExtension == "app", Bundle(url: url) != nil,
+              let icon = makeBundleIcon(url),
+              let descriptor = makeDescriptor(pixelSize: pixelSize, style: style)
+        else { return nil }
+
+        let prepare = NSSelectorFromString("prepareImageForDescriptor:")
+        let imageSel = NSSelectorFromString("CGImageForImageDescriptor:")
+        guard icon.responds(to: prepare), icon.responds(to: imageSel) else { return nil }
+        // Without the prepare, a style IconServices has not rendered yet comes back as a dashed
+        // placeholder rather than nil.
+        unsafeBitCast(icon.method(for: prepare), to: PrepareFn.self)(icon, prepare, descriptor)
+        let imageFn = unsafeBitCast(icon.method(for: imageSel), to: ImageFn.self)
+        return imageFn(icon, imageSel, descriptor)?.takeUnretainedValue()
+    }
+
+    private static func makeBundleIcon(_ url: URL) -> NSObject? {
+        let initSel = NSSelectorFromString("initWithBundleURL:")
+        guard let raw = allocate("ISBundleIcon"), raw.responds(to: initSel) else { return nil }
+        let initFn = unsafeBitCast(raw.method(for: initSel), to: InitWithURLFn.self)
+        return initFn(raw, initSel, url as NSURL)?.takeRetainedValue() as? NSObject
+    }
+
+    /// `+alloc` for a class looked up by name. The +1 it returns is handed to `init…`, which
+    /// consumes it — so the caller must call an `init…` on the result exactly once.
+    private static func allocate(_ className: String) -> NSObject? {
+        guard let cls = NSClassFromString(className) as? NSObject.Type,
+              cls.responds(to: NSSelectorFromString("alloc"))
+        else { return nil }
+        return cls.perform(NSSelectorFromString("alloc"))?.takeUnretainedValue() as? NSObject
+    }
+
+    private static func makeDescriptor(pixelSize: Int, style: AppIconRenderStyle) -> NSObject? {
+        let initSel = NSSelectorFromString("initWithSize:scale:")
+        let setAppearance = NSSelectorFromString("setAppearance:")
+        let setVariant = NSSelectorFromString("setAppearanceVariant:")
+        guard let raw = allocate("ISImageDescriptor"), raw.responds(to: initSel) else { return nil }
+        let initFn = unsafeBitCast(raw.method(for: initSel), to: InitWithSizeFn.self)
+        guard let descriptor = initFn(raw, initSel, CGSize(width: pixelSize, height: pixelSize), 1)?
+                .takeRetainedValue() as? NSObject,
+              descriptor.responds(to: setAppearance), descriptor.responds(to: setVariant)
+        else { return nil }
+        let values = descriptorValues(for: style)
+        unsafeBitCast(descriptor.method(for: setAppearance), to: SetIntFn.self)(descriptor, setAppearance, values.appearance)
+        unsafeBitCast(descriptor.method(for: setVariant), to: SetIntFn.self)(descriptor, setVariant, values.appearanceVariant)
+        return descriptor
+    }
+}

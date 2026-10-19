@@ -435,9 +435,12 @@ extension DockTileIconPreview {
 
 /// A tile as the app shows the tile itself. Under the Tinted icon style macOS recolours every
 /// icon with a colour no public API exposes (it is not `controlAccentColor`), so our own drawing
-/// can only show a grey stand-in (issue #22). When the tile's helper on disk was built from
-/// exactly this look, show the icon macOS renders for that helper instead — the Dock's own
-/// render. Otherwise (other styles, edits not yet applied with Update, never added) draw it.
+/// can only show a grey stand-in (issue #22). Clear is the same case: macOS draws the tile as
+/// light or dark glass with each layer remapped, which our grey stand-in does not match (an App
+/// Grid tile showed a white plate in the app beside dark glass in the Dock). When the tile's
+/// helper on disk was built from exactly this look, show the icon macOS renders for that helper
+/// instead — the Dock's own render. Otherwise (Default/Dark, edits not yet applied with Update,
+/// never added) draw it.
 struct TileFace: View {
     let config: DockTileConfiguration
     let size: CGFloat
@@ -446,7 +449,7 @@ struct TileFace: View {
     @Environment(\.colorScheme) private var colorScheme
 
     nonisolated static func showsSystemIcon(style: IconStyle, helperSignature: String?, tileSignature: String) -> Bool {
-        style == .tinted && helperSignature == tileSignature
+        (style == .tinted || style == .clear) && helperSignature == tileSignature
     }
 
     var body: some View {
@@ -465,7 +468,7 @@ struct TileFace: View {
 
     private var systemIcon: NSImage? {
         let style = IconStyle.forDisplay(raw: iconStyleManager.rawStyle, colorScheme: colorScheme, fallback: .defaultStyle)
-        guard style == .tinted,   // the helper lookup scans a folder — only pay for it here
+        guard style == .tinted || style == .clear,   // the helper lookup scans a folder — only pay for it here
               let built = HelperBundleManager.shared.builtIconSignature(for: config),
               Self.showsSystemIcon(style: style, helperSignature: built.signature, tileSignature: config.iconSignature)
         else { return nil }

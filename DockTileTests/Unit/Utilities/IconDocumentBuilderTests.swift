@@ -105,7 +105,22 @@ struct IconDocumentBuilderTests {
         #expect(try Data(contentsOf: url.appendingPathComponent("Assets/glyph-light.png")) == Data([1, 2, 3]))
     }
 
-    @Test("Apps face: system fills, one always-visible layer, and the flat look written explicitly")
+    @Test("A glyph document never gains a tinted hidden-specialization (the Apps-only change stays Apps-only)")
+    func glyphDocumentHasNoTintedHiding() throws {
+        let json = makeJSON(layers: [
+            .init(name: "glyph-light", imageName: "glyph-light.png", exclusiveTo: .light),
+            .init(name: "glyph-dark", imageName: "glyph-dark.png", exclusiveTo: .dark)
+        ])
+        let layers = try #require((json["groups"] as? [[String: Any]])?.first?["layers"] as? [[String: Any]])
+        #expect(layers.count == 2)
+        for layer in layers {
+            let hidden = try #require(layer["hidden-specializations"] as? [[String: Any]])
+            #expect(hidden.count == 2)
+            #expect(!hidden.contains { $0["appearance"] as? String == "tinted" }, "\(layer["name"] ?? "?")")
+        }
+    }
+
+    @Test("Apps face: system fills, one grid per appearance slot, and the flat look written explicitly")
     func appsFaceDocument() throws {
         let json = IconDocumentBuilder.appsFaceIconJSON()
         #expect(json["fill"] as? String == "system-light")
@@ -122,12 +137,26 @@ struct IconDocumentBuilderTests {
         let shadow = try #require(group["shadow"] as? [String: Any])
         #expect(shadow["kind"] as? String == "none" && (shadow["opacity"] as? NSNumber)?.doubleValue == 0)
 
+        // One grid per appearance slot: Default renders (light), Dark renders (dark) and Clear Dark
+        // renders (tinted — which also feeds Clear Light/Dark and Tinted Light/Dark).
         let layers = try #require(group["layers"] as? [[String: Any]])
-        #expect(layers.count == 1)
-        #expect(layers[0]["name"] as? String == "grid" && layers[0]["image-name"] as? String == "grid.png")
-        #expect(layers[0]["glass"] as? Bool == false)
-        #expect(layers[0]["fill"] as? String == "none")
-        #expect(layers[0]["hidden-specializations"] == nil)
+        #expect(layers.map { $0["name"] as? String } == ["grid", "grid-dark", "grid-tinted"])
+        #expect(layers.map { $0["image-name"] as? String } == ["grid.png", "grid-dark.png", "grid-tinted.png"])
+        for layer in layers {
+            #expect(layer["glass"] as? Bool == false)
+            #expect(layer["fill"] as? String == "none")
+        }
+        func hidden(_ layer: [String: Any]) -> [String] {
+            ((layer["hidden-specializations"] as? [[String: Any]]) ?? []).map {
+                "\($0["appearance"] as? String ?? "default")=\($0["value"] as? Bool ?? false)"
+            }
+        }
+        #expect(hidden(layers[0]) == ["default=false", "dark=true", "tinted=true"])
+        #expect(hidden(layers[1]) == ["default=true", "dark=false"])
+        #expect(hidden(layers[2]) == ["default=true", "tinted=false"])
+        #expect(IconDocumentBuilder.appsFaceImageName(for: .standard) == "grid.png")
+        #expect(IconDocumentBuilder.appsFaceImageName(for: .dark) == "grid-dark.png")
+        #expect(IconDocumentBuilder.appsFaceImageName(for: .clearDark) == "grid-tinted.png")
         #expect((json["supported-platforms"] as? [String: [String]])?["squares"] == ["macOS"])
         // The document serialises (no Swift tuples or enums leaked in).
         #expect(JSONSerialization.isValidJSONObject(json))
