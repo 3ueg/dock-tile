@@ -220,18 +220,22 @@ Popover, Dock Lock) · Dock Tile (About)** — the old accordion `@AppStorage` e
   `maxWindowWidth` are the one definition (`DockTileApp`, `DockTileConfigurationView` and
   `WindowAccessor` read them) and the pure `AppDelegate.clampedWindowWidth(_:)` clamps `windowWillResize`
   and a restored saved frame. Guarded by `MainWindowWidthTests`.
-- **Customise Tile is the one pane WITHOUT a title band.** Its canvas runs under the 52 pt toolbar
-  strip (`.ignoresSafeArea(edges: .top)`); a floating **‹ Select Apps** glass pill returns to Tile
-  Detail. The pill sits just BELOW the strip, in the safe area: inside it the window-drag toolbar
-  region would swallow the clicks. The inspector `ScrollView` stays in the safe area with
-  `paneScrollEdgeEffect()`. There is no `paneTitleBand(_:subtitle:)` subtitle option any more and no
+- **Customise Tile is the one pane WITHOUT a title band.** Both columns run up into the 52 pt toolbar
+  strip (`.ignoresSafeArea(edges: .top)`) and start on one line, `paneTopInset` (10 pt) below the
+  window top. A floating **‹ Select Apps** glass pill, inset 12 pt in the canvas's top-left corner,
+  returns to Tile Detail; the inspector's Style cards (App Grid · Symbol · Emoji) sit at the top of
+  the inspector. Both are inside the strip, and clicks DO land there: an earlier note said the
+  window-drag region would swallow them, but the owner's real mouse clicks on the pill and on all
+  three cards were logged (`ui` lines, 2026-10-19). The inspector does NOT scroll; only the
+  symbol/emoji picker grid scrolls, inside its own card, so it carries no `paneScrollEdgeEffect()`.
+  There is no `paneTitleBand(_:subtitle:)` subtitle option any more and no
   Back button. Layout: canvas `minWidth` 200 + a 260 pt inspector. 200, not the mock's 250, because the
   sidebar may be dragged to its 280 pt max while the window is at its 782 pt min, which leaves the
   canvas about 214 pt. Design handoff: `docs/design_handoff_customise_tile/README.md`.
-- **Two defaults for the tile face (critical)**: a NEW tile starts on App Preview
+- **Two defaults for the tile face (critical)**: a NEW tile starts on App Grid
   (`ConfigurationDefaults.iconFace = .apps`), while a stored config missing the `iconFace` key loads as
   `.glyph` (decoder literal) so no existing tile changes look on upgrade. Smart Add-created tiles also
-  open on App Preview; the suggestion cards keep their category identity. See icon-system.md "Apps
+  open on App Grid; the suggestion cards keep their category identity. See icon-system.md "Apps
   tile face".
 - **`.tilesPlaceholder` (critical)**: the "No Tiles" row is a **selectable** placeholder that routes
   to the empty-state detail. Without it, once the user opened a Settings pane at zero tiles there was

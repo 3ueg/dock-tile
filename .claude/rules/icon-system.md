@@ -121,7 +121,7 @@ Every role (fill top/bottom, glyph) per background x style x icon type is derive
 ## Apps tile face (`iconFace`, v10)
 
 A tile can show its OWN apps as a folder-style mini grid on system glass instead of a glyph. Choosing
-it is the Style picker in Customise (App Preview / Symbol / Emoji).
+it is the Style picker in Customise (App Grid / Symbol / Emoji).
 
 - **Model**: `DockTileConfiguration.iconFace` (`IconFace`: `.glyph` / `.apps`), a separate field, not an
   `IconType` case, so the glyph fields (`iconType`, `iconValue`, scale, weight, tint) are retained and
@@ -131,15 +131,20 @@ it is the Style picker in Customise (App Preview / Symbol / Emoji).
   tile appends the face plus the first nine item identities (`AppsFaceGrid.maxItems`). Guarded by
   `IconFaceTests`.
 - **Seam `AppsFaceGrid`** ([IconDepthMetrics.swift](../../DockTile/Utilities/IconDepthMetrics.swift)):
-  one item = one centred icon at 0.60; 2-4 items = 2x2; 5+ = 3x3 (nine max). Block 0.70, gap 0.047 of
-  the shape. App icons carry the icon-grid margin, so their draw box is the cell divided by 0.805
+  one item = one centred icon at 0.60; 2-4 items = 2x2; 5+ = 3x3 (nine max). Block 0.80, gap 0.035 of
+  the shape (cells 0.3825 / 0.243; was 0.70 / 0.047 until 2026-10-19, when the 3x3 read small and
+  crowded to the centre in the Dock). App icons carry the icon-grid margin, so their draw box is the cell divided by 0.805
   (`appIconContentRatio`); folders are fitted to the cell. Contact shadow 0.35 black, offset 6 and blur
   12 at 1024, gated by `minDetailSize`. Material = system grays, top then bottom: light 1.0 -> 0.925,
   dark 0.192 -> 0.078. Clear and Tinted desaturate the minis. `TilePalette` is NOT consulted (the face
   ignores the tile colour).
-- **Four renderers, one seam**: the compiled car (`IconDocumentBuilder.appsFaceIconJSON`, ONE composite
-  layer from `IconGenerator.generateAppsLayerPNG` on the `system-light` / `system-dark` fills; the
-  dark appearance is decided as `system-dark`, tinted reuses `system-light`); the fallback `.icns`
+- **Four renderers, one seam**: the compiled car (`IconDocumentBuilder.appsFaceIconJSON`, one grid
+  layer PER APPEARANCE SLOT from `IconGenerator.generateAppsLayerPNG` on the `system-light` /
+  `system-dark` fills — see "One grid per style" below; the dark appearance is decided as
+  `system-dark`, tinted reuses `system-light`; each grid spans
+  the WHOLE 1024 canvas — in an `.icon` the canvas is the tile and the system adds the icon-grid
+  margin itself, so insetting the layer too shrank every mini by 0.805 in the Dock, found against
+  TinyFolder 2026-10-19, pinned by `AppsFaceRenderTests`); the fallback `.icns`
   (`generateAppsFallbackIcns`) and the macOS 15 four-variant bake (`generateAppsIcns`), both on the
   inset squircle with the system grays; and the live preview (`DockTileIconPreview.appsFaceBody`, full
   frame, minis from `TileIconRasterCache`). Proven document shape (fixture):
@@ -158,8 +163,34 @@ it is the Style picker in Customise (App Preview / Symbol / Emoji).
   PIXEL size (rendering at the image's point size picked a low-res rep and blurred them).
 - **Staleness**: the face re-bakes only on Update and on the version-bump migration. An app's own icon
   redesign, or a later install/uninstall, stays stale in the Dock until then.
-- **Tinted / Clear on macOS 26-27: unverified.** How the system renders the minis under each Icon &
-  widget style has not been observed. Check by eye in Finder/Dock under each style before claiming it.
+- **One grid per style (critical, 2026-10-19)**: the `.icon` carries three grids, Default renders
+  (light slot), Dark renders (dark slot) and Clear DARK renders (tinted slot), each app drawn by
+  `AppIconStyleRenderer` (in `AppIconLoader.swift`). With ONE colour grid shared by every slot, the
+  system's clear filter turned VS Code's white plate into a bright square under Clear Dark while the
+  Dock drew VS Code's own dark clear icon; Dark reused the colour minis too. Facts it rests on:
+  - Apple's `ictool` (inside Xcode's Icon Composer.app): Clear Light, Clear Dark, Tinted Light and
+    Tinted Dark ALL draw from the tinted slot, brightness-remapped. Clear Dark renders there matched
+    the apps' own icons best across the four (Clear Light renders were too pale in the dark styles,
+    colour renders gave the bright-plate bug). The light styles are approximations: one slot, four styles.
+  - `NSWorkspace.icon(forFile:)` returns only the CURRENT system style (`.aqua` and `.darkAqua`
+    drawing both gave Clear Dark under Clear Dark), so a bake froze whatever style was active.
+  - Private IconServices renders a named style: `ISBundleIcon initWithBundleURL:` +
+    `ISImageDescriptor initWithSize:scale:` with `appearance` (0 light, 1 dark) and
+    `appearanceVariant` (0 normal, 2 tinted — needs the system tint colour, unexposed — 3 clear),
+    then `prepareImageForDescriptor:` (without it an unrendered style comes back as a dashed
+    placeholder) and `CGImageForImageDescriptor:`. Same icon-grid margin as the public render;
+    backing may be larger than requested; 9 apps × 3 styles render in ~80 ms. Measured on macOS 27
+    only — `AppIconStyleRendererTests` fail (never skip) on the macos-26 CI leg if it differs there.
+  - Every private call is runtime-resolved and `responds(to:)`-guarded (never `setValue(_:forKey:)` —
+    an ObjC exception is uncatchable). Any miss → that mini uses the public icon, logged once per bake
+    on `tile`. Folders always use the public icon (IconServices draws them alike in every style).
+  - The fallback `.icns` uses the Default renders, so a bake during Clear still gets a Default fallback.
+  - `docktile-actool` honours a tinted-only `hidden-specializations` entry (Tintable stack shows only
+    that layer — pinned end-to-end by `IconCompilerTests`). The three-way hiding is built in
+    `appsFaceIconJSON`, NOT through `LayerSpec.Exclusive`, so glyph documents are unchanged.
+  - **Verified by eye in the Dock under Clear Dark only (2026-10-19).** Default, Dark, Clear Light and
+    Tinted Light/Dark after the three-grid change are unverified in the Dock (only `ictool`
+    renders); check each by eye before claiming them.
 
 ## Icon Generation — Legacy Path (`IconGenerator.swift`, macOS 15 fallback)
 
@@ -378,17 +409,19 @@ single light `.icns` with no `Assets.car` (e.g. VS Code, most Electron apps).
   paid ~3.5 ms per app on the main thread (201 ms on a 10-app Release tile). Guarded by
   `TileIconRasterCacheTests`.
 
-## Tinted tile face in the app (`TileFace`, issue #22)
+## Tinted and Clear tile face in the app (`TileFace`, issue #22)
 
 macOS draws the Tinted style in a colour no public API exposes (it is NOT `controlAccentColor`:
-measured cyan beside a blue accent), so `DockTileIconPreview` can only show a grey stand-in. The
-sidebar row and the Tile Detail hero use `TileFace`, which under Tinted shows the icon macOS
+measured cyan beside a blue accent), so `DockTileIconPreview` can only show a grey stand-in. Clear is
+the same case (the system's light/dark glass with every layer remapped; an App Grid tile read as a
+white plate in the app beside dark glass in the Dock, 2026-10-19). The
+sidebar row and the Tile Detail hero use `TileFace`, which under Tinted or Clear shows the icon macOS
 renders for the tile's helper (`NSWorkspace.icon(forFile:)`, enlarged by the icon-grid margin so
 the shape fills the slot) — but only when `TileFace.showsSystemIcon` holds: the helper's
 Info.plist `DTIconSignature` (stamped by `helperInfoPlist` from `DockTileConfiguration.iconSignature`)
 equals the tile's current one. Edits not yet applied with Update, never-added tiles and helpers
-built before the stamp all keep our drawing. Every other style keeps our drawing (it matches the
-system there). The helper lookup scans the helper folder, so it runs under Tinted only. Customise
+built before the stamp all keep our drawing. Default and Dark keep our drawing (it matches the
+system there). The helper lookup scans the helper folder, so it runs under Tinted and Clear only. Customise
 and Smart Add keep `DockTileIconPreview` (canonical / not-yet-built previews).
 
 ## Helper Bundle Icon Priority
