@@ -291,36 +291,29 @@ enum IconCompiler {
             // `validate` classifies, stderr carries the detail if assetutil itself fails (a
             // truncated/corrupt car, an environment problem) — that failure must not be
             // misdiagnosed as "the compiler flattened the icon" when it's really "assetutil
-            // couldn't even read the file". With two live pipes, draining them one after another
-            // reintroduces the deadlock this task exists to avoid, so both are drained
-            // concurrently, on background queues, before `waitUntilExit`.
+            // couldn't even read the file". stderr goes to a FILE and stdout is read to EOF on THIS
+            // thread: one pipe, drained by its only reader, so a full stderr can never block the
+            // child and nothing waits on another thread. (It used to drain both pipes on
+            // `DispatchQueue.global` blocks and wait for them; with every pool thread blocked in
+            // a compile, those blocks never ran and every compile waited forever — the 2026-10-19
+            // CI hang, reproduced by `concurrentCompilesFinish`.)
             let info = Process()
             info.executableURL = URL(fileURLWithPath: "/usr/bin/assetutil")
             info.arguments = ["--info", carURL.path]
             let infoOutPipe = Pipe()
-            let infoErrPipe = Pipe()
+            let infoErrURL = outputDir.appendingPathComponent("assetutil-stderr.txt")
+            FileManager.default.createFile(atPath: infoErrURL.path, contents: nil)
+            let infoErrHandle = try FileHandle(forWritingTo: infoErrURL)
+            defer {
+                try? infoErrHandle.close()
+                try? FileManager.default.removeItem(at: infoErrURL)
+            }
             info.standardOutput = infoOutPipe
-            info.standardError = infoErrPipe
+            info.standardError = infoErrHandle
             try info.run()
-
-            // Safe despite the mutable capture: `drainGroup.wait()` below is a happens-before
-            // barrier between each background write and this thread's read, so there is never
-            // concurrent access — the compiler just can't see that through DispatchGroup.
-            nonisolated(unsafe) var infoData = Data()
-            nonisolated(unsafe) var infoErrData = Data()
-            let drainGroup = DispatchGroup()
-            drainGroup.enter()
-            DispatchQueue.global(qos: .utility).async {
-                infoData = infoOutPipe.fileHandleForReading.readDataToEndOfFile()
-                drainGroup.leave()
-            }
-            drainGroup.enter()
-            DispatchQueue.global(qos: .utility).async {
-                infoErrData = infoErrPipe.fileHandleForReading.readDataToEndOfFile()
-                drainGroup.leave()
-            }
-            drainGroup.wait()
+            let infoData = infoOutPipe.fileHandleForReading.readDataToEndOfFile()
             info.waitUntilExit()
+            let infoErrData = (try? Data(contentsOf: infoErrURL)) ?? Data()
 
             guard info.terminationStatus == 0 else {
                 let message = String(data: infoErrData, encoding: .utf8) ?? "unknown assetutil error"

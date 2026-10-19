@@ -594,39 +594,25 @@ final class HelperBundleManager {
     }
 
     /// `assetutil --info <car>`, summarised to "<N> renditions, IconImageStack: yes/no". Read-only
-    /// (info only — never `--compile` or anything that writes). Drains BOTH stdout and stderr
-    /// concurrently, on background queues, BEFORE `waitUntilExit` — a child filling either pipe's
-    /// buffer while this thread blocks in `waitUntilExit` deadlocks it (mirrors
-    /// `IconCompiler.compile`'s drain, the proven pattern for this exact hazard). Returns `nil` on
-    /// any failure (missing binary, non-zero exit, unparseable JSON) rather than throwing — a
-    /// broken car degrades this one field, not the whole report.
+    /// (info only — never `--compile` or anything that writes). stderr is discarded and stdout,
+    /// the only pipe, is read to EOF on THIS thread before `waitUntilExit`, so a full pipe can't
+    /// block the child and nothing waits on another thread (draining on `DispatchQueue.global`
+    /// blocks could starve — see `IconCompiler.compile`). Returns `nil` on any failure (missing
+    /// binary, non-zero exit, unparseable JSON) rather than throwing — a broken car degrades this
+    /// one field, not the whole report.
     private static func carRenditionSummary(carURL: URL) -> String? {
         let process = Process()
         process.executableURL = URL(fileURLWithPath: "/usr/bin/assetutil")
         process.arguments = ["--info", carURL.path]
         let outPipe = Pipe()
-        let errPipe = Pipe()
         process.standardOutput = outPipe
-        process.standardError = errPipe
+        process.standardError = FileHandle.nullDevice
         do {
             try process.run()
         } catch {
             return nil
         }
-
-        nonisolated(unsafe) var outData = Data()
-        let drainGroup = DispatchGroup()
-        drainGroup.enter()
-        DispatchQueue.global(qos: .utility).async {
-            outData = outPipe.fileHandleForReading.readDataToEndOfFile()
-            drainGroup.leave()
-        }
-        drainGroup.enter()
-        DispatchQueue.global(qos: .utility).async {
-            _ = errPipe.fileHandleForReading.readDataToEndOfFile()
-            drainGroup.leave()
-        }
-        drainGroup.wait()
+        let outData = outPipe.fileHandleForReading.readDataToEndOfFile()
         process.waitUntilExit()
 
         guard process.terminationStatus == 0 else { return nil }

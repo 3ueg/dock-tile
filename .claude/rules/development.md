@@ -56,6 +56,12 @@ The app product name is **"Dock Tile"** (with space), not "DockTile". File syste
   for the visible dimming (`.disabled` barely dims a mini switch), and attaching `.help` to the
   still-enabled row. Shipped wrong once (Show in App Switcher, 2026-09-02) — the tooltip only
   appeared after this restructure.
+- **Never block a thread waiting for work queued on `DispatchQueue.global` (critical).** Draining a
+  `Process`'s pipes in global-queue blocks while the caller `DispatchGroup.wait()`s deadlocked when
+  every pool thread was itself blocked in that wait: CI's 3-core runner hung six hours with three
+  concurrent compile tests (2026-10-19); 15 compiles on a 14-core Mac reproduce it
+  (`IconCompilerTests.concurrentCompilesFinish`). Read the one pipe you need on the calling thread
+  and send the other stream to a file or `/dev/null`. A bounded `wait(timeout:)` is acceptable.
 - **Assets fail SILENTLY — never assume one rendered.** An unknown SF Symbol name
   (`Image(systemName:)`) and a bundled image that fails to decode both draw **nothing**: no warning,
   no placeholder, no crash — the affordance is simply absent. `app.badge.plus` shipped that way in

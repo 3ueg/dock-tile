@@ -177,6 +177,35 @@ struct IconCompilerTests {
         #expect(FileManager.default.fileExists(atPath: carURL.path))
     }
 
+    /// Regression (2026-10-19, CI hung for six hours): `compile` used to drain assetutil's two pipes
+    /// on `DispatchQueue.global` blocks and wait for them. Called synchronously from enough threads
+    /// at once — Swift Testing's cooperative pool, one thread per core (three on the CI runner) — the
+    /// queued drain blocks never got a worker and every compile waited forever. More concurrent
+    /// compiles than cores must still all finish.
+    @Test("Concurrent compiles, more than there are cores, all finish (no pipe-drain starvation)",
+          .enabled(if: FileManager.default.fileExists(atPath: IconCompilerTests.builtCompilerPath)),
+          .timeLimit(.minutes(1)))
+    func concurrentCompilesFinish() async throws {
+        let document = Self.projectRoot.appendingPathComponent("docs/icon-spike-fixtures/devtile-fix.icon")
+        let compiler = URL(fileURLWithPath: Self.builtCompilerPath)
+        let count = ProcessInfo.processInfo.activeProcessorCount + 1
+        let scratch = try makeScratchDir()
+        defer { try? FileManager.default.removeItem(at: scratch) }
+        let cars = try await withThrowingTaskGroup(of: URL.self) { group in
+            for index in 0..<count {
+                let out = scratch.appendingPathComponent("out-\(index)")
+                group.addTask { try Self.compileBlocking(document: document, outputDir: out, compilerURL: compiler) }
+            }
+            return try await group.reduce(into: [URL]()) { $0.append($1) }
+        }
+        #expect(cars.count == count)
+    }
+
+    /// `compile` is `noasync`; this synchronous hop lets a task call it on its own (cooperative) thread.
+    private static func compileBlocking(document: URL, outputDir: URL, compilerURL: URL) throws -> URL {
+        try IconCompiler.compile(document: document, outputDir: outputDir, compilerURL: compilerURL)
+    }
+
     /// The test above compiles a hand-authored STATIC fixture, so it can only prove the compiler
     /// still works on the input someone typed months ago. This one closes the loop that actually
     /// ships: `IconDocumentBuilder.iconJSON` + `IconGenerator.generateGlyphLayerPNG` — the exact
