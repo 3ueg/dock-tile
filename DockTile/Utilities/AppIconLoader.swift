@@ -62,14 +62,19 @@ enum AppIconLoader {
     /// NOTE: this only ever loads *third-party* app icons (the apps a user adds to a tile). It is
     /// never used for DockTile's own helper tile faces — those are generated with their own dark
     /// variant by `IconGenerator` / `IconStyleManager` — so there's no risk of double-treatment.
+    ///
+    /// The URL is resolved through symlinks first: on macOS 27 `/Applications/Safari.app` is a
+    /// symlink, and `NSWorkspace.icon(forFile:)` on the symlink returned the icon with an alias-arrow
+    /// badge.
     private static func iconFromAppURL(_ appURL: URL) -> NSImage {
-        let workspaceIcon = NSWorkspace.shared.icon(forFile: appURL.path)
+        let bundleURL = appURL.resolvingSymlinksInPath()
+        let workspaceIcon = NSWorkspace.shared.icon(forFile: bundleURL.path)
         if !workspaceIcon.representations.isEmpty {
             return workspaceIcon
         }
         // Defensive fallback: if NSWorkspace somehow returns an empty image, read the bundle's
         // declared `.icns` directly rather than handing back a blank icon.
-        return loadIconDirectlyFromBundle(atPath: appURL.path) ?? workspaceIcon
+        return loadIconDirectlyFromBundle(atPath: bundleURL.path) ?? workspaceIcon
     }
 
     /// Load icon directly from app bundle's .icns file (defensive fallback only)
