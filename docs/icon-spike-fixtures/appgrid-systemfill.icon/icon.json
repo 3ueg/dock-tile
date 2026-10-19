@@ -1,0 +1,40 @@
+{
+  "fill": "system-light",
+  "fill-specializations": [
+    {
+      "value": "system-light"
+    },
+    {
+      "appearance": "dark",
+      "value": "system-dark"
+    },
+    {
+      "appearance": "tinted",
+      "value": "system-light"
+    }
+  ],
+  "groups": [
+    {
+      "layers": [
+        {
+          "name": "grid",
+          "image-name": "grid.png",
+          "fill": "none",
+          "position": {
+            "scale": 1.0,
+            "translation-in-points": [
+              0,
+              0
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "supported-platforms": {
+    "circles": [],
+    "squares": [
+      "macOS"
+    ]
+  }
+}

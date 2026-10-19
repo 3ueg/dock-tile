@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div style="width:{{ t.s }}px; height:{{ t.s }}px; position:relative; flex:none;">
+  <sc-if value="{{ t.isApps }}" hint-placeholder-val="{{ true }}">
+    <div style="position:absolute; inset:0; border-radius:{{ t.R }}px; background:linear-gradient(160deg,rgba(255,255,255,.84),rgba(255,255,255,.52)); -webkit-backdrop-filter:blur(18px) saturate(1.8); backdrop-filter:blur(18px) saturate(1.8); box-shadow:{{ t.glassSh }}; display:grid; grid-template-columns:{{ t.cols }}; gap:{{ t.gap }}px; align-content:center; justify-content:center;">
+      <sc-for list="{{ t.cells }}" as="c" hint-placeholder-count="4">
+        <div style="width:{{ c.w }}px; height:{{ c.w }}px; border-radius:{{ c.r }}px; background:{{ c.grad }}; box-shadow:{{ c.sh }}; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:600; font-size:{{ c.fs }}px; line-height:1; font-family:var(--font-sans),system-ui,sans-serif;">{{ c.letter }}</div>
+      </sc-for>
+    </div>
+  </sc-if>
+  <sc-if value="{{ t.isSym }}">
+    <div style="position:absolute; inset:0; border-radius:{{ t.R }}px; background:{{ t.bg }}; box-shadow:{{ t.solidSh }}; display:flex; align-items:center; justify-content:center;"><svg width="{{ t.gs }}" height="{{ t.gs }}" viewBox="0 0 24 24" fill="{{ t.gfill }}" stroke="{{ t.ink }}" stroke-width="{{ t.sw }}" stroke-linecap="round" stroke-linejoin="round"><path d="{{ t.path }}"></path></svg></div>
+  </sc-if>
+  <sc-if value="{{ t.isEmo }}">
+    <div style="position:absolute; inset:0; border-radius:{{ t.R }}px; background:{{ t.bg }}; box-shadow:{{ t.solidSh }}; display:flex; align-items:center; justify-content:center; font-size:{{ t.es }}px; line-height:1;">{{ t.emoji }}</div>
+  </sc-if>
+  <sc-if value="{{ t.grid }}">
+    <div style="position:absolute; inset:0; border-radius:{{ t.R }}px; overflow:hidden; pointer-events:none;"><svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none" style="display:block;"><g stroke="{{ t.gridInk }}" stroke-width="0.4" fill="none"><path d="M12.5 0V100M25 0V100M37.5 0V100M50 0V100M62.5 0V100M75 0V100M87.5 0V100"></path><path d="M0 12.5H100M0 25H100M0 37.5H100M0 50H100M0 62.5H100M0 75H100M0 87.5H100"></path><path d="M0 0L100 100M100 0L0 100"></path><circle cx="50" cy="50" r="46"></circle><circle cx="50" cy="50" r="37"></circle><circle cx="50" cy="50" r="28"></circle></g></svg></div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:112,&quot;height&quot;:112},&quot;t&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;object&quot;}}"></script>
+</body>
+</html>
