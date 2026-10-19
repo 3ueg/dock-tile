@@ -136,4 +136,86 @@ struct AppsFaceRenderTests {
         let rep = try Self.bitmap(try IconGenerator.generateAppsLayerPNG(minis: []))
         #expect(Self.alpha(rep, 512, 512) == 0 && Self.alpha(rep, 358, 358) == 0)
     }
+    // MARK: - Fallback .icns and the legacy bake (same renderer, four styles)
+
+    static func gray(_ rep: NSBitmapImageRep, _ x: Int, _ y: Int) throws -> CGFloat {
+        // A rep read back from an .icns is sRGB-tagged, and on macOS 27 its `colorAt` comes back
+        // labelled calibrated, so converting it to sRGB lifts 0.192 to 0.251. Read the bytes.
+        if rep.colorSpace == .sRGB, rep.bitsPerPixel == 32, let data = rep.bitmapData {
+            let o = y * rep.bytesPerRow + x * 4
+            #expect(data[o] == data[o + 1] && data[o + 1] == data[o + 2], "not gray at (\(x),\(y))")
+            return CGFloat(data[o]) / 255
+        }
+        let c = try #require(rep.colorAt(x: x, y: y)?.usingColorSpace(.sRGB))
+        #expect(abs(c.redComponent - c.greenComponent) < 0.01 && abs(c.greenComponent - c.blueComponent) < 0.01,
+                "not gray at (\(x),\(y)): \(c)")
+        return c.redComponent
+    }
+
+    static func bake(_ style: IconStyle, minis: [IconGenerator.AppsFaceMini]) throws -> NSBitmapImageRep {
+        let image = IconGenerator.appsIcon(minis: minis, size: CGSize(width: canvas, height: canvas), iconStyle: style)
+        return try #require(image.representations.compactMap { $0 as? NSBitmapImageRep }.first)
+    }
+
+    @Test("Every style bakes the icon-grid margin and the system gray pair, top stop at the top",
+          arguments: IconStyle.allCases)
+    func bakeIsMarginedOnSystemGrays(_ style: IconStyle) throws {
+        let rep = try Self.bake(style, minis: [.init(image: Self.mini(.systemBlue), isFolder: false)])
+        #expect(Self.alpha(rep, 1, 512) == 0, "\(style): mid-edge painted — no margin")
+        #expect(Self.alpha(rep, 512, 512) == 1)
+        let run = Self.opaqueRun(rep, y: 512, fromX: 0)
+        #expect(abs(run - 824) <= 2, "\(style): shape is \(run) px wide")
+        let expected = AppsFaceGrid.fillGrays(style: style)
+        #expect(abs(try Self.gray(rep, 512, 106) - expected.top) < 0.02, "\(style) top")
+        #expect(abs(try Self.gray(rep, 512, 917) - expected.bottom) < 0.02, "\(style) bottom")
+    }
+
+    @Test("Dark is the dark pair, Default the light pair — independent pins")
+    func grayPairsPinned() throws {
+        let dark = try Self.bake(.dark, minis: [])
+        #expect(abs(try Self.gray(dark, 512, 106) - 0.192) < 0.02)
+        #expect(abs(try Self.gray(dark, 512, 917) - 0.078) < 0.02)
+        let light = try Self.bake(.defaultStyle, minis: [])
+        #expect(try Self.gray(light, 512, 106) > 0.98)
+        #expect(abs(try Self.gray(light, 512, 917) - 0.925) < 0.02)
+    }
+
+    @Test("clearAndTintedVariantsDesaturateMinis: Default/Dark keep the mini's colour, Clear/Tinted are grayscale")
+    func clearAndTintedVariantsDesaturateMinis() throws {
+        let red = IconGenerator.AppsFaceMini(image: Self.mini(.systemRed, fullBleed: true), isFolder: true)
+        let c0 = Self.centre(0, count: 1)
+        for style in IconStyle.allCases {
+            let c = try #require(try Self.bake(style, minis: [red]).colorAt(x: c0.x, y: c0.y)?.usingColorSpace(.sRGB))
+            #expect(c.alphaComponent == 1)
+            if AppsFaceGrid.desaturatesMinis(style: style) {
+                #expect(c.saturationComponent < 0.05, "\(style) mini still coloured: \(c)")
+            } else {
+                #expect(c.saturationComponent > 0.6, "\(style) mini lost its colour: \(c)")
+            }
+        }
+    }
+
+    @Test("The written fallback .icns carries the margin and the light pair in its largest rendition")
+    func fallbackIcnsFile() throws {
+        let out = FileManager.default.temporaryDirectory.appendingPathComponent("docktile-apps-\(UUID().uuidString).icns")
+        defer { try? FileManager.default.removeItem(at: out) }
+        try IconGenerator.generateAppsFallbackIcns(
+            minis: [.init(image: Self.mini(.systemBlue), isFolder: false)], outputURL: out)
+        let image = try #require(NSImage(contentsOf: out))
+        let rep = try #require(image.representations.compactMap { $0 as? NSBitmapImageRep }.max(by: { $0.pixelsWide < $1.pixelsWide }))
+        #expect(rep.pixelsWide == 1024)
+        #expect(Self.alpha(rep, 1, 512) == 0)
+        #expect(try Self.gray(rep, 512, 106) > 0.98)
+    }
+
+    @Test("The legacy variant file is written for a non-default style")
+    func legacyVariantFile() throws {
+        let out = FileManager.default.temporaryDirectory.appendingPathComponent("docktile-apps-dark-\(UUID().uuidString).icns")
+        defer { try? FileManager.default.removeItem(at: out) }
+        try IconGenerator.generateAppsIcns(minis: [.init(image: Self.mini(.systemBlue), isFolder: false)],
+                                           outputURL: out, iconStyle: .dark)
+        let image = try #require(NSImage(contentsOf: out))
+        let rep = try #require(image.representations.compactMap { $0 as? NSBitmapImageRep }.max(by: { $0.pixelsWide < $1.pixelsWide }))
+        #expect(abs(try Self.gray(rep, 512, 106) - 0.192) < 0.02)
+    }
 }

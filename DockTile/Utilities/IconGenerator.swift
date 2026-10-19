@@ -1279,7 +1279,8 @@ extension IconGenerator {
         return pngData
     }
 
-    /// Draws up to `AppsFaceGrid.maxItems` minis into their cells. `desaturate` is wired in Task 6.
+    /// Draws up to `AppsFaceGrid.maxItems` minis into their cells. `desaturate` greys each mini
+    /// first (Clear/Tinted keep the legacy path's grayscale promise).
     private static func drawAppsGrid(
         minis: [AppsFaceMini],
         shape: CGRect,
@@ -1305,12 +1306,100 @@ extension IconGenerator {
             }
             // Copy so resizing never mutates the caller's image; `size` makes draw(in:) scale
             // the whole bitmap into the box.
-            let image = (mini.image.copy() as? NSImage) ?? mini.image
+            let source = desaturate ? desaturated(mini.image) : mini.image
+            let image = (source.copy() as? NSImage) ?? source
             image.size = box.size
             image.draw(in: box, from: .zero, operation: .sourceOver, fraction: 1,
                        respectFlipped: true, hints: [.interpolation: NSImageInterpolation.high])
             context.restoreGState()
         }
+    }
+
+    /// The Apps face baked as a flat bitmap: the icon-grid-inset squircle filled top-to-bottom
+    /// with the system gray pair, the mini grid on top. No stroke and no sheen, like the
+    /// compiled icon. The grays are the vendored compiler's resolution of `system-light` /
+    /// `system-dark` (`AppsFaceGrid.fillGrays`), so the bake, the preview and the compiled icon
+    /// agree. Clear/Tinted minis are desaturated to keep the legacy path's grayscale promise.
+    static func appsIcon(minis: [AppsFaceMini], size: CGSize, iconStyle: IconStyle) -> NSImage {
+        guard let bitmapRep = NSBitmapImageRep(
+            bitmapDataPlanes: nil,
+            pixelsWide: Int(size.width),
+            pixelsHigh: Int(size.height),
+            bitsPerSample: 8,
+            samplesPerPixel: 4,
+            hasAlpha: true,
+            isPlanar: false,
+            colorSpaceName: .deviceRGB,
+            bytesPerRow: 0,
+            bitsPerPixel: 0
+        ), let graphicsContext = NSGraphicsContext(bitmapImageRep: bitmapRep) else {
+            return NSImage(size: size)
+        }
+        bitmapRep.size = size
+
+        NSGraphicsContext.saveGraphicsState()
+        NSGraphicsContext.current = graphicsContext
+        let context = graphicsContext.cgContext
+        let rect = CGRect(origin: .zero, size: size)
+        context.clear(rect)
+
+        let inset = size.width * IconDepthMetrics.contentInsetRatio
+        let shape = rect.insetBy(dx: inset, dy: inset)
+        let path = createSquirclePath(in: shape, cornerRadius: shape.width * 0.225)
+        let grays = AppsFaceGrid.fillGrays(style: iconStyle)
+        drawGradient(
+            context: context,
+            path: path,
+            topColor: NSColor(white: grays.top, alpha: 1),
+            bottomColor: NSColor(white: grays.bottom, alpha: 1),
+            rect: shape
+        )
+        drawAppsGrid(minis: minis, shape: shape, nominalSize: size.width,
+                     desaturate: AppsFaceGrid.desaturatesMinis(style: iconStyle), in: context)
+        NSGraphicsContext.restoreGraphicsState()
+
+        let image = NSImage(size: size)
+        image.addRepresentation(bitmapRep)
+        return image
+    }
+
+    /// The Apps face as the macOS 26 fallback `.icns` (light composition).
+    static func generateAppsFallbackIcns(minis: [AppsFaceMini], outputURL: URL) throws {
+        try buildIcns(outputURL: outputURL) { appsIcon(minis: minis, size: $0, iconStyle: .defaultStyle) }
+    }
+
+    /// One Apps-face style variant `.icns` for the macOS 15 four-variant bake.
+    static func generateAppsIcns(minis: [AppsFaceMini], outputURL: URL, iconStyle: IconStyle) throws {
+        try buildIcns(outputURL: outputURL) { appsIcon(minis: minis, size: $0, iconStyle: iconStyle) }
+    }
+
+    /// Grayscale copy via `CIColorControls` (saturation 0), rendered into an explicit-pixel
+    /// bitmap. Returns `image` untouched if any step fails.
+    private static func desaturated(_ image: NSImage) -> NSImage {
+        var proposed = CGRect(origin: .zero, size: image.size)
+        guard let cg = image.cgImage(forProposedRect: &proposed, context: nil, hints: nil),
+              let filter = CIFilter(name: "CIColorControls") else { return image }
+        filter.setValue(CIImage(cgImage: cg), forKey: kCIInputImageKey)
+        filter.setValue(0, forKey: kCIInputSaturationKey)
+        guard let output = filter.outputImage,
+              let rep = NSBitmapImageRep(
+                bitmapDataPlanes: nil,
+                pixelsWide: cg.width,
+                pixelsHigh: cg.height,
+                bitsPerSample: 8,
+                samplesPerPixel: 4,
+                hasAlpha: true,
+                isPlanar: false,
+                colorSpaceName: .deviceRGB,
+                bytesPerRow: 0,
+                bitsPerPixel: 0
+              ),
+              let ctx = NSGraphicsContext(bitmapImageRep: rep) else { return image }
+        let extent = CGRect(x: 0, y: 0, width: cg.width, height: cg.height)
+        CIContext(cgContext: ctx.cgContext, options: nil).draw(output, in: extent, from: output.extent)
+        let result = NSImage(size: NSSize(width: cg.width, height: cg.height))
+        result.addRepresentation(rep)
+        return result
     }
 }
 
