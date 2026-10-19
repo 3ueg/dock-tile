@@ -208,6 +208,7 @@ jobs:
               -derivedDataPath ./build \
               -enableCodeCoverage YES \
               -only-testing:DockTileTests \
+              -resultBundlePath TestResults.xcresult \
               CODE_SIGNING_ALLOWED='NO' \
               ENABLE_TESTABILITY=YES \
               2>&1 | tee test.log | xcpretty --color ) &
@@ -239,6 +240,7 @@ jobs:
             build.log
             test.log
             hang/
+            TestResults.xcresult
 
       - name: Upload build artifact
         if: success()
