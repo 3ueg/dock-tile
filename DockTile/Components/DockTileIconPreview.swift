@@ -38,6 +38,12 @@ struct DockTileIconPreview: View {
     /// Pins the style (Customise's canonical Light/Dark previews); `nil` follows the live style.
     var forcedStyle: IconStyle? = nil
 
+    /// Apps-face items (`[]` = glyph face). Only installed ones draw; none installed falls back
+    /// to the glyph face.
+    let appsFaceItems: [AppItem]
+
+    @Environment(\.displayScale) private var displayScale
+
     // Observe IconStyleManager for icon style changes (single source of truth)
     @ObservedObject private var iconStyleManager = IconStyleManager.shared
 
@@ -78,6 +84,7 @@ struct DockTileIconPreview: View {
         self.iconWeight = ConfigurationDefaults.iconWeight
         self.tileBackground = .colour
         self.size = size
+        self.appsFaceItems = []
     }
 
     // New initializer with explicit icon type (legacy without scale)
@@ -89,6 +96,7 @@ struct DockTileIconPreview: View {
         self.iconWeight = ConfigurationDefaults.iconWeight
         self.tileBackground = .colour
         self.size = size
+        self.appsFaceItems = []
     }
 
     // Full initializer with icon scale and weight
@@ -99,7 +107,8 @@ struct DockTileIconPreview: View {
         iconScale: Int,
         iconWeight: IconWeight = ConfigurationDefaults.iconWeight,
         background: TileBackground,
-        size: CGFloat
+        size: CGFloat,
+        appsFaceItems: [AppItem] = []
     ) {
         self.tintColor = tintColor
         self.iconType = iconType
@@ -108,6 +117,7 @@ struct DockTileIconPreview: View {
         self.iconWeight = iconWeight
         self.tileBackground = background
         self.size = size
+        self.appsFaceItems = appsFaceItems
     }
 
     /// Side of the drawn squircle — the FULL canvas, not the icon-grid-margined shape the
@@ -180,7 +190,60 @@ struct DockTileIconPreview: View {
         return AnyShapeStyle(styleColors.foreground)
     }
 
+    /// Installed Apps-face items in tile order; empty means the glyph face draws.
+    private var appsFaceMinis: [AppItem] {
+        AppsFaceGrid.select(items: appsFaceItems) { AppInstallChecker.resolve($0).status == .installed }.selected
+    }
+
+    @ViewBuilder
     var body: some View {
+        let minis = appsFaceMinis
+        if !minis.isEmpty {
+            appsFaceBody(minis)
+        } else {
+            glyphFaceBody
+        }
+    }
+
+    /// The Apps face: the app grid on the system glass grays. Light/Dark keys on `iconStyle`
+    /// (`IconStyle.forDisplay`, like Mono), never raw `colorScheme`. The full frame is the shape
+    /// (UI slots apply no icon-grid inset). Minis are `TileIconRasterCache` bitmaps, never the
+    /// IconServices `NSImage`. The gray pair is the compiler's resolution of the system fills.
+    private func appsFaceBody(_ minis: [AppItem]) -> some View {
+        let grays = AppsFaceGrid.fillGrays(style: iconStyle)
+        let desaturate = AppsFaceGrid.desaturatesMinis(style: iconStyle)
+        let shadow = AppsFaceGrid.miniShadow(nominalSize: size)
+        let frame = CGRect(x: 0, y: 0, width: size, height: size)
+        let cells = AppsFaceGrid.cells(count: minis.count)
+        let token = TileIconRasterCache.liveAppearanceToken(isDark: colorScheme == .dark)
+        return ZStack {
+            RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                .fill(LinearGradient(
+                    colors: [Color(white: grays.top), Color(white: grays.bottom)],
+                    startPoint: .top, endPoint: .bottom))
+            ForEach(Array(minis.enumerated()), id: \.offset) { index, item in
+                let box = AppsFaceGrid.rect(
+                    AppsFaceGrid.drawBox(for: cells[index], isFolder: item.isFolder),
+                    in: frame, yUp: false)
+                if let cg = TileIconRasterCache.shared.image(
+                    for: item, pointSize: box.width, scale: displayScale, appearanceToken: token,
+                    contentStamp: TileIconRasterCache.contentStamp(
+                        for: item, resolvedPath: AppInstallChecker.resolve(item).resolvedPath)
+                ) {
+                    Image(decorative: cg, scale: displayScale)
+                        .resizable()
+                        .saturation(desaturate ? 0 : 1)
+                        .frame(width: box.width, height: box.height)
+                        .shadow(color: shadow.map { Color.black.opacity($0.blackAlpha) } ?? .clear,
+                                radius: shadow?.blur ?? 0, y: shadow?.offset ?? 0)
+                        .position(x: box.midX, y: box.midY)
+                }
+            }
+        }
+        .frame(width: size, height: size)
+    }
+
+    private var glyphFaceBody: some View {
         ZStack {
             // The tile shape fills the frame (see `contentSide`'s doc comment) — no margin is
             // applied here. The GLYPH was already measured against the full canvas in both
@@ -360,7 +423,8 @@ extension DockTileIconPreview {
             iconScale: config.iconScale,
             iconWeight: config.iconWeight,
             background: config.background,
-            size: size
+            size: size,
+            appsFaceItems: config.iconFace == .apps ? config.appItems : []
         )
     }
 }
