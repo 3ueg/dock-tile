@@ -50,6 +50,7 @@ Keep `%@`-style placeholders exactly as they are. `\n` means a line break, `\|` 
 | `button.save` | Save | Сохранить | machine | Primary toolbar button that commits the popover appearance settings |
 | `button.saving` | Applying… | Применение… | machine | Loading label on the Save button while applying settings to Dock tiles |
 | `button.scanForMissingApps` | Scan | Проверить | machine | Settings button that scans tiles for moved/uninstalled apps |
+| `button.selectApps` | Select Apps | Выбрать приложения | machine | Customise Tile: floating pill that returns to Tile Detail |
 | `button.update` | Update | Обновить | machine | Update button when tile is already in Dock |
 | `button.useThisTile` | Use This Tile | Использовать | machine | Smart Add sheet — button that creates a pre-filled tile from a suggestion |
 | `emojiCategory.activity` | Activity | Активность | machine | Emoji picker: section header |
@@ -77,10 +78,24 @@ Keep `%@`-style placeholders exactly as they are. `\n` means a line break, `\|` 
 | `iconWeight.medium` | Medium | Средний | machine | Customise: icon weight picker option |
 | `iconWeight.regular` | Regular | Обычный | machine | Customise: icon weight picker option |
 | `iconWeight.semibold` | Semibold | Полужирный | machine | Customise: icon weight picker option |
+| `label.apps.arrangement` | Arrangement | Расположение | machine | Customise Tile: Apps card row — the grid the face uses |
+| `label.apps.arrangement.fills` | Fills the Tile | На всю плитку | machine | Customise Tile: Arrangement value for one app |
+| `label.apps.arrangement.threeByThree` | 3 × 3 | 3 × 3 | machine | Customise Tile: Arrangement value for 5 or more apps |
+| `label.apps.arrangement.twoByTwo` | 2 × 2 | 2 × 2 | machine | Customise Tile: Arrangement value for 2–4 apps |
+| `label.apps.glass` | A glass folder that follows Light and Dark Mode. | Стеклянная папка, которая подстраивается под светлый и темный режим. | machine | Customise Tile: fixed sentence after the Apps caption (decided 2026-10-19: the dark appearance is system-dark) |
+| `label.apps.header` | Apps | Приложения | machine | Customise Tile: group header above the Apps card |
+| `label.apps.note.all` | Shows all %lld apps, in tile order. | Показывает все приложения (%lld) в порядке плитки. | machine | Customise Tile: Apps caption, 2–9 apps; %lld = app count |
+| `label.apps.note.firstNine` | Shows the first 9 of %lld apps, in tile order. | Показывает первые 9 приложений из %lld в порядке плитки. | machine | Customise Tile: Apps caption, more than nine apps; %lld = app count |
+| `label.apps.note.none` | No apps yet — add some in Tile Detail. | Приложений пока нет — добавьте их в разделе «Сведения о плитке». | machine | Customise Tile: Apps caption when the tile has no apps (builder copy, not in the handoff) |
+| `label.apps.note.one` | Shows the only app in this tile. | Показывает единственное приложение в этой плитке. | machine | Customise Tile: Apps caption, one app |
+| `label.apps.shown` | Shown | Показано | machine | Customise Tile: Apps card row — how many apps the face shows |
+| `label.apps.shownValue` | %1$lld of %2$lld | %1$lld из %2$lld | machine | Customise Tile: Apps card Shown value, e.g. 9 of 12; %1$lld = shown, %2$lld = total (positional so a language may reorder them) |
+| `label.appsFace.accessibility` | Apps face: showing %lld of this tile's apps | Вид приложений: показано приложений этой плитки — %lld | machine | VoiceOver label for a tile preview showing the Apps face; %lld = number of app icons shown |
 | `label.background` | Background | Фон | machine | Customise Tile: background row label |
 | `label.background.colour` | Colour | Цвет | machine | Customise Tile: Colour background chip |
 | `label.background.colour.accessibility` | Colour, filled with your colour | Цвет: плитка залита вашим цветом | machine | VoiceOver label for the Colour chip |
 | `label.background.hint.colour` | Filled with your colour | Заливка вашим цветом | machine | Customise Tile: hint under Background when Colour |
+| `label.background.hint.emojiColours` | Emoji keep their own colours. | Эмодзи сохраняют свои цвета. | machine | Customise Tile: appended to the Background caption for an Emoji tile |
 | `label.background.hint.mono` | White in Light Mode, black in Dark Mode | Белый в светлом режиме, черный — в темном | machine | Customise Tile: hint under Background when Mono |
 | `label.background.hint.mono.static` | White tile with a coloured symbol | Белая плитка с цветным символом | machine | Customise Tile: hint under Background when Mono on macOS 15 (static white tile) |
 | `label.background.mono` | Mono | Моно | machine | Customise Tile: Mono background chip |
@@ -90,6 +105,7 @@ Keep `%@`-style placeholders exactly as they are. `\n` means a line break, `\|` 
 | `label.colour.hint.deepened` | Deepened slightly so the symbol stays clear | Немного затемнен, чтобы символ оставался четким | machine | Customise Tile: colour hint when the fill was darkened for contrast |
 | `label.colour.hint.emoji` | Emoji keep their own colours | Эмодзи сохраняют свои цвета | machine | Customise Tile: colour hint, Mono emoji tile (row disabled) |
 | `label.colour.hint.fills` | Fills the tile | Заливает плитку | machine | Customise Tile: colour hint, Colour tile |
+| `label.colour.hint.tints` | Tints the symbol | Окрашивает символ | machine | Customise Tile: Colour card caption for a Mono tile |
 | `label.colour.hint.toned` | Toned for Light and Dark | Подобран для светлого и темного режимов | machine | Customise Tile: colour hint, Mono tile |
 | `label.colour.hint.toned.static` | Toned to stay clear on white | Подобран для четкости на белом | machine | Customise Tile: colour hint, Mono tile on macOS 15 |
 | `label.iconSize` | Icon Size | Размер значка | machine | Compact label for the icon size stepper (side-by-side with icon weight) |
@@ -119,7 +135,9 @@ Keep `%@`-style placeholders exactly as they are. `\n` means a line break, `\|` 
 | `label.softwareUpdateDescription` | You’re using version %@. Dock Tile checks for updates automatically. | Вы используете версию %@. Dock Tile проверяет наличие обновлений автоматически. | machine | Description under the software-update row; %@ is the current version |
 | `label.startAtLogin` | Start tiles at login | Запускать плитки при входе | machine | Label for the start-at-login toggle in Settings |
 | `label.startAtLoginDescription` | Keep your tiles ready in the Dock so they respond instantly after you restart your Mac. | Плитки будут готовы в Dock и сразу откликнутся после перезагрузки Mac. | machine | Explanation under the start-at-login toggle |
+| `label.style.appPreview` | App Preview | Приложения | machine | Customise Tile: Style picker card for the Apps face |
 | `label.symbolColour` | Symbol Colour | Цвет символа | machine | Customise Tile: colour row label for a Mono tile |
+| `label.tileColour` | Tile Colour | Цвет плитки | machine | Customise Tile: Colour card header for a Colour tile |
 | `label.tileIcon` | Tile Icon | Значок плитки | machine | Label for tile icon section |
 | `label.tileIconSize` | Tile Icon Size | Размер значка плитки | machine | Label for tile icon size |
 | `label.tileName` | Tile Name | Название плитки | machine | Label for tile name field |

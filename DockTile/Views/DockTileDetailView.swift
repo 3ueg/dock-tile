@@ -251,6 +251,9 @@ struct DockTileDetailView: View {
                     if editedConfig.iconType != updatedConfig.iconType {
                         editedConfig.iconType = updatedConfig.iconType
                     }
+                    if editedConfig.iconFace != updatedConfig.iconFace {
+                        editedConfig.iconFace = updatedConfig.iconFace
+                    }
                     if editedConfig.iconValue != updatedConfig.iconValue {
                         editedConfig.iconValue = updatedConfig.iconValue
                     }

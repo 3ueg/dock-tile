@@ -61,7 +61,6 @@ struct AppStringsTests {
         #expect(!AppStrings.Button.add.isEmpty)
         #expect(!AppStrings.Button.addATile.isEmpty)
         #expect(!AppStrings.Button.addToDock.isEmpty)
-        #expect(!AppStrings.Button.back.isEmpty)
         #expect(!AppStrings.Button.cancel.isEmpty)
         #expect(AppStrings.Button.checkNow == "Check Now")
         #expect(!AppStrings.Button.checkForUpdates.isEmpty)
@@ -76,10 +75,8 @@ struct AppStringsTests {
         #expect(!AppStrings.Button.update.isEmpty)
 
         // Labels
-        #expect(!AppStrings.Label.colour.isEmpty)
         #expect(!AppStrings.Label.showInAppSwitcher.isEmpty)
         #expect(!AppStrings.Label.showTile.isEmpty)
-        #expect(!AppStrings.Label.tileIcon.isEmpty)
         #expect(!AppStrings.Label.tileIconSize.isEmpty)
         #expect(!AppStrings.Label.tileName.isEmpty)
         #expect(AppStrings.Label.addAppsAndFolders == "Add Apps & Folders")
@@ -188,9 +185,6 @@ struct AppStringsTests {
         #expect(AppStrings.ItemMenu.forceQuit == "Force Quit")
         #expect(!AppStrings.Menu.options.isEmpty)
         #expect(!AppStrings.Menu.aboutDockTile.isEmpty)
-
-        // Navigation
-        #expect(!AppStrings.Navigation.customiseTile.isEmpty)
 
         // Sidebar
         #expect(!AppStrings.Sidebar.title.isEmpty)

@@ -18,8 +18,9 @@ struct SymbolPickerGrid: View {
     let iconWeight: IconWeight
     let onSelect: (String) -> Void
 
-    private let columns = Array(repeating: GridItem(.flexible(), spacing: 8), count: 7)
-    private let symbolSize: CGFloat = 24
+    /// Six columns of 42 pt rows fit the 260 pt Customise inspector (design handoff).
+    private let columns = Array(repeating: GridItem(.flexible(), spacing: 0), count: 6)
+    private let symbolSize: CGFloat = 18
 
     /// Shared catalog loaded once from the system
     private var catalog: SFSymbolCatalog { SFSymbolCatalog.shared }
@@ -45,8 +46,9 @@ struct SymbolPickerGrid: View {
                             .font(.caption)
                             .fontWeight(.medium)
                             .foregroundColor(.secondary)
+                            .padding(.horizontal, 4)
 
-                        LazyVGrid(columns: columns, spacing: 8) {
+                        LazyVGrid(columns: columns, spacing: 0) {
                             ForEach(symbols, id: \.self) { symbol in
                                 SymbolButton(
                                     symbolName: symbol,
@@ -75,9 +77,13 @@ private struct SymbolButton: View {
     let weight: IconWeight
     let onTap: () -> Void
 
-    /// Subtle contact shadow so picker glyphs share the tiles' raised-on-glass feel.
+    /// The selection circle; the row is 42 pt.
+    private let circle: CGFloat = 34
+
+    /// Subtle contact shadow so picker glyphs share the tiles' raised-on-glass feel. Measured on
+    /// the cell, not the 18 pt glyph, which is under the depth size gate.
     private var glyphShadow: IconDepthMetrics.GlyphShadow? {
-        IconDepthMetrics.glyphShadow(style: .defaultStyle, iconType: .sfSymbol, nominalSize: size)
+        IconDepthMetrics.glyphShadow(style: .defaultStyle, iconType: .sfSymbol, nominalSize: circle)
     }
 
     var body: some View {
@@ -89,11 +95,10 @@ private struct SymbolButton: View {
                     radius: glyphShadow?.blur ?? 0,
                     y: glyphShadow?.offset ?? 0
                 )
-                .frame(width: 40, height: 40)
-                .background(
-                    RoundedRectangle(cornerRadius: 8, style: .continuous)
-                        .fill(isSelected ? Color.accentColor : Color.clear)
-                )
+                .frame(width: circle, height: circle)
+                .background(Circle().fill(isSelected ? Color.accentColor : Color.clear))
+                .frame(maxWidth: .infinity)
+                .frame(height: 42)
                 .contentShape(Rectangle())
         }
         .buttonStyle(.plain)

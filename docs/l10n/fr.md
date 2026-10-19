@@ -50,6 +50,7 @@ Keep `%@`-style placeholders exactly as they are. `\n` means a line break, `\|` 
 | `button.save` | Save | Enregistrer | machine | Primary toolbar button that commits the popover appearance settings |
 | `button.saving` | Applying… | Mise à jour… | machine | Loading label on the Save button while applying settings to Dock tiles |
 | `button.scanForMissingApps` | Scan | Analyser | machine | Settings button that scans tiles for moved/uninstalled apps |
+| `button.selectApps` | Select Apps | Choisir les apps | machine | Customise Tile: floating pill that returns to Tile Detail |
 | `button.update` | Update | Mettre à jour | machine | Update button when tile is already in Dock |
 | `button.useThisTile` | Use This Tile | Utiliser cette tuile | machine | Smart Add sheet — button that creates a pre-filled tile from a suggestion |
 | `emojiCategory.activity` | Activity | Activités | machine | Emoji picker: section header |
@@ -77,10 +78,24 @@ Keep `%@`-style placeholders exactly as they are. `\n` means a line break, `\|` 
 | `iconWeight.medium` | Medium | Moyen | machine | Customise: icon weight picker option |
 | `iconWeight.regular` | Regular | Courant | machine | Customise: icon weight picker option |
 | `iconWeight.semibold` | Semibold | Semi-gras | machine | Customise: icon weight picker option |
+| `label.apps.arrangement` | Arrangement | Disposition | machine | Customise Tile: Apps card row — the grid the face uses |
+| `label.apps.arrangement.fills` | Fills the Tile | Remplit la tuile | machine | Customise Tile: Arrangement value for one app |
+| `label.apps.arrangement.threeByThree` | 3 × 3 | 3 × 3 | machine | Customise Tile: Arrangement value for 5 or more apps |
+| `label.apps.arrangement.twoByTwo` | 2 × 2 | 2 × 2 | machine | Customise Tile: Arrangement value for 2–4 apps |
+| `label.apps.glass` | A glass folder that follows Light and Dark Mode. | Un dossier en verre qui suit le mode clair et le mode sombre. | machine | Customise Tile: fixed sentence after the Apps caption (decided 2026-10-19: the dark appearance is system-dark) |
+| `label.apps.header` | Apps | Apps | machine | Customise Tile: group header above the Apps card |
+| `label.apps.note.all` | Shows all %lld apps, in tile order. | Affiche les %lld apps, dans l’ordre de la tuile. | machine | Customise Tile: Apps caption, 2–9 apps; %lld = app count |
+| `label.apps.note.firstNine` | Shows the first 9 of %lld apps, in tile order. | Affiche les 9 premières apps sur %lld, dans l’ordre de la tuile. | machine | Customise Tile: Apps caption, more than nine apps; %lld = app count |
+| `label.apps.note.none` | No apps yet — add some in Tile Detail. | Aucune app pour l’instant — ajoutez-en dans « Détails de la tuile ». | machine | Customise Tile: Apps caption when the tile has no apps (builder copy, not in the handoff) |
+| `label.apps.note.one` | Shows the only app in this tile. | Affiche la seule app de cette tuile. | machine | Customise Tile: Apps caption, one app |
+| `label.apps.shown` | Shown | Affichées | machine | Customise Tile: Apps card row — how many apps the face shows |
+| `label.apps.shownValue` | %1$lld of %2$lld | %1$lld sur %2$lld | machine | Customise Tile: Apps card Shown value, e.g. 9 of 12; %1$lld = shown, %2$lld = total (positional so a language may reorder them) |
+| `label.appsFace.accessibility` | Apps face: showing %lld of this tile's apps | Vue des apps : affiche %lld apps de cette tuile | machine | VoiceOver label for a tile preview showing the Apps face; %lld = number of app icons shown |
 | `label.background` | Background | Arrière-plan | machine | Customise Tile: background row label |
 | `label.background.colour` | Colour | Couleur | machine | Customise Tile: Colour background chip |
 | `label.background.colour.accessibility` | Colour, filled with your colour | Couleur, tuile remplie de votre couleur | machine | VoiceOver label for the Colour chip |
 | `label.background.hint.colour` | Filled with your colour | Remplie de votre couleur | machine | Customise Tile: hint under Background when Colour |
+| `label.background.hint.emojiColours` | Emoji keep their own colours. | Les emoji gardent leurs propres couleurs. | machine | Customise Tile: appended to the Background caption for an Emoji tile |
 | `label.background.hint.mono` | White in Light Mode, black in Dark Mode | Blanche en mode clair, noire en mode sombre | machine | Customise Tile: hint under Background when Mono |
 | `label.background.hint.mono.static` | White tile with a coloured symbol | Tuile blanche avec un symbole en couleur | machine | Customise Tile: hint under Background when Mono on macOS 15 (static white tile) |
 | `label.background.mono` | Mono | Mono | machine | Customise Tile: Mono background chip |
@@ -90,6 +105,7 @@ Keep `%@`-style placeholders exactly as they are. `\n` means a line break, `\|` 
 | `label.colour.hint.deepened` | Deepened slightly so the symbol stays clear | Légèrement assombrie pour que le symbole reste net | machine | Customise Tile: colour hint when the fill was darkened for contrast |
 | `label.colour.hint.emoji` | Emoji keep their own colours | Les emoji gardent leurs propres couleurs | machine | Customise Tile: colour hint, Mono emoji tile (row disabled) |
 | `label.colour.hint.fills` | Fills the tile | Remplit la tuile | machine | Customise Tile: colour hint, Colour tile |
+| `label.colour.hint.tints` | Tints the symbol | Colore le symbole | machine | Customise Tile: Colour card caption for a Mono tile |
 | `label.colour.hint.toned` | Toned for Light and Dark | Ajustée pour les modes clair et sombre | machine | Customise Tile: colour hint, Mono tile |
 | `label.colour.hint.toned.static` | Toned to stay clear on white | Ajustée pour rester nette sur fond blanc | machine | Customise Tile: colour hint, Mono tile on macOS 15 |
 | `label.iconSize` | Icon Size | Taille de l’icône | machine | Compact label for the icon size stepper (side-by-side with icon weight) |
@@ -119,7 +135,9 @@ Keep `%@`-style placeholders exactly as they are. `\n` means a line break, `\|` 
 | `label.softwareUpdateDescription` | You’re using version %@. Dock Tile checks for updates automatically. | Vous utilisez la version %@. Dock Tile recherche automatiquement les mises à jour. | machine | Description under the software-update row; %@ is the current version |
 | `label.startAtLogin` | Start tiles at login | Lancer les tuiles avec la session | machine | Label for the start-at-login toggle in Settings |
 | `label.startAtLoginDescription` | Keep your tiles ready in the Dock so they respond instantly after you restart your Mac. | Gardez vos tuiles prêtes dans le Dock pour qu’elles répondent instantanément après le redémarrage de votre Mac. | machine | Explanation under the start-at-login toggle |
+| `label.style.appPreview` | App Preview | Aperçu des apps | machine | Customise Tile: Style picker card for the Apps face |
 | `label.symbolColour` | Symbol Colour | Couleur du symbole | machine | Customise Tile: colour row label for a Mono tile |
+| `label.tileColour` | Tile Colour | Couleur de la tuile | machine | Customise Tile: Colour card header for a Colour tile |
 | `label.tileIcon` | Tile Icon | Icône de la tuile | machine | Label for tile icon section |
 | `label.tileIconSize` | Tile Icon Size | Taille de l’icône de la tuile | machine | Label for tile icon size |
 | `label.tileName` | Tile Name | Nom de la tuile | machine | Label for tile name field |

@@ -13,8 +13,9 @@ struct EmojiPickerGrid: View {
     @Binding var searchText: String
     let onSelect: (String) -> Void
 
-    private let columns = Array(repeating: GridItem(.flexible(), spacing: 4), count: 7)
-    private let emojiSize: CGFloat = 28
+    /// Six columns of 42 pt rows fit the 260 pt Customise inspector (design handoff).
+    private let columns = Array(repeating: GridItem(.flexible(), spacing: 0), count: 6)
+    private let emojiSize: CGFloat = 21
 
     /// Filter emojis based on search text using keywords
     private func filteredEmojis(for category: EmojiCategory) -> [String] {
@@ -44,8 +45,9 @@ struct EmojiPickerGrid: View {
                             .font(.caption)
                             .fontWeight(.medium)
                             .foregroundColor(.secondary)
+                            .padding(.horizontal, 4)
 
-                        LazyVGrid(columns: columns, spacing: 4) {
+                        LazyVGrid(columns: columns, spacing: 0) {
                             ForEach(filteredEmojis(for: category), id: \.self) { emoji in
                                 EmojiButton(
                                     emoji: emoji,
@@ -72,9 +74,13 @@ private struct EmojiButton: View {
     let size: CGFloat
     let onTap: () -> Void
 
-    /// Subtle contact shadow so picker emoji share the tiles' raised-on-glass feel.
+    /// The selection square; the row is 42 pt.
+    private let square: CGFloat = 36
+
+    /// Subtle contact shadow so picker emoji share the tiles' raised-on-glass feel. Measured on
+    /// the cell, not the 21 pt emoji, which is under the depth size gate.
     private var glyphShadow: IconDepthMetrics.GlyphShadow? {
-        IconDepthMetrics.glyphShadow(style: .defaultStyle, iconType: .emoji, nominalSize: size)
+        IconDepthMetrics.glyphShadow(style: .defaultStyle, iconType: .emoji, nominalSize: square)
     }
 
     var body: some View {
@@ -86,15 +92,17 @@ private struct EmojiButton: View {
                     radius: glyphShadow?.blur ?? 0,
                     y: glyphShadow?.offset ?? 0
                 )
-                .frame(width: 40, height: 40)
+                .frame(width: square, height: square)
                 .background(
-                    RoundedRectangle(cornerRadius: 8, style: .continuous)
+                    RoundedRectangle(cornerRadius: 9, style: .continuous)
                         .fill(isSelected ? Color.accentColor.opacity(0.2) : Color.clear)
                         .overlay(
-                            RoundedRectangle(cornerRadius: 8, style: .continuous)
-                                .strokeBorder(isSelected ? Color.accentColor : Color.clear, lineWidth: 2)
+                            RoundedRectangle(cornerRadius: 9, style: .continuous)
+                                .strokeBorder(isSelected ? Color.accentColor : Color.clear, lineWidth: 1.5)
                         )
                 )
+                .frame(maxWidth: .infinity)
+                .frame(height: 42)
                 .contentShape(Rectangle())
         }
         .buttonStyle(.plain)

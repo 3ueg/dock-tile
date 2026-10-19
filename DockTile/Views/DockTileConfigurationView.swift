@@ -370,18 +370,17 @@ struct PaneIcon: Equatable {
 /// The title item shared by both `PaneTitleBand` variants below — written exactly once so the plain
 /// band and the trailing-actions band can never drift apart.
 @ToolbarContentBuilder
-private func paneTitleItem(title: String, subtitle: String? = nil) -> some ToolbarContent {
+private func paneTitleItem(title: String) -> some ToolbarContent {
     if #available(macOS 26.0, *) {
-        ToolbarItem(placement: .navigation) { PaneTitleLabel(title: title, subtitle: subtitle) }
+        ToolbarItem(placement: .navigation) { PaneTitleLabel(title: title) }
             .sharedBackgroundVisibility(.hidden)   // no Liquid Glass capsule around a title
     } else {
-        ToolbarItem(placement: .navigation) { PaneTitleLabel(title: title, subtitle: subtitle) }
+        ToolbarItem(placement: .navigation) { PaneTitleLabel(title: title) }
     }
 }
 
 private struct PaneTitleLabel: View {
     let title: String
-    var subtitle: String? = nil
 
     /// Nudge that lands the title on the pane's CONTENT leading edge rather than the toolbar's own,
     /// narrower inset — the title band IS the page header, so a title starting left of the first row
@@ -392,30 +391,21 @@ private struct PaneTitleLabel: View {
     static let leadingAdjustment: CGFloat = 12
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            Text(title)
-                .font(.system(size: 16, weight: .semibold))
-                .foregroundStyle(.primary)
-                .lineLimit(1)
-                .accessibilityAddTraits(.isHeader)
-            if let subtitle {
-                Text(subtitle)
-                    .font(.system(size: 11))
-                    .foregroundStyle(.secondary)
-                    .lineLimit(1)
-            }
-        }
-        .padding(.leading, Self.leadingAdjustment)
+        Text(title)
+            .font(.system(size: 16, weight: .semibold))
+            .foregroundStyle(.primary)
+            .lineLimit(1)
+            .accessibilityAddTraits(.isHeader)
+            .padding(.leading, Self.leadingAdjustment)
     }
 }
 
 private struct PaneTitleBand: ViewModifier {
     let title: String
-    var subtitle: String? = nil
 
     func body(content: Content) -> some View {
         content.toolbar {
-            paneTitleItem(title: title, subtitle: subtitle)
+            paneTitleItem(title: title)
         }
     }
 }
@@ -526,8 +516,8 @@ struct PaneScrollEdgeEffect: ViewModifier {
 
 extension View {
     /// Page header in the title band: the title text only. Replaces `.navigationTitle`.
-    func paneTitleBand(_ title: String, subtitle: String? = nil) -> some View {
-        modifier(PaneTitleBand(title: title, subtitle: subtitle))
+    func paneTitleBand(_ title: String) -> some View {
+        modifier(PaneTitleBand(title: title))
     }
 
     /// Fades a material scrim in behind the title band while content scrolls beneath it.

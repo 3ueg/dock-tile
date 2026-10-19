@@ -241,6 +241,8 @@ struct DockTileIconPreview: View {
             }
         }
         .frame(width: size, height: size)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(AppStrings.Label.appsFaceAccessibility(minis.count))
     }
 
     private var glyphFaceBody: some View {

@@ -2,8 +2,9 @@
 //  CustomiseTileView.swift
 //  DockTile
 //
-//  Studio Canvas design for tile customization
-//  Full-width preview header with unified scrolling inspector
+//  Customise Tile: a live canvas beside a 260 pt inspector. The inspector opens with the Style
+//  picker (App Preview · Symbol · Emoji); Symbol and Emoji carry the Background, Colour, Icon Size
+//  and picker controls, App Preview has none. Design: docs/design_handoff_customise_tile/.
 //  Swift 6 - Strict Concurrency
 //
 
@@ -16,7 +17,6 @@ struct CustomiseTileView: View {
     let onBack: () -> Void
 
     @State private var editedConfig: DockTileConfiguration
-    @State private var selectedIconTab: IconPickerTab = .symbol
     @State private var customColor: Color = .blue
     @State private var searchText: String = ""
     @State private var showWeightInfo: Bool = false
@@ -29,34 +29,17 @@ struct CustomiseTileView: View {
         self.config = config
         self.onBack = onBack
         self._editedConfig = State(initialValue: config)
-        // Initialize selected tab based on current icon type
-        self._selectedIconTab = State(initialValue: config.iconType == .sfSymbol ? .symbol : .emoji)
     }
 
     var body: some View {
-        VStack(spacing: 0) {
-            // Studio Canvas - Full-width header area with vibrancy
-            studioCanvas
-
-            // Inspector Card — fills remaining vertical space
-            inspectorCard
-                .padding(.horizontal, 20)
-                .padding(.top, 8)
-                .padding(.bottom, 16)
+        HStack(alignment: .top, spacing: 18) {
+            canvas
+            inspector
         }
+        .padding(.leading, 10)
+        .padding(.bottom, 10)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(NSColorBackgroundView.windowBackground)
-        .paneTitleBand(configManager.displayName(for: editedConfig.id), subtitle: AppStrings.Navigation.customiseTile)
-        .toolbar {
-            ToolbarItem(placement: .navigation) {
-                Button(action: {
-                    DiagnosticsLog.shared.ui("Customise → Back to Tile Detail '\(editedConfig.name)'")
-                    onBack()
-                }) {
-                    Label(AppStrings.Button.back, systemImage: "chevron.left")
-                }
-            }
-        }
         .onChange(of: editedConfig) { oldValue, newValue in
             // Mark as edited immediately (enables + button)
             // Defer to avoid "Publishing changes from within view updates" warning
@@ -98,9 +81,108 @@ struct CustomiseTileView: View {
         .onChange(of: editedConfig.iconWeight) { _, newValue in
             DiagnosticsLog.shared.ui("Customise → Icon weight \(newValue.rawValue) for '\(editedConfig.name)'")
         }
-        .onChange(of: selectedIconTab) { _, newTab in
-            DiagnosticsLog.shared.ui("Customise → Icon picker tab '\(newTab == .symbol ? "Symbol" : "Emoji")'")
+        .onChange(of: editedConfig.iconFace) { _, newValue in
+            DiagnosticsLog.shared.log("tile", "Face changed to \(newValue.rawValue) for \(editedConfig.diagnosticName)")
         }
+        .onChange(of: selectedStyle) { _, _ in
+            // A query typed for symbols means nothing to the emoji grid.
+            searchText = ""
+        }
+    }
+
+    // MARK: - Seams
+
+    /// The three Style cards. The face decides first (App Preview), then the glyph's type.
+    enum TileStyle: CaseIterable, Equatable {
+        case apps, symbol, emoji
+
+        init(face: IconFace, iconType: IconType) {
+            switch face {
+            case .apps: self = .apps
+            case .glyph: self = iconType == .emoji ? .emoji : .symbol
+            }
+        }
+
+        var label: String {
+            switch self {
+            case .apps: return AppStrings.Label.styleAppPreview
+            case .symbol: return AppStrings.Tab.symbol
+            case .emoji: return AppStrings.Tab.emoji
+            }
+        }
+    }
+
+    /// What a Style card tap does to the tile. App Preview only switches the face, so the glyph
+    /// behind it survives a round trip; Symbol/Emoji keep the current glyph when it is already of
+    /// that type, else seed the default one. `symbolEmoji` (legacy) mirrors `iconValue`.
+    nonisolated static func applyStyle(_ style: TileStyle, to config: DockTileConfiguration) -> DockTileConfiguration {
+        var result = config
+        switch style {
+        case .apps:
+            result.iconFace = .apps
+        case .symbol:
+            result.iconFace = .glyph
+            if config.iconType != .sfSymbol {
+                result.iconType = .sfSymbol
+                result.iconValue = ConfigurationDefaults.iconValue
+                result.symbolEmoji = result.iconValue
+            }
+        case .emoji:
+            result.iconFace = .glyph
+            if config.iconType != .emoji {
+                result.iconType = .emoji
+                result.iconValue = ConfigurationDefaults.symbolEmoji
+                result.symbolEmoji = result.iconValue
+            }
+        }
+        return result
+    }
+
+    enum InspectorSection: Equatable {
+        case stylePicker, apps, background, colour, iconSize, iconWeight, picker
+    }
+
+    /// Which inspector groups show, in order. App Preview has no knobs. Mono + Emoji HIDES the
+    /// Colour card (an emoji can't take a colour); `tintColor` is kept, so switching back to a
+    /// symbol restores it.
+    nonisolated static func inspectorSections(face: IconFace, background: TileBackground, iconType: IconType) -> [InspectorSection] {
+        guard face == .glyph else { return [.stylePicker, .apps] }
+        var sections: [InspectorSection] = [.stylePicker, .background]
+        if !colourRowState(background: background, iconType: iconType, fillDeepened: false).isDisabled {
+            sections.append(.colour)
+        }
+        sections.append(.iconSize)
+        if iconType == .sfSymbol { sections.append(.iconWeight) }
+        sections.append(.picker)
+        return sections
+    }
+
+    struct AppsSummary: Equatable {
+        let shown: String
+        let arrangement: String
+        let note: String
+    }
+
+    /// The Apps card's two values and its caption, for `count` items in the tile.
+    nonisolated static func appsSummary(count: Int) -> AppsSummary {
+        let shown = AppStrings.Label.appsShownValue(min(count, AppsFaceGrid.maxItems), count)
+        guard count > 0 else {
+            // An em dash, not copy: nothing is arranged yet.
+            return AppsSummary(shown: shown, arrangement: "—", note: AppStrings.Label.appsNoteNone)
+        }
+        let arrangement: String
+        switch AppsFaceGrid.columns(count: count) {
+        case 1: arrangement = AppStrings.Label.appsArrangementFills
+        case 2: arrangement = AppStrings.Label.appsArrangementTwoByTwo
+        default: arrangement = AppStrings.Label.appsArrangementThreeByThree
+        }
+        let note: String
+        switch count {
+        case 1: note = AppStrings.Label.appsNoteOne
+        case ...AppsFaceGrid.maxItems: note = AppStrings.Label.appsNoteAll(count)
+        default: note = AppStrings.Label.appsNoteFirstNine(count)
+        }
+        return AppsSummary(shown: shown, arrangement: arrangement, note: note)
     }
 
     enum ColourRowState: Equatable {
@@ -109,8 +191,8 @@ struct CustomiseTileView: View {
         var usesSymbolLabel: Bool { self == .toned || self == .emojiLocked }
     }
 
-    /// Colour row copy + enablement. Mono + emoji locks the swatches (an emoji can't take a colour)
-    /// but never resets `tintColor` — switching back to a symbol restores the same colour.
+    /// Colour card copy. Mono + emoji is the locked state (the card is hidden — see
+    /// `inspectorSections`) but never resets `tintColor`.
     nonisolated static func colourRowState(background: TileBackground, iconType: IconType, fillDeepened: Bool) -> ColourRowState {
         switch background {
         case .mono: return iconType == .emoji ? .emojiLocked : .toned
@@ -119,11 +201,13 @@ struct CustomiseTileView: View {
         }
     }
 
-    /// Which hero previews Customise shows. Mono follows Light/Dark only where the tile's icon is
-    /// compiled per appearance (macOS 26+, `IconPipeline.isDeclarative`); the macOS 15 legacy
-    /// bake always shows the light variant (there is no icon-style setting to follow), so the
-    /// screen must not promise a black tile there. `nil` = follow the live style (Colour).
-    nonisolated static func heroStyles(background: TileBackground, followsAppearance: Bool) -> [IconStyle?] {
+    /// Which hero previews Customise shows. The Apps face is one live hero. A Mono glyph follows
+    /// Light/Dark only where the tile's icon is compiled per appearance (macOS 26+,
+    /// `IconPipeline.isDeclarative`); the macOS 15 legacy bake always shows the light variant
+    /// (there is no icon-style setting to follow), so the screen must not promise a black tile
+    /// there. `nil` = follow the live style.
+    nonisolated static func heroStyles(background: TileBackground, followsAppearance: Bool, iconFace: IconFace) -> [IconStyle?] {
+        guard iconFace == .glyph else { return [nil] }
         switch background {
         case .colour: return [nil]
         case .mono: return followsAppearance ? [.defaultStyle, .dark] : [.defaultStyle]
@@ -132,6 +216,10 @@ struct CustomiseTileView: View {
 
     /// The one place the Mono presentation forks on OS: true where Mono really is white-or-black.
     private var monoFollowsAppearance: Bool { IconPipeline.isDeclarative }
+
+    private var selectedStyle: TileStyle {
+        TileStyle(face: editedConfig.iconFace, iconType: editedConfig.iconType)
+    }
 
     private var colourRow: ColourRowState {
         Self.colourRowState(background: editedConfig.background, iconType: editedConfig.iconType,
@@ -152,108 +240,252 @@ struct CustomiseTileView: View {
         hasPendingSave = false
     }
 
-    // MARK: - Studio Canvas (Hero Section)
-
-    private var studioCanvas: some View {
-        HStack(alignment: .top, spacing: 28) {
-            let styles = Self.heroStyles(background: editedConfig.background, followsAppearance: monoFollowsAppearance)
-            ForEach(Array(styles.enumerated()), id: \.offset) { _, style in
-                // Captions only label a Light/Dark pair; a lone preview needs none.
-                if styles.count > 1 {
-                    heroTile(style: style,
-                             caption: style == .dark ? AppStrings.Label.previewDark : AppStrings.Label.previewLight,
-                             symbol: style == .dark ? "moon" : "sun.max")
-                } else {
-                    heroTile(style: style, caption: nil, symbol: nil)
-                }
-            }
-        }
-        .frame(maxWidth: .infinity)
-        .padding(.bottom, 12)
-        .padding(.top, 4) // Tight offset to clear the toolbar area
-        .background(StudioCanvasBackgroundView().ignoresSafeArea(edges: .top))
+    private func selectIcon(_ value: String, type: IconType) {
+        editedConfig.iconType = type
+        editedConfig.iconValue = value
+        editedConfig.symbolEmoji = value  // Keep legacy field in sync
     }
 
-    /// One hero preview. `style` forces canonical Default/Dark for the Mono pair — whatever the
-    /// user's system icon style — so the two always explain what Mono means; `nil` follows the
-    /// live style (Colour tiles show one preview, as before).
+    // MARK: - Canvas
+
+    /// The canvas card runs up under the transparent 52 pt toolbar strip; the pill stays in the
+    /// safe area, where a click reaches it.
+    private var canvas: some View {
+        let styles = Self.heroStyles(background: editedConfig.background, followsAppearance: monoFollowsAppearance,
+                                     iconFace: editedConfig.iconFace)
+        return ZStack(alignment: .topLeading) {
+            canvasSurface(styles)
+                .padding(.top, 10)
+                .ignoresSafeArea(edges: .top)
+            selectAppsPill
+                .padding(12)
+        }
+        .frame(minWidth: 250, maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    private func canvasSurface(_ styles: [IconStyle?]) -> some View {
+        let shape = RoundedRectangle(cornerRadius: 12, style: .continuous)
+        return Group {
+            if styles.count > 1 {
+                VStack(spacing: 0) {
+                    ForEach(Array(styles.enumerated()), id: \.offset) { _, style in
+                        pairHalf(style: style)
+                    }
+                }
+            } else {
+                VStack(spacing: 12) {
+                    heroTile(style: styles.first ?? nil, size: 100)
+                    Text(configManager.displayName(for: editedConfig.id))
+                        .font(.system(size: 13, weight: .medium))
+                        .foregroundStyle(.primary)
+                        .lineLimit(1)
+                        .padding(.horizontal, 12)
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .background(StudioCanvasBackgroundView())
+            }
+        }
+        .clipShape(shape)
+        .overlay(shape.strokeBorder(Color(nsColor: .quinaryLabel), lineWidth: 0.5))
+    }
+
+    /// One half of the Mono Light / Dark pair. The style is forced (canonical Default/Dark,
+    /// whatever the user's system icon style) so the pair always explains what Mono means.
     @ViewBuilder
-    private func heroTile(style: IconStyle?, caption: String?, symbol: String?) -> some View {
-        VStack(spacing: 8) {
-            ZStack {
-                DockTileIconPreview(
-                    tintColor: editedConfig.tintColor,
-                    iconType: editedConfig.iconType,
-                    iconValue: editedConfig.iconValue,
-                    iconScale: editedConfig.iconScale,
-                    iconWeight: editedConfig.iconWeight,
-                    background: editedConfig.background,
-                    size: 100
-                )
+    private func pairHalf(style: IconStyle?) -> some View {
+        if style == .dark {
+            VStack(spacing: 10) {
+                heroTile(style: style, size: 88)
+                pairCaption(AppStrings.Label.previewDark, symbol: "moon")
+                    .environment(\.colorScheme, .dark)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(LinearGradient(colors: [Color(white: 0.17), Color(white: 0.11)],
+                                       startPoint: .top, endPoint: .bottom))
+        } else {
+            VStack(spacing: 10) {
+                heroTile(style: style, size: 88)
+                pairCaption(AppStrings.Label.previewLight, symbol: "sun.max")
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(StudioCanvasBackgroundView())
+        }
+    }
+
+    private func pairCaption(_ text: String, symbol: String) -> some View {
+        Label(text, systemImage: symbol)
+            .font(.system(size: 13, weight: .medium))
+            .foregroundStyle(.secondary)
+    }
+
+    /// The tile as it will look; the icon-grid overlay guides glyph placement only, so it never
+    /// draws on the Apps face.
+    private func heroTile(style: IconStyle?, size: CGFloat) -> some View {
+        ZStack {
+            DockTileIconPreview.fromConfig(editedConfig, size: size)
                 .forcing(style)
+            if editedConfig.iconFace == .glyph {
                 if editedConfig.background == .mono {
-                    IconGridOverlay(size: 100, lineColor: style == .dark ? .white.opacity(0.25) : .black.opacity(0.15))
+                    IconGridOverlay(size: size, lineColor: style == .dark ? .white.opacity(0.25) : .black.opacity(0.15))
                 } else {
-                    IconGridOverlay(size: 100, backgroundColor: editedConfig.tintColor)
+                    IconGridOverlay(size: size, backgroundColor: editedConfig.tintColor)
                 }
             }
-            if let caption, let symbol {
-                Label(caption, systemImage: symbol)
-                    .font(.system(size: 11, weight: .medium))
-                    .foregroundStyle(.secondary)
+        }
+    }
+
+    private var selectAppsPill: some View {
+        Button {
+            DiagnosticsLog.shared.ui("Customise → Select Apps (back to Tile Detail)")
+            onBack()
+        } label: {
+            Label(AppStrings.Button.selectApps, systemImage: "chevron.left")
+                .font(.system(size: 13, weight: .medium))
+                .padding(.horizontal, 10)
+                .frame(height: 28)
+                .contentShape(Capsule())
+        }
+        .buttonStyle(.plain)
+        .modifier(GlassCapsule())
+    }
+
+    // MARK: - Inspector
+
+    private var inspector: some View {
+        let sections = Self.inspectorSections(face: editedConfig.iconFace, background: editedConfig.background,
+                                              iconType: editedConfig.iconType)
+        return ScrollView(.vertical) {
+            VStack(alignment: .leading, spacing: 18) {
+                if sections.contains(.stylePicker) { stylePicker }
+                if sections.contains(.apps) { appsSection }
+                if sections.contains(.background) { backgroundSection }
+                if sections.contains(.colour) { colourSection }
+                if sections.contains(.iconSize) { iconSizeCard(showsWeight: sections.contains(.iconWeight)) }
+                if sections.contains(.picker) { pickerSection }
+            }
+            .padding(.trailing, 12)
+            .padding(.bottom, 14)
+        }
+        .frame(width: 260)
+        .frame(maxHeight: .infinity)
+        .paneScrollEdgeEffect()
+    }
+
+    private func groupHeader(_ title: String) -> some View {
+        Text(title)
+            .font(.system(size: 15, weight: .semibold))
+            .foregroundStyle(.tertiary)
+            .padding(.horizontal, 4)
+    }
+
+    private func caption(_ text: String) -> some View {
+        Text(text)
+            .font(.system(size: 12))
+            .foregroundStyle(.secondary)
+            .fixedSize(horizontal: false, vertical: true)
+            .padding(.horizontal, 4)
+    }
+
+    private var cardHairline: some View {
+        Rectangle()
+            .fill(Color(nsColor: .quinaryLabel))
+            .frame(height: 0.5)
+    }
+
+    // MARK: Style picker
+
+    private var stylePicker: some View {
+        HStack(spacing: 10) {
+            ForEach(TileStyle.allCases, id: \.self) { style in
+                styleCard(style)
             }
         }
     }
 
-    // MARK: - Inspector Card
-
-    private var inspectorCard: some View {
-        VStack(spacing: 0) {
-            // Background Section
-            backgroundSection
-
-            Rectangle()
-                .fill(Color(nsColor: .quinaryLabel))
-                .frame(height: 1)
-
-            // Colour Section
-            colourSection
-
-            // Separator (matches form group style)
-            Rectangle()
-                .fill(Color(nsColor: .quinaryLabel))
-                .frame(height: 1)
-
-            // Tile Icon Size Section (moved above Tile Icon)
-            tileIconSizeSection
-
-            // Separator
-            Rectangle()
-                .fill(Color(nsColor: .quinaryLabel))
-                .frame(height: 1)
-
-            // Tile Icon Section
-            tileIconSection
+    /// One Style card: a mini tile rendered in that style from the tile's CURRENT settings.
+    private func styleCard(_ style: TileStyle) -> some View {
+        let isSelected = selectedStyle == style
+        let styled = Self.applyStyle(style, to: editedConfig)
+        return Button {
+            DiagnosticsLog.shared.ui("Customise → Style '\(style)'")
+            editedConfig = styled
+        } label: {
+            VStack(spacing: 7) {
+                DockTileIconPreview(
+                    tintColor: styled.tintColor,
+                    iconType: styled.iconType,
+                    iconValue: styled.iconValue,
+                    iconScale: styled.iconScale,
+                    iconWeight: styled.iconWeight,
+                    background: styled.background,
+                    size: 32,
+                    appsFaceItems: style == .apps ? editedConfig.appItems : []
+                )
+                Text(style.label)
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundStyle(.primary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.75)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.top, 12)
+            .padding(.bottom, 10)
+            .padding(.horizontal, 2)
+            .modifier(InspectorCard(isSelected: isSelected))
+            .overlay(alignment: .topTrailing) {
+                if isSelected {
+                    Image(systemName: "checkmark.circle.fill")
+                        .symbolRenderingMode(.palette)
+                        .foregroundStyle(.white, Color.accentColor)
+                        .font(.system(size: 16))
+                        .padding(6)
+                }
+            }
+            .contentShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
         }
-        .padding(.horizontal, 10)
-        .background(NSColorBackgroundView.formGroup)
-        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .buttonStyle(.plain)
+        .accessibilityLabel(style.label)
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
     }
 
-    // MARK: - Background Section
+    // MARK: Apps
+
+    private var appsSection: some View {
+        let summary = Self.appsSummary(count: editedConfig.appItems.count)
+        return VStack(alignment: .leading, spacing: 8) {
+            groupHeader(AppStrings.Label.appsHeader)
+            VStack(spacing: 0) {
+                valueRow(AppStrings.Label.appsShown, value: summary.shown)
+                cardHairline
+                valueRow(AppStrings.Label.appsArrangement, value: summary.arrangement)
+            }
+            .modifier(InspectorCard())
+            caption(summary.note + " " + AppStrings.Label.appsGlass)
+        }
+    }
+
+    private func valueRow(_ title: String, value: String) -> some View {
+        HStack(spacing: 12) {
+            Text(title)
+                .font(.system(size: 13))
+                .foregroundStyle(.primary)
+                .lineLimit(1)
+            Spacer(minLength: 8)
+            Text(value)
+                .font(.system(size: 13))
+                .foregroundStyle(.secondary)
+                .lineLimit(1)
+        }
+        .padding(.horizontal, 14)
+        .frame(minHeight: 46)
+    }
+
+    // MARK: Background
 
     private var backgroundSection: some View {
-        HStack(alignment: .center, spacing: 16) {
-            VStack(alignment: .leading, spacing: 2) {
-                Text(AppStrings.Label.background)
-                    .font(.system(size: 13))
-                    .foregroundColor(.primary)
-                Text(backgroundHint)
-                    .font(.system(size: 11))
-                    .foregroundStyle(.secondary)
-            }
-            Spacer()
-            HStack(spacing: 16) {
+        VStack(alignment: .leading, spacing: 8) {
+            groupHeader(AppStrings.Label.background)
+            HStack(spacing: 8) {
                 ForEach(TileBackground.allCases, id: \.self) { option in
                     BackgroundChip(option: option, config: editedConfig, isSelected: editedConfig.background == option,
                                    followsAppearance: monoFollowsAppearance) {
@@ -261,32 +493,15 @@ struct CustomiseTileView: View {
                     }
                 }
             }
-        }
-        .frame(height: 76)
-    }
-
-    // MARK: - Colour Section
-
-    private var colourSection: some View {
-        let state = colourRow
-        return HStack(alignment: .center, spacing: 16) {
             VStack(alignment: .leading, spacing: 2) {
-                Text(state.usesSymbolLabel ? AppStrings.Label.symbolColour : AppStrings.Label.colour)
-                    .font(.system(size: 13))
-                    .foregroundColor(.primary)
-                Text(colourHint(state))
-                    .font(.system(size: 11))
-                    .foregroundStyle(.secondary)
+                caption(backgroundHint)
+                // Mono + Emoji: says why the Colour card is gone. Its own line — the Mono hint
+                // carries no full stop, so appending would run the two sentences together.
+                if editedConfig.background == .mono && editedConfig.iconType == .emoji {
+                    caption(AppStrings.Label.backgroundHintEmojiColours)
+                }
             }
-            Spacer()
-            // `.disabled` on the swatches only; the ROW carries the fade and the tooltip —
-            // `.help` never fires inside a disabled subtree (development.md).
-            colourPickerStrip
-                .disabled(state.isDisabled)
         }
-        .frame(height: 56)
-        .opacity(state.isDisabled ? 0.45 : 1)
-        .help(state.isDisabled ? AppStrings.Label.colourHintEmoji : "")
     }
 
     private var backgroundHint: String {
@@ -296,23 +511,45 @@ struct CustomiseTileView: View {
         }
     }
 
-    private func colourHint(_ state: ColourRowState) -> String {
+    // MARK: Colour
+
+    private var colourSection: some View {
+        let state = colourRow
+        return VStack(alignment: .leading, spacing: 8) {
+            HStack(alignment: .firstTextBaseline, spacing: 8) {
+                groupHeader(state.usesSymbolLabel ? AppStrings.Label.symbolColour : AppStrings.Label.tileColour)
+                    .layoutPriority(1)
+                Spacer(minLength: 4)
+                Text(colourCaption(state))
+                    .font(.system(size: 12))
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.trailing)
+                    .padding(.trailing, 4)
+            }
+            colourPickerStrip
+                .padding(.horizontal, 14)
+                .padding(.vertical, 12)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .modifier(InspectorCard())
+        }
+    }
+
+    private func colourCaption(_ state: ColourRowState) -> String {
         switch state {
         case .fillsTile: return AppStrings.Label.colourHintFills
         case .deepened: return AppStrings.Label.colourHintDeepened
-        case .toned: return monoFollowsAppearance ? AppStrings.Label.colourHintToned : AppStrings.Label.colourHintTonedStatic
-        case .emojiLocked: return AppStrings.Label.colourHintEmoji
+        case .toned, .emojiLocked: return AppStrings.Label.colourHintTints
         }
     }
 
     private var colourPickerStrip: some View {
-        HStack(spacing: 8) {
+        HStack(spacing: 6) {
             // Preset colors
             ForEach(TintColor.PresetColor.allCases, id: \.self) { preset in
                 ColorSwatchButton(
                     color: preset.colorBottom,
                     isSelected: isPresetSelected(preset),
-                    size: 24
+                    size: 20
                 ) {
                     withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
                         editedConfig.tintColor = .preset(preset)
@@ -324,7 +561,7 @@ struct CustomiseTileView: View {
             CustomColorPickerButton(
                 selectedColor: $customColor,
                 isSelected: isCustomColorSelected,
-                size: 24
+                size: 20
             ) { newColor in
                 let hexString = newColor.toHexString()
                 withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
@@ -348,42 +585,7 @@ struct CustomiseTileView: View {
         return false
     }
 
-    // MARK: - Segmented Picker
-
-    /// Segmented picker with flexible button sizing (macOS 26+)
-    @available(macOS 26.0, *)
-    private var pickerWithFlexibleSizing: some View {
-        Picker("", selection: $selectedIconTab) {
-            Text(AppStrings.Tab.symbol).tag(IconPickerTab.symbol)
-            Text(AppStrings.Tab.emoji).tag(IconPickerTab.emoji)
-        }
-        .pickerStyle(.segmented)
-        .labelsHidden()
-        .frame(maxWidth: .infinity)
-        .buttonSizing(.flexible)
-    }
-
-    /// Segmented picker with standard sizing (macOS 15.0+)
-    private var pickerWithStandardSizing: some View {
-        Picker("", selection: $selectedIconTab) {
-            Text(AppStrings.Tab.symbol).tag(IconPickerTab.symbol)
-            Text(AppStrings.Tab.emoji).tag(IconPickerTab.emoji)
-        }
-        .pickerStyle(.segmented)
-        .labelsHidden()
-        .frame(maxWidth: .infinity)
-    }
-
-    @ViewBuilder
-    private var segmentedPicker: some View {
-        if #available(macOS 26.0, *) {
-            pickerWithFlexibleSizing
-        } else {
-            pickerWithStandardSizing
-        }
-    }
-
-    // MARK: - Tile Icon Size Section
+    // MARK: Icon Size / Icon Weight
 
     /// Maximum allowed scale value (keeps icon within its type's safe area)
     private var maxIconScale: Int {
@@ -394,44 +596,39 @@ struct CustomiseTileView: View {
         editedConfig.iconType == .emoji ? IconDepthMetrics.emojiScaleMax : 19
     }
 
-    /// Combined row: Icon Size stepper on the left, Icon Weight pull-down on the
-    /// right, split by a vertical divider (matches the inspector design).
-    private var tileIconSizeSection: some View {
-        HStack(spacing: 12) {
-            // Icon Size (left half)
-            HStack(spacing: 8) {
+    private func iconSizeCard(showsWeight: Bool) -> some View {
+        VStack(spacing: 0) {
+            HStack(spacing: 10) {
                 Text(AppStrings.Label.iconSize)
                     .font(.system(size: 13))
-                    .foregroundColor(.primary)
-
+                    .foregroundStyle(.primary)
+                    .lineLimit(1)
                 Spacer(minLength: 8)
-
                 Stepper(value: $editedConfig.iconScale, in: 10...maxIconScale) {
                     Text("\(editedConfig.iconScale)")
                         .monospacedDigit()
-                        .frame(width: 24, alignment: .trailing)
+                        .foregroundStyle(.secondary)
                 }
             }
-            .frame(maxWidth: .infinity)
+            .padding(.horizontal, 14)
+            .frame(minHeight: 46)
 
-            Divider()
-                .frame(height: 28)
-
-            // Icon Weight (right half)
-            HStack(spacing: 6) {
-                Text(AppStrings.Label.iconWeight)
-                    .font(.system(size: 13))
-                    .foregroundColor(.primary)
-
-                iconWeightInfoButton
-
-                Spacer(minLength: 8)
-
-                iconWeightPicker
+            if showsWeight {
+                cardHairline
+                HStack(spacing: 6) {
+                    Text(AppStrings.Label.iconWeight)
+                        .font(.system(size: 13))
+                        .foregroundStyle(.primary)
+                        .lineLimit(1)
+                    iconWeightInfoButton
+                    Spacer(minLength: 8)
+                    iconWeightPicker
+                }
+                .padding(.horizontal, 14)
+                .frame(minHeight: 46)
             }
-            .frame(maxWidth: .infinity)
         }
-        .frame(height: 52)
+        .modifier(InspectorCard())
     }
 
     /// Small info affordance next to the Icon Weight label. Click reveals a popover
@@ -459,7 +656,6 @@ struct CustomiseTileView: View {
     }
 
     /// Native macOS pull-down (pop-up button) for choosing the SF Symbol weight.
-    /// Stays enabled for emojis — the renderers simply ignore weight for emoji content.
     private var iconWeightPicker: some View {
         Picker("", selection: $editedConfig.iconWeight) {
             ForEach(IconWeight.allCases, id: \.self) { weight in
@@ -471,83 +667,42 @@ struct CustomiseTileView: View {
         .fixedSize()
     }
 
-    // MARK: - Tile Icon Section
+    // MARK: Picker
 
-    private var tileIconSection: some View {
-        VStack(spacing: 12) {
-            Text(AppStrings.Label.tileIcon)
-                .font(.body)
-                .foregroundColor(.primary)
-                .frame(maxWidth: .infinity, alignment: .leading)
-
-            // Segmented control for Symbol/Emoji - full width
-            // Note: Switching tabs only changes the picker view, NOT the iconType
-            // iconType only changes when user explicitly selects a new icon
-            segmentedPicker
-
-            // Search field - sticky (outside ScrollView)
-            iconSearchField
-
-            // Icon grid — fills remaining space in the inspector card
-            ScrollView(.vertical, showsIndicators: false) {
-                Group {
-                    switch selectedIconTab {
-                    case .symbol:
-                        SymbolPickerGrid(
-                            selectedSymbol: Binding(
-                                get: {
-                                    // Only show selection if current icon is an SF Symbol
-                                    editedConfig.iconType == .sfSymbol ? editedConfig.iconValue : ""
-                                },
-                                set: { newValue in
-                                    editedConfig.iconType = .sfSymbol
-                                    editedConfig.iconValue = newValue
-                                    editedConfig.symbolEmoji = newValue  // Keep legacy field in sync
-                                }
-                            ),
-                            searchText: $searchText,
-                            iconWeight: editedConfig.iconWeight,
-                            onSelect: { symbol in
-                                editedConfig.iconType = .sfSymbol
-                                editedConfig.iconValue = symbol
-                                editedConfig.symbolEmoji = symbol
-                            }
-                        )
-
-                    case .emoji:
-                        EmojiPickerGrid(
-                            selectedEmoji: Binding(
-                                get: {
-                                    // Only show selection if current icon is an emoji
-                                    editedConfig.iconType == .emoji ? editedConfig.iconValue : ""
-                                },
-                                set: { newValue in
-                                    editedConfig.iconType = .emoji
-                                    editedConfig.iconValue = newValue
-                                    editedConfig.symbolEmoji = newValue  // Keep legacy field in sync
-                                }
-                            ),
-                            searchText: $searchText,
-                            onSelect: { emoji in
-                                editedConfig.iconType = .emoji
-                                editedConfig.iconValue = emoji
-                                editedConfig.symbolEmoji = emoji
-                            }
-                        )
-                    }
+    private var pickerSection: some View {
+        let isEmoji = editedConfig.iconType == .emoji
+        return VStack(alignment: .leading, spacing: 8) {
+            groupHeader(isEmoji ? AppStrings.Tab.emoji : AppStrings.Tab.symbol)
+            VStack(spacing: 8) {
+                iconSearchField
+                    .padding(.horizontal, 4)
+                if isEmoji {
+                    EmojiPickerGrid(
+                        selectedEmoji: Binding(
+                            get: { editedConfig.iconValue },
+                            set: { selectIcon($0, type: .emoji) }
+                        ),
+                        searchText: $searchText,
+                        onSelect: { selectIcon($0, type: .emoji) }
+                    )
+                } else {
+                    SymbolPickerGrid(
+                        selectedSymbol: Binding(
+                            get: { editedConfig.iconValue },
+                            set: { selectIcon($0, type: .sfSymbol) }
+                        ),
+                        searchText: $searchText,
+                        iconWeight: editedConfig.iconWeight,
+                        onSelect: { selectIcon($0, type: .sfSymbol) }
+                    )
                 }
-                .frame(maxWidth: .infinity)
             }
-            .frame(maxHeight: .infinity)
-        }
-        .padding(.vertical, 12)
-        .onChange(of: selectedIconTab) { _, _ in
-            // Clear search when switching tabs
-            searchText = ""
+            .padding(.top, 10)
+            .padding(.horizontal, 8)
+            .padding(.bottom, 8)
+            .modifier(InspectorCard())
         }
     }
-
-    // MARK: - Icon Search Field
 
     private var iconSearchField: some View {
         HStack(spacing: 6) {
@@ -556,7 +711,7 @@ struct CustomiseTileView: View {
                 .foregroundColor(.secondary)
 
             TextField(
-                selectedIconTab == .symbol ? AppStrings.Search.symbols : AppStrings.Search.emojis,
+                editedConfig.iconType == .emoji ? AppStrings.Search.emojis : AppStrings.Search.symbols,
                 text: $searchText
             )
             .textFieldStyle(.plain)
@@ -578,11 +733,32 @@ struct CustomiseTileView: View {
     }
 }
 
-// MARK: - Icon Picker Tab
+// MARK: - Inspector card surface
 
-private enum IconPickerTab {
-    case symbol
-    case emoji
+/// The inspector's card: the form-group surface, 12 pt continuous corners, a hairline — or a
+/// 2 pt accent ring when the card is the selected choice.
+private struct InspectorCard: ViewModifier {
+    var isSelected = false
+
+    func body(content: Content) -> some View {
+        let shape = RoundedRectangle(cornerRadius: 12, style: .continuous)
+        content
+            .background(NSColorBackgroundView.formGroup)
+            .clipShape(shape)
+            .overlay(shape.strokeBorder(isSelected ? Color.accentColor : Color(nsColor: .quinaryLabel),
+                                        lineWidth: isSelected ? 2 : 0.5))
+    }
+}
+
+/// Liquid Glass capsule on macOS 26+, a material capsule before it.
+private struct GlassCapsule: ViewModifier {
+    func body(content: Content) -> some View {
+        if #available(macOS 26.0, *) {
+            content.glassEffect(.regular, in: .capsule)
+        } else {
+            content.background(.regularMaterial, in: Capsule())
+        }
+    }
 }
 
 // MARK: - Native Background Views
@@ -609,12 +785,13 @@ private struct ColorSwatchButton: View {
                     .frame(width: size, height: size)
 
                 if isSelected {
+                    // White inner ring + white check (the handoff's selected swatch).
                     Circle()
-                        .strokeBorder(Color.white, lineWidth: 2)
-                        .frame(width: size - 4, height: size - 4)
+                        .strokeBorder(Color.white.opacity(0.95), lineWidth: 2)
+                        .frame(width: size, height: size)
 
                     Image(systemName: "checkmark")
-                        .font(.system(size: 12, weight: .bold))
+                        .font(.system(size: size * 0.45, weight: .bold))
                         .foregroundColor(.white)
                 }
             }
@@ -651,16 +828,16 @@ private struct CustomColorPickerButton: View {
                 // Inner circle (white or selected color)
                 Circle()
                     .fill(isSelected ? selectedColor : Color.white)
-                    .frame(width: size - 6, height: size - 6)
+                    .frame(width: size * 0.75, height: size * 0.75)
 
                 // Plus icon when not selected, checkmark when selected
                 if !isSelected {
                     Image(systemName: "plus")
-                        .font(.system(size: 10, weight: .bold))
+                        .font(.system(size: size * 0.4, weight: .bold))
                         .foregroundColor(.gray)
                 } else {
                     Image(systemName: "checkmark")
-                        .font(.system(size: 10, weight: .bold))
+                        .font(.system(size: size * 0.4, weight: .bold))
                         .foregroundColor(.white)
                         .shadow(color: .black.opacity(0.3), radius: 1, x: 0, y: 1)
                 }
@@ -739,11 +916,12 @@ extension Color {
         onBack: {}
     )
     .environmentObject(ConfigurationManager())
-    .frame(width: 500, height: 700)
+    .frame(width: 620, height: 700)
 }
 
-/// A 44pt tile thumbnail for the Background choice. Colour shows the tile filled; Mono is split
-/// on the diagonal into its Light and Dark renders, so the one chip explains "follows the system".
+/// A card for the Background choice: a 32 pt tile thumbnail and the label. Colour shows the tile
+/// filled; Mono is split on the diagonal into its Light and Dark renders, so the one card explains
+/// "follows the system".
 private struct BackgroundChip: View {
     let option: TileBackground
     let config: DockTileConfiguration
@@ -752,23 +930,24 @@ private struct BackgroundChip: View {
     let followsAppearance: Bool
     let action: () -> Void
 
-    private let side: CGFloat = 44
+    private let side: CGFloat = 32
 
     var body: some View {
         Button(action: action) {
-            VStack(spacing: 6) {
+            HStack(spacing: 8) {
                 thumbnail
                     .frame(width: side, height: side)
-                    .overlay {
-                        // 2pt ring, 2pt gap: the 2pt stroke is centred on a path 3pt outside the tile.
-                        RoundedRectangle(cornerRadius: side * 0.225 + 3, style: .continuous)
-                            .stroke(isSelected ? Color.accentColor : .clear, lineWidth: 2)
-                            .padding(-3)
-                    }
                 Text(option == .colour ? AppStrings.Label.backgroundColour : AppStrings.Label.backgroundMono)
-                    .font(.system(size: 11, weight: isSelected ? .semibold : .regular))
-                    .foregroundStyle(isSelected ? .primary : .secondary)
+                    .font(.system(size: 13, weight: isSelected ? .semibold : .regular))
+                    .foregroundStyle(.primary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
+                Spacer(minLength: 0)
             }
+            .padding(8)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .modifier(InspectorCard(isSelected: isSelected))
+            .contentShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
         }
         .buttonStyle(.plain)
         .accessibilityLabel(accessibilityText)

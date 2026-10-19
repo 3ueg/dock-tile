@@ -155,10 +155,10 @@ enum AppStrings {
             comment: "Button to add tile to Dock"
         )
 
-        static let back = NSLocalizedString(
-            "button.back",
-            value: "Back",
-            comment: "Back button label"
+        static let selectApps = NSLocalizedString(
+            "button.selectApps",
+            value: "Select Apps",
+            comment: "Customise Tile: floating pill that returns to Tile Detail"
         )
 
         static let resetToDefaults = NSLocalizedString(
@@ -321,12 +321,6 @@ enum AppStrings {
     // MARK: - Labels
 
     enum Label {
-        static let colour = NSLocalizedString(
-            "label.colour",
-            value: "Colour",
-            comment: "Label for colour picker section"
-        )
-
         // MARK: Tile background (Colour / Mono)
         static let background = NSLocalizedString(
             "label.background",
@@ -388,21 +382,6 @@ enum AppStrings {
             value: "Deepened slightly so the symbol stays clear",
             comment: "Customise Tile: colour hint when the fill was darkened for contrast"
         )
-        static let colourHintToned = NSLocalizedString(
-            "label.colour.hint.toned",
-            value: "Toned for Light and Dark",
-            comment: "Customise Tile: colour hint, Mono tile"
-        )
-        static let colourHintTonedStatic = NSLocalizedString(
-            "label.colour.hint.toned.static",
-            value: "Toned to stay clear on white",
-            comment: "Customise Tile: colour hint, Mono tile on macOS 15"
-        )
-        static let colourHintEmoji = NSLocalizedString(
-            "label.colour.hint.emoji",
-            value: "Emoji keep their own colours",
-            comment: "Customise Tile: colour hint, Mono emoji tile (row disabled)"
-        )
         static let previewLight = NSLocalizedString(
             "label.preview.light",
             value: "Light",
@@ -413,6 +392,102 @@ enum AppStrings {
             value: "Dark",
             comment: "Customise Tile: caption under the Dark Mode preview"
         )
+        static let tileColour = NSLocalizedString(
+            "label.tileColour",
+            value: "Tile Colour",
+            comment: "Customise Tile: Colour card header for a Colour tile"
+        )
+        static let colourHintTints = NSLocalizedString(
+            "label.colour.hint.tints",
+            value: "Tints the symbol",
+            comment: "Customise Tile: Colour card caption for a Mono tile"
+        )
+        static let backgroundHintEmojiColours = NSLocalizedString(
+            "label.background.hint.emojiColours",
+            value: "Emoji keep their own colours.",
+            comment: "Customise Tile: appended to the Background caption for an Emoji tile"
+        )
+
+        // MARK: Customise Tile — Style picker and the Apps face
+
+        static let styleAppPreview = NSLocalizedString(
+            "label.style.appPreview",
+            value: "App Preview",
+            comment: "Customise Tile: Style picker card for the Apps face"
+        )
+        static let appsHeader = NSLocalizedString(
+            "label.apps.header",
+            value: "Apps",
+            comment: "Customise Tile: group header above the Apps card"
+        )
+        static let appsShown = NSLocalizedString(
+            "label.apps.shown",
+            value: "Shown",
+            comment: "Customise Tile: Apps card row — how many apps the face shows"
+        )
+        static func appsShownValue(_ shown: Int, _ total: Int) -> String {
+            String(format: NSLocalizedString(
+                "label.apps.shownValue",
+                value: "%1$lld of %2$lld",
+                comment: "Customise Tile: Apps card Shown value, e.g. 9 of 12; %1$lld = shown, %2$lld = total (positional so a language may reorder them)"
+            ), shown, total)
+        }
+        static let appsArrangement = NSLocalizedString(
+            "label.apps.arrangement",
+            value: "Arrangement",
+            comment: "Customise Tile: Apps card row — the grid the face uses"
+        )
+        static let appsArrangementFills = NSLocalizedString(
+            "label.apps.arrangement.fills",
+            value: "Fills the Tile",
+            comment: "Customise Tile: Arrangement value for one app"
+        )
+        static let appsArrangementTwoByTwo = NSLocalizedString(
+            "label.apps.arrangement.twoByTwo",
+            value: "2 × 2",
+            comment: "Customise Tile: Arrangement value for 2–4 apps"
+        )
+        static let appsArrangementThreeByThree = NSLocalizedString(
+            "label.apps.arrangement.threeByThree",
+            value: "3 × 3",
+            comment: "Customise Tile: Arrangement value for 5 or more apps"
+        )
+        static let appsNoteOne = NSLocalizedString(
+            "label.apps.note.one",
+            value: "Shows the only app in this tile.",
+            comment: "Customise Tile: Apps caption, one app"
+        )
+        static func appsNoteAll(_ count: Int) -> String {
+            String(format: NSLocalizedString(
+                "label.apps.note.all",
+                value: "Shows all %lld apps, in tile order.",
+                comment: "Customise Tile: Apps caption, 2–9 apps; %lld = app count"
+            ), count)
+        }
+        static func appsNoteFirstNine(_ count: Int) -> String {
+            String(format: NSLocalizedString(
+                "label.apps.note.firstNine",
+                value: "Shows the first 9 of %lld apps, in tile order.",
+                comment: "Customise Tile: Apps caption, more than nine apps; %lld = app count"
+            ), count)
+        }
+        static let appsNoteNone = NSLocalizedString(
+            "label.apps.note.none",
+            value: "No apps yet — add some in Tile Detail.",
+            comment: "Customise Tile: Apps caption when the tile has no apps (builder copy, not in the handoff)"
+        )
+        static let appsGlass = NSLocalizedString(
+            "label.apps.glass",
+            value: "A glass folder that follows Light and Dark Mode.",
+            comment: "Customise Tile: fixed sentence after the Apps caption (decided 2026-10-19: the dark appearance is system-dark)"
+        )
+        static func appsFaceAccessibility(_ count: Int) -> String {
+            String(format: NSLocalizedString(
+                "label.appsFace.accessibility",
+                value: "Apps face: showing %lld of this tile's apps",
+                comment: "VoiceOver label for a tile preview showing the Apps face; %lld = number of app icons shown"
+            ), count)
+        }
 
         // MARK: Popover Appearance controls
 
@@ -516,12 +591,6 @@ enum AppStrings {
             "label.showTile",
             value: "Show Tile",
             comment: "Label for show tile toggle"
-        )
-
-        static let tileIcon = NSLocalizedString(
-            "label.tileIcon",
-            value: "Tile Icon",
-            comment: "Label for tile icon section"
         )
 
         static let tileIconSize = NSLocalizedString(
@@ -1079,16 +1148,6 @@ enum AppStrings {
             comment: "Popover item context menu: quit the running app")
         static let forceQuit = NSLocalizedString("itemMenu.forceQuit", value: "Force Quit",
             comment: "Popover item context menu: force quit (shown while Option is held)")
-    }
-
-    // MARK: - Navigation
-
-    enum Navigation {
-        static let customiseTile = NSLocalizedString(
-            "navigation.customiseTile",
-            value: "Customise Tile",
-            comment: "Navigation title for customise tile view"
-        )
     }
 
     // MARK: - Sidebar
