@@ -67,7 +67,7 @@ it, and unit-test the seam so a broken rule fails loudly. Existing seams: `resol
 `IconDocumentBuilder.appsFaceIconJSON` (system fills + explicit flat keys + one grid per appearance slot, glyph documents never gain a tinted hiding; `IconDocumentBuilderTests`, compiled end-to-end in `IconCompilerTests`, which also asserts each appearance stack shows only its own grid),
 `AppIconStyleRenderer.descriptorValues` / `.render` + `HelperBundleManager.styledAppsFaceMinis` (App Grid minis rendered in a NAMED style via private IconServices — Default/Dark/Clear Dark differ by luminance, same icon-grid margin as the public render, folders keep the public icon; `AppIconStyleRendererTests`, which fail rather than skip on macOS 26+ when a render is nil),
 `AppInstallChecker.isInstalled` (the one installed-predicate shared by the Apps-face bake, the preview and the Customise Apps card),
-`CustomiseTileView.TileStyle(face:iconType:)` / `.applyStyle` / `.inspectorSections` / `.appsSummary(items:isInstalled:)` / `.heroStyles(…iconFace:)` (the Style picker and the Apps card; `applyStyle` saves the outgoing symbol/emoji + size into `savedSymbol` / `savedEmoji` (schema v11) and restores the incoming one, so switching cards never loses a choice; `CustomiseStyleTests` + `CustomiseHeroStylesTests` + `SavedGlyphTests`, English host),
+`CustomiseTileView.TileStyle(face:iconType:)` / `.applyStyle` / `.inspectorSections` / `.appsSummary(items:isInstalled:)` / `.heroStyles(…iconFace:)` (the Style picker and the Apps card; `applyStyle` saves the outgoing symbol/emoji + size + Colour/Mono background + tile colour into `savedSymbol` / `savedEmoji` (schema v11) and restores the incoming one, so switching cards never loses a choice; `CustomiseStyleTests` + `CustomiseHeroStylesTests` + `SavedGlyphTests`, English host),
 `DockTileDetailView.dockActionParameters` (`tile_added_to_dock` / `tile_updated` parameters incl. `face`; `DockActionResolutionTests`),
 `AppDelegate.clampedWindowWidth` (window 782…1200 pt; `MainWindowWidthTests`),
 `IconFace` tolerant decode + the two defaults (missing key → glyph, new tile → apps; unknown value → glyph; `IconFaceTests`),
@@ -145,7 +145,11 @@ the test), and a test that reads the source tree through `#filePath` works on ma
 because that job checks the repo out at the same path. The first macOS 15 run failed 11 tests for
 exactly these two reasons. Since the String Catalog ships (2026-10-17), runtime `AppStrings` values
 also follow the test host's language: pin locale-specific expectations through the catalog JSON,
-never through `AppStrings` at runtime. UI/integration tests run locally only.
+never through `AppStrings` at runtime. Likewise the owner's Mac **icon style**: a test that reads a
+real app's icon through `NSWorkspace` gets the CURRENT style, so `AppsFacePreviewTests`
+(`oneAppOnLightGlass`, `clearAndTintedDesaturate`, Finder saturation) fail whenever the host is on
+Clear or Tinted (2026-10-19). Run the suite on Default, or pin a style with `AppIconStyleRenderer`.
+UI/integration tests run locally only.
 
 **Count tests per suite, not by grepping a whole log.** `grep -c "passed"` over an `xcodebuild`
 log drifted between runs of the same tree (748/750/765 for one branch), so a "+N tests" claim

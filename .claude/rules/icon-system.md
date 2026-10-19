@@ -109,9 +109,11 @@ Every role (fill top/bottom, glyph) per background x style x icon type is derive
 - **Layer model (spike, 2026-10-14)**: a Mono symbol `.icon` keeps the SAME two glyph layers as a
   Colour one; the tinted appearance reuses the (coloured) light layer, and macOS 27 derives a legible
   Tinted/Clear relief from it (verified by eye in Finder). No third layer was needed.
-- **Verify icon styles by eye in Finder/Dock**: `NSWorkspace.icon(forFile:)` from a CLI script does
-  NOT follow the system icon style on macOS 27 (inside the running app it does — `TileFace` relies
-  on that). `AppleIconAppearanceTheme` IS written on macOS 27 with the documented values (an
+- **Verify icon styles by eye in Finder/Dock**: whether `NSWorkspace.icon(forFile:)` follows the
+  system icon style is inconsistent — a CLI script did NOT on macOS 27 (issue #22), yet one DID
+  (Clear Dark) on 2026-10-19, and a long-running app process can lag a style change. For a specific
+  style use `AppIconStyleRenderer` (named style), never a public render. `AppleIconAppearanceTheme`
+  IS written on macOS 27 with the documented values (an
   earlier note here said it was absent; issue #22 measured it).
 - **Not adopted for glyph tiles**: Apple's `system-light`/`system-dark` fills — their values are
   unpublished, so the 3:1 contrast promise cannot be computed against them. The Apps face DOES use

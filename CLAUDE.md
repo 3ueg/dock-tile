@@ -69,6 +69,9 @@ python3 -I -m unittest discover -s Scripts/l10n -p 'test_*.py'
 python3 -I Scripts/l10n/l10n.py check
 ```
 
+Run it with the Mac on the **Default** icon style: two App Grid preview tests read Finder's live icon
+and fail under Clear/Tinted (see [Testing](/.claude/rules/testing.md)).
+
 Tests leave the shared Debug product effectively unsigned (SMAppService then fails with -67056).
 Before launching the dev app afterwards: rebuild WITHOUT that flag and check `codesign --verify`
 passes — see [Driving the Dev Build](/.claude/rules/driving-the-dev-build.md).
