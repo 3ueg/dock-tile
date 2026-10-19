@@ -32,11 +32,12 @@ struct CustomiseTileView: View {
     }
 
     var body: some View {
-        HStack(alignment: .top, spacing: 18) {
+        // One gutter on both sides of the canvas: sidebar→canvas and canvas→inspector are both 10 pt.
+        HStack(alignment: .top, spacing: Self.paneGutter) {
             canvas
             inspector
         }
-        .padding(.leading, 10)
+        .padding(.leading, Self.paneGutter)
         .padding(.bottom, 10)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(NSColorBackgroundView.windowBackground)
@@ -114,13 +115,14 @@ struct CustomiseTileView: View {
 
     /// What a Style card tap does to the tile. App Grid only switches the face, so the glyph
     /// behind it survives a round trip. Symbol/Emoji keep the current glyph when it is already of
-    /// that type. Otherwise the outgoing glyph and its size are saved (`savedSymbol` /
-    /// `savedEmoji`) and the incoming type's saved glyph is restored, so switching never loses a
-    /// choice; with nothing saved yet the default glyph is seeded and the size carries over.
-    /// `symbolEmoji` (legacy) mirrors `iconValue`.
+    /// that type. Otherwise the outgoing glyph and its settings (size, Colour/Mono background, tile
+    /// colour) are saved (`savedSymbol` / `savedEmoji`) and the incoming type's are restored, so
+    /// switching never loses a choice; with nothing saved yet the default glyph is seeded and the
+    /// settings carry over. `symbolEmoji` (legacy) mirrors `iconValue`.
     nonisolated static func applyStyle(_ style: TileStyle, to config: DockTileConfiguration) -> DockTileConfiguration {
         var result = config
-        let outgoing = SavedGlyph(value: config.iconValue, scale: config.iconScale)
+        let outgoing = SavedGlyph(value: config.iconValue, scale: config.iconScale,
+                                  background: config.background, tint: config.tintColor)
         switch style {
         case .apps:
             result.iconFace = .apps
@@ -145,6 +147,8 @@ struct CustomiseTileView: View {
                                             into config: inout DockTileConfiguration) {
         config.iconValue = saved?.value ?? value
         if let saved { config.iconScale = saved.scale }
+        if let background = saved?.background { config.background = background }
+        if let tint = saved?.tint { config.tintColor = tint }
         config.symbolEmoji = config.iconValue
     }
 
@@ -267,6 +271,8 @@ struct CustomiseTileView: View {
     /// Top inset shared by the canvas and the inspector, so both columns start on one line under
     /// the transparent toolbar strip (they run up into it, using that space).
     private static let paneTopInset: CGFloat = 10
+    /// The gap on each side of the canvas (sidebar→canvas and canvas→inspector).
+    private static let paneGutter: CGFloat = 10
 
     /// Inset of the "Select Apps" pill from the canvas card's top and leading edges.
     private static let pillInset: CGFloat = 12
@@ -379,7 +385,7 @@ struct CustomiseTileView: View {
     private var inspector: some View {
         let sections = Self.inspectorSections(face: editedConfig.iconFace, background: editedConfig.background,
                                               iconType: editedConfig.iconType)
-        return VStack(alignment: .leading, spacing: 14) {
+        return VStack(alignment: .leading, spacing: 16) {
             if sections.contains(.stylePicker) { stylePicker }
             if sections.contains(.apps) { appsSection }
             if sections.contains(.background) { backgroundSection }
@@ -398,27 +404,52 @@ struct CustomiseTileView: View {
         .ignoresSafeArea(edges: .top)
     }
 
-    /// Section label in the System Settings style ("Theme"): 13 pt headline in the primary
-    /// label colour, not a large grey title.
+    // Inspector metrics follow Icon Composer's inspector (measured from a 2× screenshot,
+    // 2026-10-19): 11 pt semibold secondary section headers ~10 pt in from the card edge and ~6 pt
+    // above it; 36 pt rows with a 13 pt label (no leading symbol); outline-less cards whose
+    // dividers are inset 10 pt from both edges.
+    private static let headerInset: CGFloat = 10
+    private static let headerToCard: CGFloat = 6
+    private static let rowHeight: CGFloat = 36
+    private static let rowPadding: CGFloat = 14
+
     private func groupHeader(_ title: String) -> some View {
         Text(title)
-            .font(.headline)
-            .foregroundStyle(.primary)
-            .padding(.horizontal, 4)
+            .font(.system(size: 11, weight: .semibold))
+            .foregroundStyle(.secondary)
+            .padding(.horizontal, Self.headerInset)
     }
 
     private func caption(_ text: String) -> some View {
         Text(text)
-            .font(.system(size: 12))
+            .font(.system(size: 11))
             .foregroundStyle(.secondary)
             .fixedSize(horizontal: false, vertical: true)
-            .padding(.horizontal, 4)
+            .padding(.horizontal, Self.headerInset)
     }
 
     private var cardHairline: some View {
         Rectangle()
             .fill(Color(nsColor: .quinaryLabel))
             .frame(height: 0.5)
+            .padding(.horizontal, Self.headerInset)
+    }
+
+    /// One inspector row: the 13 pt label, then `content` — which places its own `Spacer` so a row
+    /// can keep an accessory beside the label. No leading symbol (owner's call, 2026-10-19).
+    private func inspectorRow<Content: View>(
+        _ title: String, @ViewBuilder content: () -> Content
+    ) -> some View {
+        HStack(spacing: 8) {
+            Text(title)
+                .font(.system(size: 13))
+                .foregroundStyle(.primary)
+                .lineLimit(1)
+                .layoutPriority(1)   // the label wins over a wide control (Icon Weight truncated)
+            content()
+        }
+        .padding(.horizontal, Self.rowPadding)
+        .frame(minHeight: Self.rowHeight)
     }
 
     // MARK: Style picker
@@ -481,7 +512,7 @@ struct CustomiseTileView: View {
 
     private var appsSection: some View {
         let summary = Self.appsSummary(items: editedConfig.appItems) { AppInstallChecker.isInstalled($0) }
-        return VStack(alignment: .leading, spacing: 8) {
+        return VStack(alignment: .leading, spacing: Self.headerToCard) {
             groupHeader(AppStrings.Label.appsHeader)
             VStack(spacing: 0) {
                 valueRow(AppStrings.Label.appsShown, value: summary.shown)
@@ -500,25 +531,19 @@ struct CustomiseTileView: View {
     }
 
     private func valueRow(_ title: String, value: String) -> some View {
-        HStack(spacing: 12) {
-            Text(title)
-                .font(.system(size: 13))
-                .foregroundStyle(.primary)
-                .lineLimit(1)
+        inspectorRow(title) {
             Spacer(minLength: 8)
             Text(value)
                 .font(.system(size: 13))
                 .foregroundStyle(.secondary)
                 .lineLimit(1)
         }
-        .padding(.horizontal, 14)
-        .frame(minHeight: 46)
     }
 
     // MARK: Background
 
     private var backgroundSection: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: Self.headerToCard) {
             groupHeader(AppStrings.Label.background)
             HStack(spacing: 8) {
                 ForEach(TileBackground.allCases, id: \.self) { option in
@@ -550,20 +575,21 @@ struct CustomiseTileView: View {
 
     private var colourSection: some View {
         let state = colourRow
-        return VStack(alignment: .leading, spacing: 8) {
+        return VStack(alignment: .leading, spacing: Self.headerToCard) {
             HStack(alignment: .firstTextBaseline, spacing: 8) {
                 groupHeader(state.usesSymbolLabel ? AppStrings.Label.symbolColour : AppStrings.Label.tileColour)
                     .layoutPriority(1)
                 Spacer(minLength: 4)
+                // Trailing header note, like Icon Composer's "All" scope control beside its headers.
                 Text(colourCaption(state))
-                    .font(.system(size: 12))
+                    .font(.system(size: 11))
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.trailing)
-                    .padding(.trailing, 4)
+                    .padding(.trailing, Self.headerInset)
             }
             colourPickerStrip
-                .padding(.horizontal, 14)
-                .padding(.vertical, 12)
+                .padding(.horizontal, Self.rowPadding)
+                .padding(.vertical, 8)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .modifier(InspectorCard())
         }
@@ -633,34 +659,27 @@ struct CustomiseTileView: View {
 
     private func iconSizeCard(showsWeight: Bool) -> some View {
         VStack(spacing: 0) {
-            HStack(spacing: 10) {
-                Text(AppStrings.Label.iconSize)
-                    .font(.system(size: 13))
-                    .foregroundStyle(.primary)
-                    .lineLimit(1)
+            inspectorRow(AppStrings.Label.iconSize) {
                 Spacer(minLength: 8)
                 Stepper(value: $editedConfig.iconScale, in: 10...maxIconScale) {
                     Text("\(editedConfig.iconScale)")
+                        .font(.system(size: 13))
                         .monospacedDigit()
                         .foregroundStyle(.secondary)
                 }
             }
-            .padding(.horizontal, 14)
-            .frame(minHeight: 46)
 
             if showsWeight {
                 cardHairline
-                HStack(spacing: 6) {
-                    Text(AppStrings.Label.iconWeight)
-                        .font(.system(size: 13))
-                        .foregroundStyle(.primary)
-                        .lineLimit(1)
-                    iconWeightInfoButton
-                    Spacer(minLength: 8)
-                    iconWeightPicker
+                inspectorRow(AppStrings.Label.iconWeight) {
+                    // Its own tight stack: with the row's 8 pt gaps around the info button and a
+                    // spacer, the label truncated to "Icon We…" in the 260 pt inspector.
+                    HStack(spacing: 4) {
+                        iconWeightInfoButton
+                        Spacer(minLength: 0)
+                        iconWeightPicker
+                    }
                 }
-                .padding(.horizontal, 14)
-                .frame(minHeight: 46)
             }
         }
         .modifier(InspectorCard())
@@ -699,6 +718,7 @@ struct CustomiseTileView: View {
         }
         .labelsHidden()
         .pickerStyle(.menu)
+        .controlSize(.small)   // compact pop-up, as in Icon Composer's inspector
         .fixedSize()
     }
 
@@ -706,7 +726,7 @@ struct CustomiseTileView: View {
 
     private var pickerSection: some View {
         let isEmoji = editedConfig.iconType == .emoji
-        return VStack(alignment: .leading, spacing: 8) {
+        return VStack(alignment: .leading, spacing: Self.headerToCard) {
             groupHeader(isEmoji ? AppStrings.Tab.emoji : AppStrings.Tab.symbol)
             VStack(spacing: 8) {
                 // The search field stays fixed; only the grid below it scrolls.
@@ -776,8 +796,9 @@ struct CustomiseTileView: View {
 
 // MARK: - Inspector card surface
 
-/// The inspector's card: the form-group surface, 12 pt continuous corners, a hairline — or a
-/// 2 pt accent ring when the card is the selected choice.
+/// The inspector's card: the form-group surface with 12 pt continuous corners and no outline
+/// (Icon Composer's inspector cards are fill-only) — or a 2 pt accent ring when the card is the
+/// selected choice.
 private struct InspectorCard: ViewModifier {
     var isSelected = false
 
@@ -786,8 +807,7 @@ private struct InspectorCard: ViewModifier {
         content
             .background(NSColorBackgroundView.formGroup)
             .clipShape(shape)
-            .overlay(shape.strokeBorder(isSelected ? Color.accentColor : Color(nsColor: .quinaryLabel),
-                                        lineWidth: isSelected ? 2 : 0.5))
+            .overlay(shape.strokeBorder(Color.accentColor, lineWidth: 2).opacity(isSelected ? 1 : 0))
     }
 }
 

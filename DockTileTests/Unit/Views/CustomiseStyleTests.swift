@@ -48,16 +48,55 @@ struct CustomiseStyleTests {
         // First visit to Emoji: nothing saved yet, so the default emoji (size carries over, as before).
         var emoji = CustomiseTileView.applyStyle(.emoji, to: start)
         #expect(emoji.iconType == .emoji && emoji.iconValue == ConfigurationDefaults.symbolEmoji)
-        #expect(emoji.savedSymbol == SavedGlyph(value: "bolt", scale: 16))
+        #expect(emoji.savedSymbol == SavedGlyph(value: "bolt", scale: 16, background: .colour, tint: ConfigurationDefaults.tintColor))
         // The user picks an emoji and a size, then goes back to Symbol.
         emoji.iconValue = "🎬"; emoji.symbolEmoji = "🎬"; emoji.iconScale = 21
         let symbol = CustomiseTileView.applyStyle(.symbol, to: emoji)
         #expect(symbol.iconType == .sfSymbol && symbol.iconValue == "bolt" && symbol.iconScale == 16)
         #expect(symbol.symbolEmoji == "bolt")
-        #expect(symbol.savedEmoji == SavedGlyph(value: "🎬", scale: 21))
+        #expect(symbol.savedEmoji == SavedGlyph(value: "🎬", scale: 21, background: .colour, tint: ConfigurationDefaults.tintColor))
         // And Emoji again restores the picked emoji, not the default.
         let again = CustomiseTileView.applyStyle(.emoji, to: symbol)
         #expect(again.iconType == .emoji && again.iconValue == "🎬" && again.iconScale == 21 && again.symbolEmoji == "🎬")
+    }
+
+    @Test("Colour / Mono is local to Symbol and Emoji: each style restores its own background")
+    func backgroundIsPerStyle() {
+        let start = DockTileConfiguration(name: "W", iconType: .sfSymbol, iconValue: "bolt", iconScale: 16,
+                                          background: .colour, iconFace: .glyph)
+        // First visit to Emoji keeps the current background (nothing saved yet); the user picks Mono.
+        var emoji = CustomiseTileView.applyStyle(.emoji, to: start)
+        #expect(emoji.background == .colour)
+        #expect(emoji.savedSymbol == SavedGlyph(value: "bolt", scale: 16, background: .colour, tint: ConfigurationDefaults.tintColor))
+        emoji.background = .mono
+        // Back to Symbol: Symbol's own Colour comes back, Emoji's Mono is saved.
+        let symbol = CustomiseTileView.applyStyle(.symbol, to: emoji)
+        #expect(symbol.background == .colour)
+        #expect(symbol.savedEmoji?.background == .mono)
+        // And Emoji again is Mono.
+        #expect(CustomiseTileView.applyStyle(.emoji, to: symbol).background == .mono)
+    }
+
+    @Test("The tile colour is local to Symbol and Emoji too: each style restores its own colour")
+    func tintIsPerStyle() {
+        let start = DockTileConfiguration(name: "W", tintColor: .preset(.blue), iconType: .sfSymbol, iconValue: "bolt",
+                                          iconFace: .glyph)
+        var emoji = CustomiseTileView.applyStyle(.emoji, to: start)
+        #expect(emoji.tintColor == .preset(.blue))                  // first visit carries the colour over
+        #expect(emoji.savedSymbol?.tint == .preset(.blue))
+        emoji.tintColor = .custom("#FF8800")
+        let symbol = CustomiseTileView.applyStyle(.symbol, to: emoji)
+        #expect(symbol.tintColor == .preset(.blue))                 // Symbol's own colour comes back
+        #expect(symbol.savedEmoji?.tint == .custom("#FF8800"))
+        #expect(CustomiseTileView.applyStyle(.emoji, to: symbol).tintColor == .custom("#FF8800"))
+    }
+
+    @Test("A saved glyph without a background (saved before this field) keeps the current background")
+    func savedGlyphWithoutBackground() {
+        let emojiTile = DockTileConfiguration(name: "E", iconType: .emoji, iconValue: "🎬", background: .mono,
+                                              iconFace: .glyph, savedSymbol: SavedGlyph(value: "bolt", scale: 12))
+        let symbol = CustomiseTileView.applyStyle(.symbol, to: emojiTile)
+        #expect(symbol.iconValue == "bolt" && symbol.background == .mono)
     }
 
     @Test("App Grid in between keeps both memories: Emoji → App Grid → Symbol restores the saved symbol")
@@ -68,7 +107,7 @@ struct CustomiseStyleTests {
         #expect(apps.iconFace == .apps && apps.iconValue == "🎬")
         let symbol = CustomiseTileView.applyStyle(.symbol, to: apps)
         #expect(symbol.iconFace == .glyph && symbol.iconValue == "bolt" && symbol.iconScale == 12)
-        #expect(symbol.savedEmoji == SavedGlyph(value: "🎬", scale: 20))
+        #expect(symbol.savedEmoji == SavedGlyph(value: "🎬", scale: 20, background: .colour, tint: ConfigurationDefaults.tintColor))
     }
 
     @Test("appsSummary: Shown, Arrangement and the note for 0, 1, 4, 9 and 12 apps")

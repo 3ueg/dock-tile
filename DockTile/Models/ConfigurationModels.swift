@@ -228,6 +228,11 @@ struct DockTileConfiguration: Identifiable, Codable, Hashable {
 struct SavedGlyph: Codable, Hashable {
     var value: String
     var scale: Int
+    /// Colour / Mono and the tile colour are local to the Symbol and Emoji styles too. Optional: a
+    /// glyph saved before these fields existed decodes with nil, and restoring it keeps the tile's
+    /// current value. (Icon weight needs no copy: only Symbol shows or uses it.)
+    var background: TileBackground? = nil
+    var tint: TintColor? = nil
 }
 
 // MARK: - Icon Type
