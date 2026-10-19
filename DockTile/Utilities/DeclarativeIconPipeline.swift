@@ -71,7 +71,42 @@ enum IconDocumentBuilder {
         return [
             "fill": defaultFill,
             "fill-specializations": fillSpecializations,
-            "groups": [["layers": layers.map(layerDict)]],
+            "groups": [["layers": layers.map { layerDict($0) }]],
+            "supported-platforms": ["circles": [], "squares": ["macOS"]]
+        ]
+    }
+
+    /// Apple's own adaptive icon fills (what the system Apps icon and iOS folders use).
+    nonisolated static let systemLightFill = "system-light"
+    nonisolated static let systemDarkFill = "system-dark"
+    nonisolated static let appsFaceLayerName = "grid"
+    nonisolated static let appsFaceImageName = "grid.png"
+
+    /// The `icon.json` for an Apps-face tile: the system's glass fill (light / dark; tinted reuses
+    /// the light fill) behind ONE composite layer that is visible in every appearance.
+    ///
+    /// The flat look is written explicitly (`specular` off, `translucency` off, `shadow` none,
+    /// layer `glass` false): Apple's `actool` defaults are specular on, translucency 0.3 and shadow
+    /// 0.5, which wash out real app icons. The vendored compiler ignores these keys, so spelling
+    /// them out makes the document mean the same under both compilers. Proven shape:
+    /// `docs/icon-spike-fixtures/appgrid-systemfill.icon`.
+    nonisolated static func appsFaceIconJSON() -> [String: Any] {
+        let layer = layerDict(
+            LayerSpec(name: appsFaceLayerName, imageName: appsFaceImageName, exclusiveTo: nil), glass: false)
+        let group: [String: Any] = [
+            "specular": false,
+            "translucency": ["enabled": false, "value": 0],
+            "shadow": ["kind": "none", "opacity": 0],
+            "layers": [layer]
+        ]
+        return [
+            "fill": systemLightFill,
+            "fill-specializations": [
+                ["value": systemLightFill],
+                ["appearance": IconAppearance.dark.rawValue, "value": systemDarkFill],
+                ["appearance": IconAppearance.tinted.rawValue, "value": systemLightFill]
+            ],
+            "groups": [group],
             "supported-platforms": ["circles": [], "squares": ["macOS"]]
         ]
     }
@@ -96,7 +131,8 @@ enum IconDocumentBuilder {
 
     // MARK: - Private
 
-    private static func layerDict(_ layer: LayerSpec) -> [String: Any] {
+    /// `glass` nil = key omitted, which keeps the glyph document byte-identical.
+    private static func layerDict(_ layer: LayerSpec, glass: Bool? = nil) -> [String: Any] {
         var dict: [String: Any] = [
             "name": layer.name,
             "image-name": layer.imageName,
@@ -114,6 +150,7 @@ enum IconDocumentBuilder {
                 ["appearance": IconAppearance.dark.rawValue, "value": exclusiveTo != .dark]
             ]
         }
+        if let glass { dict["glass"] = glass }
         return dict
     }
 

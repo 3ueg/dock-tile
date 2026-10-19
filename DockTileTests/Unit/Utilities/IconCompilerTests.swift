@@ -273,4 +273,35 @@ struct IconCompilerTests {
         try FileManager.default.setAttributes([.posixPermissions: 0o755], ofItemAtPath: url.path)
         return url
     }
+
+    @MainActor
+    @Test("End-to-end: the Apps-face document compiles to a valid layered car",
+          .enabled(if: FileManager.default.fileExists(atPath: IconCompilerTests.builtCompilerPath)))
+    func appsFaceDocumentCompilesToValidCar() throws {
+        let scratch = try makeScratchDir()
+        defer { try? FileManager.default.removeItem(at: scratch) }
+        let mini = AppsFaceRenderTests.mini(.systemBlue)
+        let png = try IconGenerator.generateAppsLayerPNG(
+            minis: (0..<5).map { _ in .init(image: mini, isFolder: false) })
+        let document = try IconDocumentBuilder.writeDocument(
+            json: IconDocumentBuilder.appsFaceIconJSON(),
+            layerPNGs: [IconDocumentBuilder.appsFaceImageName: png], name: "AppIcon", parent: scratch)
+        let car = try IconCompiler.compile(
+            document: document, outputDir: scratch.appendingPathComponent("out"),
+            compilerURL: URL(fileURLWithPath: Self.builtCompilerPath))
+        #expect(FileManager.default.fileExists(atPath: car.path))
+    }
+
+    /// The fixture's layer is SYNTHETIC (nine flat squares from `make-appgrid-layer.swift`); its
+    /// `icon.json` is the spike's real system-fill document, which is what this pins.
+    @Test("End-to-end: the preserved system-fill fixture (synthetic layer) compiles to a layered car",
+          .enabled(if: FileManager.default.fileExists(atPath: IconCompilerTests.builtCompilerPath)))
+    func appsFaceFixtureCompiles() throws {
+        let document = Self.projectRoot.appendingPathComponent("docs/icon-spike-fixtures/appgrid-systemfill.icon")
+        let outputDir = try makeScratchDir()
+        defer { try? FileManager.default.removeItem(at: outputDir) }
+        let car = try IconCompiler.compile(
+            document: document, outputDir: outputDir, compilerURL: URL(fileURLWithPath: Self.builtCompilerPath))
+        #expect(car.lastPathComponent == "Assets.car")
+    }
 }

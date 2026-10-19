@@ -104,4 +104,32 @@ struct IconDocumentBuilderTests {
         #expect(FileManager.default.fileExists(atPath: url.appendingPathComponent("icon.json").path))
         #expect(try Data(contentsOf: url.appendingPathComponent("Assets/glyph-light.png")) == Data([1, 2, 3]))
     }
+
+    @Test("Apps face: system fills, one always-visible layer, and the flat look written explicitly")
+    func appsFaceDocument() throws {
+        let json = IconDocumentBuilder.appsFaceIconJSON()
+        #expect(json["fill"] as? String == "system-light")
+        let specs = try #require(json["fill-specializations"] as? [[String: Any]])
+        #expect(specs.count == 3)
+        #expect(specs[0]["appearance"] == nil && specs[0]["value"] as? String == "system-light")
+        #expect(specs[1]["appearance"] as? String == "dark" && specs[1]["value"] as? String == "system-dark")
+        #expect(specs[2]["appearance"] as? String == "tinted" && specs[2]["value"] as? String == "system-light")
+
+        let group = try #require((json["groups"] as? [[String: Any]])?.first)
+        #expect(group["specular"] as? Bool == false)
+        let translucency = try #require(group["translucency"] as? [String: Any])
+        #expect(translucency["enabled"] as? Bool == false && (translucency["value"] as? NSNumber)?.doubleValue == 0)
+        let shadow = try #require(group["shadow"] as? [String: Any])
+        #expect(shadow["kind"] as? String == "none" && (shadow["opacity"] as? NSNumber)?.doubleValue == 0)
+
+        let layers = try #require(group["layers"] as? [[String: Any]])
+        #expect(layers.count == 1)
+        #expect(layers[0]["name"] as? String == "grid" && layers[0]["image-name"] as? String == "grid.png")
+        #expect(layers[0]["glass"] as? Bool == false)
+        #expect(layers[0]["fill"] as? String == "none")
+        #expect(layers[0]["hidden-specializations"] == nil)
+        #expect((json["supported-platforms"] as? [String: [String]])?["squares"] == ["macOS"])
+        // The document serialises (no Swift tuples or enums leaked in).
+        #expect(JSONSerialization.isValidJSONObject(json))
+    }
 }
