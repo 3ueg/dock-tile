@@ -496,6 +496,8 @@ export function FinalCta() {
           </Link>
           <span className="h-1 w-1 rounded-full bg-white/20" />
           <span>macOS 15+</span>
+          <span className="h-1 w-1 rounded-full bg-white/20 max-sm:hidden" />
+          <span className="max-sm:hidden">{m.metaAppleSilicon}</span>
         </div>
         <p className="mt-6 text-sm text-white/50">
           {content.supportText}{" "}
