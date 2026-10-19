@@ -3,8 +3,8 @@
 //  DockTile
 //
 //  Customise Tile: a live canvas beside a 260 pt inspector. The inspector opens with the Style
-//  picker (App Preview · Symbol · Emoji); Symbol and Emoji carry the Background, Colour, Icon Size
-//  and picker controls, App Preview has none. Design: docs/design_handoff_customise_tile/.
+//  picker (App Grid · Symbol · Emoji); Symbol and Emoji carry the Background, Colour, Icon Size
+//  and picker controls, App Grid has none. Design: docs/design_handoff_customise_tile/.
 //  Swift 6 - Strict Concurrency
 //
 
@@ -92,7 +92,7 @@ struct CustomiseTileView: View {
 
     // MARK: - Seams
 
-    /// The three Style cards. The face decides first (App Preview), then the glyph's type.
+    /// The three Style cards. The face decides first (App Grid), then the glyph's type.
     enum TileStyle: CaseIterable, Equatable {
         case apps, symbol, emoji
 
@@ -112,37 +112,47 @@ struct CustomiseTileView: View {
         }
     }
 
-    /// What a Style card tap does to the tile. App Preview only switches the face, so the glyph
-    /// behind it survives a round trip; Symbol/Emoji keep the current glyph when it is already of
-    /// that type, else seed the default one. `symbolEmoji` (legacy) mirrors `iconValue`.
+    /// What a Style card tap does to the tile. App Grid only switches the face, so the glyph
+    /// behind it survives a round trip. Symbol/Emoji keep the current glyph when it is already of
+    /// that type. Otherwise the outgoing glyph and its size are saved (`savedSymbol` /
+    /// `savedEmoji`) and the incoming type's saved glyph is restored, so switching never loses a
+    /// choice; with nothing saved yet the default glyph is seeded and the size carries over.
+    /// `symbolEmoji` (legacy) mirrors `iconValue`.
     nonisolated static func applyStyle(_ style: TileStyle, to config: DockTileConfiguration) -> DockTileConfiguration {
         var result = config
+        let outgoing = SavedGlyph(value: config.iconValue, scale: config.iconScale)
         switch style {
         case .apps:
             result.iconFace = .apps
+            return result
         case .symbol:
             result.iconFace = .glyph
-            if config.iconType != .sfSymbol {
-                result.iconType = .sfSymbol
-                result.iconValue = ConfigurationDefaults.iconValue
-                result.symbolEmoji = result.iconValue
-            }
+            guard config.iconType != .sfSymbol else { return result }
+            result.savedEmoji = outgoing
+            result.iconType = .sfSymbol
+            restore(config.savedSymbol, orDefault: ConfigurationDefaults.iconValue, into: &result)
         case .emoji:
             result.iconFace = .glyph
-            if config.iconType != .emoji {
-                result.iconType = .emoji
-                result.iconValue = ConfigurationDefaults.symbolEmoji
-                result.symbolEmoji = result.iconValue
-            }
+            guard config.iconType != .emoji else { return result }
+            result.savedSymbol = outgoing
+            result.iconType = .emoji
+            restore(config.savedEmoji, orDefault: ConfigurationDefaults.symbolEmoji, into: &result)
         }
         return result
+    }
+
+    private nonisolated static func restore(_ saved: SavedGlyph?, orDefault value: String,
+                                            into config: inout DockTileConfiguration) {
+        config.iconValue = saved?.value ?? value
+        if let saved { config.iconScale = saved.scale }
+        config.symbolEmoji = config.iconValue
     }
 
     enum InspectorSection: Equatable {
         case stylePicker, apps, background, colour, iconSize, iconWeight, picker
     }
 
-    /// Which inspector groups show, in order. App Preview has no knobs. Mono + Emoji HIDES the
+    /// Which inspector groups show, in order. App Grid has no knobs. Mono + Emoji HIDES the
     /// Colour card (an emoji can't take a colour); `tintColor` is kept, so switching back to a
     /// symbol restores it.
     nonisolated static func inspectorSections(face: IconFace, background: TileBackground, iconType: IconType) -> [InspectorSection] {
@@ -254,20 +264,40 @@ struct CustomiseTileView: View {
 
     // MARK: - Canvas
 
-    /// The canvas card runs up under the transparent 52 pt toolbar strip; the pill stays in the
-    /// safe area, where a click reaches it.
+    /// Top inset shared by the canvas and the inspector, so both columns start on one line under
+    /// the transparent toolbar strip (they run up into it, using that space).
+    private static let paneTopInset: CGFloat = 10
+
+    /// Inset of the "Select Apps" pill from the canvas card's top and leading edges.
+    private static let pillInset: CGFloat = 12
+
     private var canvas: some View {
         let styles = Self.heroStyles(background: editedConfig.background, followsAppearance: monoFollowsAppearance,
                                      iconFace: editedConfig.iconFace)
-        return ZStack(alignment: .topLeading) {
-            canvasSurface(styles)
-                .padding(.top, 10)
-                .ignoresSafeArea(edges: .top)
-            selectAppsPill
-                .padding(12)
+        return canvasSurface(styles)
+            .overlay(alignment: .topLeading) {
+                selectAppsPill
+                    .padding(Self.pillInset)
+            }
+            .padding(.top, Self.paneTopInset)
+            .ignoresSafeArea(edges: .top)
+            // 200, not the handoff's 250: a 280 pt sidebar in a 782 pt window leaves ~502 pt for the pane.
+            .frame(minWidth: 200, maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    private var selectAppsPill: some View {
+        Button {
+            DiagnosticsLog.shared.ui("Customise → Select Apps (back to Tile Detail)")
+            onBack()
+        } label: {
+            Label(AppStrings.Button.selectApps, systemImage: "chevron.left")
+                .font(.system(size: 13, weight: .medium))
+                .padding(.horizontal, 12)
+                .frame(height: 28)
+                .contentShape(Capsule())
         }
-        // 200, not the handoff's 250: a 280 pt sidebar in a 782 pt window leaves ~502 pt for the pane.
-        .frame(minWidth: 200, maxWidth: .infinity, maxHeight: .infinity)
+        .buttonStyle(.plain)
+        .modifier(GlassCapsule())
     }
 
     private func canvasSurface(_ styles: [IconStyle?]) -> some View {
@@ -341,47 +371,39 @@ struct CustomiseTileView: View {
         }
     }
 
-    private var selectAppsPill: some View {
-        Button {
-            DiagnosticsLog.shared.ui("Customise → Select Apps (back to Tile Detail)")
-            onBack()
-        } label: {
-            Label(AppStrings.Button.selectApps, systemImage: "chevron.left")
-                .font(.system(size: 13, weight: .medium))
-                .padding(.horizontal, 10)
-                .frame(height: 28)
-                .contentShape(Capsule())
-        }
-        .buttonStyle(.plain)
-        .modifier(GlassCapsule())
-    }
-
     // MARK: - Inspector
 
+    /// The inspector itself never scrolls: it starts at the top of the window (the Style cards use
+    /// the band beside the toolbar's "Select Apps") and only the symbol/emoji grid scrolls, inside
+    /// its own card, so the controls above it stay put.
     private var inspector: some View {
         let sections = Self.inspectorSections(face: editedConfig.iconFace, background: editedConfig.background,
                                               iconType: editedConfig.iconType)
-        return ScrollView(.vertical) {
-            VStack(alignment: .leading, spacing: 18) {
-                if sections.contains(.stylePicker) { stylePicker }
-                if sections.contains(.apps) { appsSection }
-                if sections.contains(.background) { backgroundSection }
-                if sections.contains(.colour) { colourSection }
-                if sections.contains(.iconSize) { iconSizeCard(showsWeight: sections.contains(.iconWeight)) }
-                if sections.contains(.picker) { pickerSection }
+        return VStack(alignment: .leading, spacing: 14) {
+            if sections.contains(.stylePicker) { stylePicker }
+            if sections.contains(.apps) { appsSection }
+            if sections.contains(.background) { backgroundSection }
+            if sections.contains(.colour) { colourSection }
+            if sections.contains(.iconSize) { iconSizeCard(showsWeight: sections.contains(.iconWeight)) }
+            if sections.contains(.picker) {
+                pickerSection
+            } else {
+                Spacer(minLength: 0)
             }
-            .padding(.trailing, 12)
-            .padding(.bottom, 14)
         }
+        .padding(.top, Self.paneTopInset)
+        .padding(.trailing, 12)
         .frame(width: 260)
-        .frame(maxHeight: .infinity)
-        .paneScrollEdgeEffect()
+        .frame(maxHeight: .infinity, alignment: .top)
+        .ignoresSafeArea(edges: .top)
     }
 
+    /// Section label in the System Settings style ("Theme"): 13 pt headline in the primary
+    /// label colour, not a large grey title.
     private func groupHeader(_ title: String) -> some View {
         Text(title)
-            .font(.system(size: 15, weight: .semibold))
-            .foregroundStyle(.tertiary)
+            .font(.headline)
+            .foregroundStyle(.primary)
             .padding(.horizontal, 4)
     }
 
@@ -687,34 +709,40 @@ struct CustomiseTileView: View {
         return VStack(alignment: .leading, spacing: 8) {
             groupHeader(isEmoji ? AppStrings.Tab.emoji : AppStrings.Tab.symbol)
             VStack(spacing: 8) {
+                // The search field stays fixed; only the grid below it scrolls.
                 iconSearchField
                     .padding(.horizontal, 4)
-                if isEmoji {
-                    EmojiPickerGrid(
-                        selectedEmoji: Binding(
-                            get: { editedConfig.iconValue },
-                            set: { selectIcon($0, type: .emoji) }
-                        ),
-                        searchText: $searchText,
-                        onSelect: { selectIcon($0, type: .emoji) }
-                    )
-                } else {
-                    SymbolPickerGrid(
-                        selectedSymbol: Binding(
-                            get: { editedConfig.iconValue },
-                            set: { selectIcon($0, type: .sfSymbol) }
-                        ),
-                        searchText: $searchText,
-                        iconWeight: editedConfig.iconWeight,
-                        onSelect: { selectIcon($0, type: .sfSymbol) }
-                    )
+                ScrollView(.vertical) {
+                    if isEmoji {
+                        EmojiPickerGrid(
+                            selectedEmoji: Binding(
+                                get: { editedConfig.iconValue },
+                                set: { selectIcon($0, type: .emoji) }
+                            ),
+                            searchText: $searchText,
+                            onSelect: { selectIcon($0, type: .emoji) }
+                        )
+                    } else {
+                        SymbolPickerGrid(
+                            selectedSymbol: Binding(
+                                get: { editedConfig.iconValue },
+                                set: { selectIcon($0, type: .sfSymbol) }
+                            ),
+                            searchText: $searchText,
+                            iconWeight: editedConfig.iconWeight,
+                            onSelect: { selectIcon($0, type: .sfSymbol) }
+                        )
+                    }
                 }
+                .frame(maxHeight: .infinity)
             }
             .padding(.top, 10)
             .padding(.horizontal, 8)
             .padding(.bottom, 8)
+            .frame(maxHeight: .infinity)
             .modifier(InspectorCard())
         }
+        .frame(maxHeight: .infinity)
     }
 
     private var iconSearchField: some View {

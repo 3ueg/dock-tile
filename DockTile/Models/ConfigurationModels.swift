@@ -24,6 +24,8 @@ struct DockTileConfiguration: Identifiable, Codable, Hashable {
     var iconWeight: IconWeight  // v7: SF Symbol stroke weight (ignored for emojis)
     var background: TileBackground  // v9: Colour fill or Mono (white/near-black)
     var iconFace: IconFace  // v10: glyph (symbol/emoji) or the Apps grid
+    var savedSymbol: SavedGlyph?  // v11: last symbol + size, restored when the Symbol style is picked again
+    var savedEmoji: SavedGlyph?  // v11: last emoji + size, restored when the Emoji style is picked again
     var layoutMode: LayoutMode
     var appItems: [AppItem]
     var isVisibleInDock: Bool
@@ -82,6 +84,8 @@ struct DockTileConfiguration: Identifiable, Codable, Hashable {
             iconWeight: iconWeight,
             background: background,
             iconFace: iconFace,
+            savedSymbol: savedSymbol,
+            savedEmoji: savedEmoji,
             layoutMode: layoutMode,
             appItems: appItems,
             isVisibleInDock: false,
@@ -102,6 +106,8 @@ struct DockTileConfiguration: Identifiable, Codable, Hashable {
         iconWeight: IconWeight = ConfigurationDefaults.iconWeight,
         background: TileBackground = ConfigurationDefaults.background,
         iconFace: IconFace = ConfigurationDefaults.iconFace,
+        savedSymbol: SavedGlyph? = nil,
+        savedEmoji: SavedGlyph? = nil,
         layoutMode: LayoutMode = ConfigurationDefaults.layoutMode,
         appItems: [AppItem] = [],
         isVisibleInDock: Bool = ConfigurationDefaults.isVisibleInDock,
@@ -120,6 +126,8 @@ struct DockTileConfiguration: Identifiable, Codable, Hashable {
         self.iconWeight = iconWeight
         self.background = background
         self.iconFace = iconFace
+        self.savedSymbol = savedSymbol
+        self.savedEmoji = savedEmoji
         self.layoutMode = layoutMode
         self.appItems = appItems
         self.isVisibleInDock = isVisibleInDock
@@ -175,6 +183,10 @@ struct DockTileConfiguration: Identifiable, Codable, Hashable {
         // ConfigurationDefaults.iconFace (.apps, for NEW tiles): existing tiles must not change on upgrade.
         iconFace = try container.decodeIfPresent(IconFace.self, forKey: .iconFace) ?? .glyph
 
+        // v11 fields - per-type glyph memory (old configs have none saved)
+        savedSymbol = try container.decodeIfPresent(SavedGlyph.self, forKey: .savedSymbol)
+        savedEmoji = try container.decodeIfPresent(SavedGlyph.self, forKey: .savedEmoji)
+
         // v5 fields - last Dock position
         lastDockIndex = try container.decodeIfPresent(Int.self, forKey: .lastDockIndex)
 
@@ -200,11 +212,22 @@ struct DockTileConfiguration: Identifiable, Codable, Hashable {
         case background
         // v10 fields
         case iconFace
+        // v11 fields
+        case savedSymbol, savedEmoji
         // v5 fields
         case lastDockIndex
         // v6 fields
         case helperAppVersion
     }
+}
+
+// MARK: - Saved Glyph
+
+/// A symbol or emoji the tile showed before its Style switched away, with the icon size it had.
+/// Restored when that Style card is picked again, so switching never loses a choice (v11).
+struct SavedGlyph: Codable, Hashable {
+    var value: String
+    var scale: Int
 }
 
 // MARK: - Icon Type

@@ -6920,49 +6920,49 @@
         "de": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "App-Vorschau"
+            "value": "App-Raster"
           }
         },
         "en-GB": {
           "stringUnit": {
             "state": "translated",
-            "value": "App Preview"
+            "value": "App Grid"
           }
         },
         "en-AU": {
           "stringUnit": {
             "state": "translated",
-            "value": "App Preview"
+            "value": "App Grid"
           }
         },
         "en-US": {
           "stringUnit": {
             "state": "translated",
-            "value": "App Preview"
+            "value": "App Grid"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Aperçu des apps"
+            "value": "Grille d’apps"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "アプリプレビュー"
+            "value": "アプリグリッド"
           }
         },
         "ru": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Приложения"
+            "value": "Сетка"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "App预览"
+            "value": "App网格"
           }
         }
       }

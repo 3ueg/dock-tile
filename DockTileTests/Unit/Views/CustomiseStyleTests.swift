@@ -41,6 +41,36 @@ struct CustomiseStyleTests {
         #expect(CustomiseTileView.applyStyle(.emoji, to: emojiTile) == emojiTile)
     }
 
+    @Test("Switching Symbol → Emoji → Symbol restores the symbol and its size, and the emoji and its size")
+    func styleSwitchRemembersEachGlyph() {
+        let start = DockTileConfiguration(name: "W", iconType: .sfSymbol, iconValue: "bolt", iconScale: 16,
+                                          iconFace: .glyph)
+        // First visit to Emoji: nothing saved yet, so the default emoji (size carries over, as before).
+        var emoji = CustomiseTileView.applyStyle(.emoji, to: start)
+        #expect(emoji.iconType == .emoji && emoji.iconValue == ConfigurationDefaults.symbolEmoji)
+        #expect(emoji.savedSymbol == SavedGlyph(value: "bolt", scale: 16))
+        // The user picks an emoji and a size, then goes back to Symbol.
+        emoji.iconValue = "🎬"; emoji.symbolEmoji = "🎬"; emoji.iconScale = 21
+        let symbol = CustomiseTileView.applyStyle(.symbol, to: emoji)
+        #expect(symbol.iconType == .sfSymbol && symbol.iconValue == "bolt" && symbol.iconScale == 16)
+        #expect(symbol.symbolEmoji == "bolt")
+        #expect(symbol.savedEmoji == SavedGlyph(value: "🎬", scale: 21))
+        // And Emoji again restores the picked emoji, not the default.
+        let again = CustomiseTileView.applyStyle(.emoji, to: symbol)
+        #expect(again.iconType == .emoji && again.iconValue == "🎬" && again.iconScale == 21 && again.symbolEmoji == "🎬")
+    }
+
+    @Test("App Grid in between keeps both memories: Emoji → App Grid → Symbol restores the saved symbol")
+    func appGridRoundTripKeepsMemories() {
+        let emojiTile = DockTileConfiguration(name: "E", iconType: .emoji, iconValue: "🎬", iconScale: 20,
+                                              iconFace: .glyph, savedSymbol: SavedGlyph(value: "bolt", scale: 12))
+        let apps = CustomiseTileView.applyStyle(.apps, to: emojiTile)
+        #expect(apps.iconFace == .apps && apps.iconValue == "🎬")
+        let symbol = CustomiseTileView.applyStyle(.symbol, to: apps)
+        #expect(symbol.iconFace == .glyph && symbol.iconValue == "bolt" && symbol.iconScale == 12)
+        #expect(symbol.savedEmoji == SavedGlyph(value: "🎬", scale: 20))
+    }
+
     @Test("appsSummary: Shown, Arrangement and the note for 0, 1, 4, 9 and 12 apps")
     func appsSummary() {
         typealias S = CustomiseTileView.AppsSummary

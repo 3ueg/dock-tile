@@ -135,7 +135,7 @@ Keep `%@`-style placeholders exactly as they are. `\n` means a line break, `\|` 
 | `label.softwareUpdateDescription` | You’re using version %@. Dock Tile checks for updates automatically. | バージョン%@を使用しています。Dock Tileはアップデートを自動的に確認します。 | machine | Description under the software-update row; %@ is the current version |
 | `label.startAtLogin` | Start tiles at login | ログイン時にタイルを起動 | machine | Label for the start-at-login toggle in Settings |
 | `label.startAtLoginDescription` | Keep your tiles ready in the Dock so they respond instantly after you restart your Mac. | Macを再起動した後もすぐに反応するように、タイルをDockで準備しておきます。 | machine | Explanation under the start-at-login toggle |
-| `label.style.appPreview` | App Preview | アプリプレビュー | machine | Customise Tile: Style picker card for the Apps face |
+| `label.style.appPreview` | App Grid | アプリグリッド | machine | Customise Tile: Style picker card for the Apps face |
 | `label.symbolColour` | Symbol Colour | シンボルのカラー | machine | Customise Tile: colour row label for a Mono tile |
 | `label.tileColour` | Tile Colour | タイルのカラー | machine | Customise Tile: Colour card header for a Colour tile |
 | `label.tileIcon` | Tile Icon | タイルのアイコン | machine | Label for tile icon section |

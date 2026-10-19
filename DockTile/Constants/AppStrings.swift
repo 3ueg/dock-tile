@@ -412,7 +412,7 @@ enum AppStrings {
 
         static let styleAppPreview = NSLocalizedString(
             "label.style.appPreview",
-            value: "App Preview",
+            value: "App Grid",
             comment: "Customise Tile: Style picker card for the Apps face"
         )
         static let appsHeader = NSLocalizedString(

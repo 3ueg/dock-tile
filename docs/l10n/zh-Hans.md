@@ -135,7 +135,7 @@ Keep `%@`-style placeholders exactly as they are. `\n` means a line break, `\|` 
 | `label.softwareUpdateDescription` | You’re using version %@. Dock Tile checks for updates automatically. | 你正在使用版本%@。Dock Tile会自动检查更新。 | machine | Description under the software-update row; %@ is the current version |
 | `label.startAtLogin` | Start tiles at login | 登录时启动磁贴 | machine | Label for the start-at-login toggle in Settings |
 | `label.startAtLoginDescription` | Keep your tiles ready in the Dock so they respond instantly after you restart your Mac. | 让程序坞中的磁贴随时待命，重新启动Mac后也能立即响应。 | machine | Explanation under the start-at-login toggle |
-| `label.style.appPreview` | App Preview | App预览 | machine | Customise Tile: Style picker card for the Apps face |
+| `label.style.appPreview` | App Grid | App网格 | machine | Customise Tile: Style picker card for the Apps face |
 | `label.symbolColour` | Symbol Colour | 符号颜色 | machine | Customise Tile: colour row label for a Mono tile |
 | `label.tileColour` | Tile Colour | 磁贴颜色 | machine | Customise Tile: Colour card header for a Colour tile |
 | `label.tileIcon` | Tile Icon | 磁贴图标 | machine | Label for tile icon section |
