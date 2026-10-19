@@ -85,6 +85,10 @@ struct AppsFacePreviewTests {
 
     @Test("Clear / Tinted previews keep the light glass and drain the minis' colour")
     func clearAndTintedDesaturate() throws {
+        // Positive control: the same ImageRenderer scan must SEE colour on Default, or the
+        // "< 0.05" checks below would pass for a view that always desaturates.
+        let coloured = try renderWithImageRenderer(items: [Self.finder], style: .defaultStyle)
+        #expect(try maxSaturation(coloured, in: Self.cell(0, count: 1)) > 0.15, "default keeps colour")
         for style in [IconStyle.clear, .tinted] {
             let rep = try render(items: [Self.finder], style: style)
             #expect(try srgb(rep, 128, 4).redComponent > 0.97, "\(style)")
