@@ -184,7 +184,14 @@ struct DockTileDetailView: View {
         }
         // Customise Tile edits THIS view's editedConfig through a binding, so its edits ride the
         // debounced save below — one copy, one save path.
-        .inspector(isPresented: inspectorShown) {
+        // Writes go through the toggle: if SwiftUI ever dismisses the inspector itself, the flag must not change without the window shrinking.
+        // Compared against the STORED flag: SwiftUI echoes every toggle back through this setter while
+        // the captured binding still reads the old value (logged 2026-10-20: set true, binding=false,
+        // stored=true), and comparing against the binding toggled twice — two resizes per press.
+        .inspector(isPresented: Binding(
+            get: { inspectorShown.wrappedValue },
+            set: { if $0 != UserDefaults.standard.bool(forKey: UserDefaultsKeys.inspectorShown) { onToggleInspector() } }
+        )) {
             CustomiseTileView(config: $editedConfig, isPresented: inspectorShown.wrappedValue,
                               onToggleInspector: onToggleInspector)
                 // Pinned: AppKit throws (update-constraints loop) when the content's minimum width exceeds its column.

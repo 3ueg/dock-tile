@@ -2,9 +2,9 @@
 //  CustomiseTileView.swift
 //  DockTile
 //
-//  Customise Tile: a live canvas beside a 260 pt inspector. The inspector opens with the Style
-//  picker (App Grid · Symbol · Emoji); Symbol and Emoji carry the Background, Colour, Icon Size
-//  and picker controls, App Grid has none. Design: docs/design_handoff_customise_tile/.
+//  Customise Tile: the 260 pt inspector beside Tile Detail. It opens with the Style picker
+//  (App Grid · Symbol · Emoji); Symbol and Emoji carry the Background, Colour, Icon Size and
+//  picker controls, App Grid has none. Design: docs/design_handoff_customise_tile/.
 //  Swift 6 - Strict Concurrency
 //
 
@@ -12,11 +12,11 @@ import SwiftUI
 import AppKit
 
 struct CustomiseTileView: View {
-    @EnvironmentObject private var configManager: ConfigurationManager
     /// Tile Detail's own `editedConfig`: the inspector keeps no copy and no save path of its own —
     /// Tile Detail's debounce + `preservingStoredVisibility` save persists these edits.
     @Binding private var editedConfig: DockTileConfiguration
-    /// Whether the inspector is open; guards the inspector's toolbar content (Task 5).
+    /// Whether the inspector is open; guards the inspector band's toolbar content (SwiftUI builds the
+    /// content while closed, and an unguarded inspector toolbar merges into the main band).
     let isPresented: Bool
     let onToggleInspector: () -> Void
 
@@ -31,15 +31,16 @@ struct CustomiseTileView: View {
     }
 
     var body: some View {
-        // One gutter on both sides of the canvas: sidebar→canvas and canvas→inspector are both 10 pt.
-        HStack(alignment: .top, spacing: Self.paneGutter) {
-            canvas
-            inspector
+        // The whole inspector scrolls; only the picker grid scrolls inside its own fixed-height card.
+        ScrollView {
+            inspectorContent
+                .padding(12)
         }
-        .padding(.leading, Self.paneGutter)
-        .padding(.bottom, 10)
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(NSColorBackgroundView.windowBackground)
+        .paneScrollEdgeEffect()
+        // Under the band too: the inspector column's own background otherwise shows there as a
+        // grey surface, and the band must have none at rest.
+        .background { NSColorBackgroundView.windowBackground.ignoresSafeArea() }
+        .inspectorTitleBand(AppStrings.Title.customiseTile, isPresented: isPresented, onToggle: onToggleInspector)
         // Per-control diagnostics. Colour and size change continuously (colour-panel drag /
         // stepper repeat) so they're verbose; icon selection is a discrete click.
         .onChange(of: editedConfig.tintColor) { _, newValue in
@@ -196,19 +197,6 @@ struct CustomiseTileView: View {
         }
     }
 
-    /// Which hero previews Customise shows. The Apps face is one live hero. A Mono glyph follows
-    /// Light/Dark only where the tile's icon is compiled per appearance (macOS 26+,
-    /// `IconPipeline.isDeclarative`); the macOS 15 legacy bake always shows the light variant
-    /// (there is no icon-style setting to follow), so the screen must not promise a black tile
-    /// there. `nil` = follow the live style.
-    nonisolated static func heroStyles(background: TileBackground, followsAppearance: Bool, iconFace: IconFace) -> [IconStyle?] {
-        guard iconFace == .glyph else { return [nil] }
-        switch background {
-        case .colour: return [nil]
-        case .mono: return followsAppearance ? [.defaultStyle, .dark] : [.defaultStyle]
-        }
-    }
-
     /// The one place the Mono presentation forks on OS: true where Mono really is white-or-black.
     private var monoFollowsAppearance: Bool { IconPipeline.isDeclarative }
 
@@ -229,104 +217,13 @@ struct CustomiseTileView: View {
         editedConfig.symbolEmoji = value  // Keep legacy field in sync
     }
 
-    // MARK: - Canvas
-
-    /// Top inset shared by the canvas and the inspector, so both columns start on one line under
-    /// the transparent toolbar strip (they run up into it, using that space).
-    private static let paneTopInset: CGFloat = 10
-    /// The gap on each side of the canvas (sidebar→canvas and canvas→inspector).
-    private static let paneGutter: CGFloat = 10
-
-    /// Inset of the "Select Apps" pill from the canvas card's top and leading edges.
-    private static let pillInset: CGFloat = 12
-
-    private var canvas: some View {
-        let styles = Self.heroStyles(background: editedConfig.background, followsAppearance: monoFollowsAppearance,
-                                     iconFace: editedConfig.iconFace)
-        return canvasSurface(styles)
-            .padding(.top, Self.paneTopInset)
-            .ignoresSafeArea(edges: .top)
-            // 200, not the handoff's 250: a 280 pt sidebar in a 782 pt window leaves ~502 pt for the pane.
-            .frame(minWidth: 200, maxWidth: .infinity, maxHeight: .infinity)
-    }
-
-    private func canvasSurface(_ styles: [IconStyle?]) -> some View {
-        let shape = RoundedRectangle(cornerRadius: 12, style: .continuous)
-        return Group {
-            if styles.count > 1 {
-                VStack(spacing: 0) {
-                    ForEach(Array(styles.enumerated()), id: \.offset) { _, style in
-                        pairHalf(style: style)
-                    }
-                }
-            } else {
-                VStack(spacing: 12) {
-                    heroTile(style: styles.first ?? nil, size: 100)
-                    Text(configManager.displayName(for: editedConfig.id))
-                        .font(.system(size: 13, weight: .medium))
-                        .foregroundStyle(.primary)
-                        .lineLimit(1)
-                        .padding(.horizontal, 12)
-                }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .background(StudioCanvasBackgroundView())
-            }
-        }
-        .clipShape(shape)
-        .overlay(shape.strokeBorder(Color(nsColor: .quinaryLabel), lineWidth: 0.5))
-    }
-
-    /// One half of the Mono Light / Dark pair. The style is forced (canonical Default/Dark,
-    /// whatever the user's system icon style) so the pair always explains what Mono means.
-    @ViewBuilder
-    private func pairHalf(style: IconStyle?) -> some View {
-        if style == .dark {
-            VStack(spacing: 10) {
-                heroTile(style: style, size: 88)
-                pairCaption(AppStrings.Label.previewDark, symbol: "moon")
-                    .environment(\.colorScheme, .dark)
-            }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(LinearGradient(colors: [Color(white: 0.17), Color(white: 0.11)],
-                                       startPoint: .top, endPoint: .bottom))
-        } else {
-            VStack(spacing: 10) {
-                heroTile(style: style, size: 88)
-                pairCaption(AppStrings.Label.previewLight, symbol: "sun.max")
-            }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(StudioCanvasBackgroundView())
-        }
-    }
-
-    private func pairCaption(_ text: String, symbol: String) -> some View {
-        Label(text, systemImage: symbol)
-            .font(.system(size: 13, weight: .medium))
-            .foregroundStyle(.secondary)
-    }
-
-    /// The tile as it will look; the icon-grid overlay guides glyph placement only, so it never
-    /// draws on the Apps face.
-    private func heroTile(style: IconStyle?, size: CGFloat) -> some View {
-        ZStack {
-            DockTileIconPreview.fromConfig(editedConfig, size: size)
-                .forcing(style)
-            if editedConfig.iconFace == .glyph {
-                if editedConfig.background == .mono {
-                    IconGridOverlay(size: size, lineColor: style == .dark ? .white.opacity(0.25) : .black.opacity(0.15))
-                } else {
-                    IconGridOverlay(size: size, backgroundColor: editedConfig.tintColor)
-                }
-            }
-        }
-    }
-
     // MARK: - Inspector
 
-    /// The inspector itself never scrolls: it starts at the top of the window (the Style cards use
-    /// the band beside the toolbar's "Select Apps") and only the symbol/emoji grid scrolls, inside
-    /// its own card, so the controls above it stay put.
-    private var inspector: some View {
+    /// Height of the symbol/emoji grid's own scroll area: fixed, so the picker card keeps one size
+    /// while the inspector around it scrolls.
+    nonisolated static let pickerGridHeight: CGFloat = 320
+
+    private var inspectorContent: some View {
         let sections = Self.inspectorSections(face: editedConfig.iconFace, background: editedConfig.background,
                                               iconType: editedConfig.iconType)
         return VStack(alignment: .leading, spacing: 16) {
@@ -335,17 +232,8 @@ struct CustomiseTileView: View {
             if sections.contains(.background) { backgroundSection }
             if sections.contains(.colour) { colourSection }
             if sections.contains(.iconSize) { iconSizeCard(showsWeight: sections.contains(.iconWeight)) }
-            if sections.contains(.picker) {
-                pickerSection
-            } else {
-                Spacer(minLength: 0)
-            }
+            if sections.contains(.picker) { pickerSection }
         }
-        .padding(.top, Self.paneTopInset)
-        .padding(.trailing, 12)
-        .frame(width: 260)
-        .frame(maxHeight: .infinity, alignment: .top)
-        .ignoresSafeArea(edges: .top)
     }
 
     // Inspector metrics follow Icon Composer's inspector (measured from a 2× screenshot,
@@ -698,15 +586,13 @@ struct CustomiseTileView: View {
                         )
                     }
                 }
-                .frame(maxHeight: .infinity)
+                .frame(height: Self.pickerGridHeight)
             }
             .padding(.top, 10)
             .padding(.horizontal, 8)
             .padding(.bottom, 8)
-            .frame(maxHeight: .infinity)
             .modifier(InspectorCard())
         }
-        .frame(maxHeight: .infinity)
     }
 
     private var iconSearchField: some View {
@@ -752,17 +638,6 @@ private struct InspectorCard: ViewModifier {
             .background(NSColorBackgroundView.formGroup)
             .clipShape(shape)
             .overlay { if isSelected { shape.strokeBorder(Color.accentColor, lineWidth: 2) } }
-    }
-}
-
-/// Liquid Glass capsule on macOS 26+, a material capsule before it.
-private struct GlassCapsule: ViewModifier {
-    func body(content: Content) -> some View {
-        if #available(macOS 26.0, *) {
-            content.glassEffect(.regular, in: .capsule)
-        } else {
-            content.background(.regularMaterial, in: Capsule())
-        }
     }
 }
 
@@ -922,7 +797,7 @@ extension Color {
         onToggleInspector: {}
     )
     .environmentObject(ConfigurationManager())
-    .frame(width: 620, height: 700)
+    .frame(width: 260, height: 700)
 }
 
 /// A card for the Background choice: a 32 pt tile thumbnail and the label. Colour shows the tile
@@ -932,7 +807,7 @@ private struct BackgroundChip: View {
     let option: TileBackground
     let config: DockTileConfiguration
     let isSelected: Bool
-    /// False on macOS 15, where Mono is always the light render (see `CustomiseTileView.heroStyles`).
+    /// False on macOS 15, where Mono is always the light render (`IconPipeline.isDeclarative`).
     let followsAppearance: Bool
     let action: () -> Void
 

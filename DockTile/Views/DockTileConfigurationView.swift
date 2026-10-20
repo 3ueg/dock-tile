@@ -364,13 +364,16 @@ private struct PaneTitleLabel: View {
     /// share a leading edge on both the Tile Detail (ScrollView) and Settings (Form) panes.
     static let leadingAdjustment: CGFloat = 12
 
+    /// The inspector band passes its own measured value (`InspectorTitleBand.titleLeadingAdjustment`).
+    var leadingAdjustment: CGFloat = PaneTitleLabel.leadingAdjustment
+
     var body: some View {
         Text(title)
             .font(.system(size: 16, weight: .semibold))
             .foregroundStyle(.primary)
             .lineLimit(1)
             .accessibilityAddTraits(.isHeader)
-            .padding(.leading, Self.leadingAdjustment)
+            .padding(.leading, leadingAdjustment)
     }
 }
 
@@ -415,6 +418,51 @@ private struct PaneTitleBandWithActions<Trailing: ToolbarContent>: ViewModifier 
                 ToolbarItem(placement: .automatic) { Spacer() }
             }
             trailing
+        }
+    }
+}
+
+/// The Customise inspector's own band: its title, a flexible spacer and the close toggle. Not
+/// `PaneTitleBand`, on purpose (spike, 2026-10-20):
+/// a `.navigation` title is pulled into the DETAIL band, so the title is placed `.automatic`; and
+/// SwiftUI builds the inspector content while it is closed, so the whole block is guarded on
+/// `isPresented` or the inspector's items leak into the main band.
+private struct InspectorTitleBand: ViewModifier {
+    /// Meant to land "Customise Tile" on the inspector cards' leading edge. NOT yet measurable
+    /// (2026-10-20, signed dev build, macOS 27): the window toolbar has no inspector tracking
+    /// separator (its only `NSTrackingSeparatorToolbarItem` is the sidebar's), so the title sits in
+    /// the detail band beside Update: title text AX x 936 vs first card 1155 in a 1200 pt window,
+    /// 916 vs 1115 at 1160 pt — the gap moves with the window width, so no constant can close it.
+    /// Kept at the panes' value until the band is placed.
+    static let titleLeadingAdjustment: CGFloat = 12
+
+    let title: String
+    let isPresented: Bool
+    let onToggle: () -> Void
+
+    func body(content: Content) -> some View {
+        content.toolbar {
+            if isPresented {
+                if #available(macOS 26.0, *) {
+                    ToolbarItem(placement: .automatic) {
+                        PaneTitleLabel(title: title, leadingAdjustment: Self.titleLeadingAdjustment)
+                    }
+                    .sharedBackgroundVisibility(.hidden)   // no Liquid Glass capsule around a title
+                    ToolbarSpacer(.flexible)
+                } else {
+                    ToolbarItem(placement: .automatic) {
+                        PaneTitleLabel(title: title, leadingAdjustment: Self.titleLeadingAdjustment)
+                    }
+                    ToolbarItem(placement: .automatic) { Spacer() }
+                }
+                ToolbarItem(placement: .primaryAction) {
+                    Button(action: onToggle) {
+                        Image(systemName: "sidebar.trailing")
+                    }
+                    .help(AppStrings.Menu.hideInspector)
+                    .accessibilityLabel(AppStrings.Menu.hideInspector)
+                }
+            }
         }
     }
 }
@@ -492,6 +540,11 @@ extension View {
     /// Page header in the title band: the title text only. Replaces `.navigationTitle`.
     func paneTitleBand(_ title: String) -> some View {
         modifier(PaneTitleBand(title: title))
+    }
+
+    /// The Customise inspector's band: title + close toggle, shown only while `isPresented`.
+    func inspectorTitleBand(_ title: String, isPresented: Bool, onToggle: @escaping () -> Void) -> some View {
+        modifier(InspectorTitleBand(title: title, isPresented: isPresented, onToggle: onToggle))
     }
 
     /// Fades a material scrim in behind the title band while content scrolls beneath it.
