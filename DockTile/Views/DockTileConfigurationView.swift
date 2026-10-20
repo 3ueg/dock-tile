@@ -197,6 +197,9 @@ struct DockTileConfigurationView: View {
         ) {
             Button(AppStrings.Button.remove, role: .destructive) {
                 configManager.removeMissingApps()
+                // R16: the live edit session still holds the removed apps; without this the next
+                // edit's debounced save writes them back.
+                editSessions.syncAppItems(from: configManager.configurations)
             }
             Button(AppStrings.Button.keep, role: .cancel) {
                 configManager.showMissingAppsPrompt = false
@@ -365,6 +368,13 @@ final class TileEditSessionStore: ObservableObject {
     }
 
     func clear() { current = nil }
+
+    /// After the missing-apps Remove: copy ONLY `appItems` from the stored config into the current
+    /// session. Never a general sync — that would overwrite unsaved edits whenever another tile saves.
+    func syncAppItems(from configurations: [DockTileConfiguration]) {
+        guard let current, let stored = configurations.first(where: { $0.id == current.id }) else { return }
+        current.config.appItems = stored.appItems
+    }
 }
 
 /// Observes the session so the inspector re-renders on every edit, wherever it came from.
