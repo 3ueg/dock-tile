@@ -187,6 +187,8 @@ struct DockTileDetailView: View {
         .inspector(isPresented: inspectorShown) {
             CustomiseTileView(config: $editedConfig, isPresented: inspectorShown.wrappedValue,
                               onToggleInspector: onToggleInspector)
+                // Pinned: AppKit throws (update-constraints loop) when the content's minimum width exceeds its column.
+                .frame(width: AppDelegate.inspectorWidth)
                 .inspectorColumnWidth(AppDelegate.inspectorWidth)
         }
         .alert(AppStrings.Title.deleteTile, isPresented: $showDeleteConfirmation) {
