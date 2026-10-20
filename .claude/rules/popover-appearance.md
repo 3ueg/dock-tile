@@ -93,7 +93,7 @@ architecture.md "Sidebar Selection & Empty State" for the title-band chrome). Pe
   material `withinWindow` + ~14pt continuous corner + shadow); `isPreview:true` keeps the panel
   interactive for hover yet neutralises every action (clicks never launch apps / open the
   configurator). The preview hero sits on the shared `StudioCanvasBackgroundView` (same
-  `underWindowBackground` treatment as the Customise-Tile studio).
+  `underWindowBackground` treatment as the About pane).
 - **Hover highlight**: mouse hover uses the subtle Liquid-Glass `.quaternary` fill (the Tahoe
   treatment), NOT the bold accent — the accent is reserved for keyboard-focus selection. Applies to
   the real popover too. The preview scales with `.scaleEffect` (a *fixed* per-layout fit, not a

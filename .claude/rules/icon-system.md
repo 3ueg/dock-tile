@@ -90,7 +90,7 @@ Every role (fill top/bottom, glyph) per background x style x icon type is derive
   glyph. **Colour** = the tint as the fill, white glyph.
 - **Mono follows Light/Dark on macOS 26+ only.** On macOS 15 the legacy path always shows the light
   variant (no icon-style setting exists there), so Customise presents Mono as a white tile with a
-  coloured symbol (one preview, static hint) via `CustomiseTileView.heroStyles`.
+  coloured symbol (static hint).
 - **The promise: every drawn symbol/fill pair >= 3:1** (`ToneMap.floor` 3.0, searched at
   `searchTarget` 3.1 for 8-bit/gamut headroom) via `ToneMap.fit` (OKLCH lightness search,
   hue-preserving). Each fit tests the pairs the renderer actually draws: Colour clears TWO (white
@@ -102,7 +102,7 @@ Every role (fill top/bottom, glyph) per background x style x icon type is derive
   add a glyph/surface sheen that is decoration, not part of the promise.
 - **The target is fixed**: a Dock icon is compiled once and cannot react to Increase Contrast (no
   such icon appearance).
-- **Previews are canonical**: the Customise chips and Mono hero always render Default/Dark via
+- **Previews are canonical**: the Customise chips and the Tile Detail hero (while the inspector is open) always render Default/Dark via
   `DockTileIconPreview.forcing(_:)` (`displayStyle(forced:raw:colorScheme:)`), whatever the system
   icon style is.
 - **Fills are P3 JSON fills** (`HelperBundleManager.declarativeFillsP3`), not pixels.

@@ -225,22 +225,44 @@ Popover, Dock Lock) · Dock Tile (About)** — the old accordion `@AppStorage` e
   label typography too, so it would shrink those panes' title and description text. Verify a
   change by reading the AX frame (`size of every checkbox …`), not by eye.
 
-- **The window is resizable, 782…1200 pt wide** (it was fixed at 768): `AppDelegate.minWindowWidth` /
-  `maxWindowWidth` are the one definition (`DockTileApp`, `DockTileConfigurationView` and
-  `WindowAccessor` read them) and the pure `AppDelegate.clampedWindowWidth(_:)` clamps `windowWillResize`
-  and a restored saved frame. Guarded by `MainWindowWidthTests`.
-- **Customise Tile is the one pane WITHOUT a title band.** Both columns run up into the 52 pt toolbar
-  strip (`.ignoresSafeArea(edges: .top)`) and start on one line, `paneTopInset` (10 pt) below the
-  window top. A floating **‹ Select Apps** glass pill, inset 12 pt in the canvas's top-left corner,
-  returns to Tile Detail; the inspector's Style cards (App Grid · Symbol · Emoji) sit at the top of
-  the inspector. Both are inside the strip, and clicks DO land there: an earlier note said the
-  window-drag region would swallow them, but the owner's real mouse clicks on the pill and on all
-  three cards were logged (`ui` lines, 2026-10-19). The inspector does NOT scroll; only the
-  symbol/emoji picker grid scrolls, inside its own card, so it carries no `paneScrollEdgeEffect()`.
-  There is no `paneTitleBand(_:subtitle:)` subtitle option any more and no
-  Back button. Layout: canvas `minWidth` 200 + a 260 pt inspector. 200, not the mock's 250, because the
-  sidebar may be dragged to its 280 pt max while the window is at its 782 pt min, which leaves the
-  canvas about 214 pt. Design handoff: `docs/design_handoff_customise_tile/README.md`.
+- **Window widths: 768 closed, 1028 open, 1200 max** (`AppDelegate.minWindowWidth` / `inspectorWidth` 260 /
+  `maxWindowWidth`; `DockTileApp`, `DockTileConfigurationView` and `WindowAccessor` read them). The pure
+  `AppDelegate.clampedWindowWidth(_:inspectorShown:)` clamps `windowWillResize` and a restored saved
+  frame; `windowFrame(forInspectorShown:from:visibleFrame:)` is the frame rule. Guarded by `MainWindowWidthTests`.
+- **Customise Tile is a native trailing `.inspector`, not a screen (critical).** The old drill-down
+  (a canvas, a floating Select Apps pill, a 700 pt window height) is gone.
+  - **Placement**: `.inspector` is attached to the `NavigationSplitView` in `DockTileConfigurationView`,
+    NOT inside `DockTileDetailView`. Only that placement gives the window toolbar a real inspector
+    section; inside the detail, the "Customise Tile" title landed beside Update at a gap that changed
+    with window width (measured 2026-10-20).
+  - **One edit session**: the edited config lives in `TileEditSession` (an `ObservableObject` holding
+    `config`). `DockTileDetailView` observes it and owns the ONLY save path: 300 ms debounce,
+    `onDisappear` flush, `preservingStoredVisibility`, `performDockAction`. The inspector edits
+    `$session.config` and never saves. `TileEditSessionStore` hands out a fresh session per tile and
+    clears it when the selection leaves the tiles.
+  - **Presentation** comes from the seam `inspectorIsPresented(stored:selection:)` (stored flag AND a
+    tile row selected; `InspectorVisibilityTests`). The binding's setter calls `setInspectorShown(_:)`
+    only when the value differs from what is presented, and reads the stored flag from `UserDefaults`:
+    `@AppStorage` was measured stale inside the setter and toggled twice per press.
+  - **The window KEEPS its width when the inspector toggles** (Xcode/Pages/Keynote). Opening grows it
+    only when narrower than 1028; closing never changes the frame. Shrinking in the same turn as the
+    inspector collapsed crashed AppKit's constraint pass. `AppDelegate.resizeConfigurationWindow` is
+    `static` because `NSApp.delegate as? AppDelegate` is nil under SwiftUI's
+    `NSApplicationDelegateAdaptor` proxy, so the instance call silently never ran.
+    `WindowAccessor.updateNSView` never moves the frame.
+  - **Content pinned to 260 pt** (`CustomiseInspectorColumn`): AppKit throws in a constraint loop when
+    the content's minimum width exceeds its column.
+  - **Inspector band**: `InspectorTitleBand` places its title `.automatic` (never `.navigation`) and its
+    whole toolbar is guarded on the presented flag. Unguarded, its items leaked into the main band
+    while the inspector was closed.
+  - **One moving toggle** (`sidebar.trailing`): Show Inspector trails Update in Tile Detail while
+    closed; Hide Inspector sits beside "Customise Tile" while open. Customise button and hero tap
+    only OPEN. ⌥⌘I is in the View menu via a `FocusedValue` (`InspectorCommand`), enabled only for a
+    tile row (`inspectorCommandIsEnabled`, `InspectorEntryPointTests`).
+  - **Hero**: canonical Default/Dark while the inspector is open, live `TileFace` while closed
+    (`DockTileDetailView.heroForcedStyle`, `InspectorEntryPointTests`).
+  - **No `onAppear` work in the inspector**: SwiftUI instantiates its content while it is closed.
+  Design handoff (superseded where it describes a screen): `docs/design_handoff_customise_tile/README.md`.
 - **Two defaults for the tile face (critical)**: a NEW tile starts on App Grid
   (`ConfigurationDefaults.iconFace = .apps`), while a stored config missing the `iconFace` key loads as
   `.glyph` (decoder literal) so no existing tile changes look on upgrade. Smart Add-created tiles also

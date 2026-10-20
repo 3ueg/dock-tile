@@ -1,5 +1,7 @@
 # Handoff: Customise Tile — three-way Style picker with the Apps face
 
+> **Superseded in part (2026-10-20):** Customise Tile is no longer a drill-down screen with a canvas and a Select Apps pill. It is a native trailing inspector beside Tile Detail; see `docs/superpowers/specs/2026-10-20-customise-inspector-design.md` and `.claude/rules/architecture.md`. The Style cards, Colour and Apps card content below still apply.
+
 Source: Claude Design project `191d3520-2496-46ac-a25a-58f39e0c5d6e`, files `Customise Tile.dc.html`
 and `Tile Icon.dc.html` (copied here verbatim, 2026-10-19). `Tile Detail.dc.html` in that project
 is today's Tile Detail unchanged (104 pt icon + **Customise** button, Tile Name / Show Tile /
