@@ -256,7 +256,7 @@ Popover, Dock Lock) · Dock Tile (About)** — the old accordion `@AppStorage` e
     whole toolbar is guarded on the presented flag. Unguarded, its items leaked into the main band
     while the inspector was closed.
   - **One moving toggle** (`sidebar.trailing`): Show Inspector trails Update in Tile Detail while
-    closed; Hide Inspector sits beside "Customise Tile" while open. Customise button and hero tap
+    closed; Hide Inspector trails the inspector band while open. Customise button and hero tap
     only OPEN. ⌥⌘I is in the View menu via a `FocusedValue` (`InspectorCommand`), enabled only for a
     tile row (`inspectorCommandIsEnabled`, `InspectorEntryPointTests`).
   - **Hero**: canonical Default/Dark while the inspector is open, live `TileFace` while closed

@@ -12,7 +12,7 @@ import SwiftUI
 import AppKit
 
 struct CustomiseTileView: View {
-    /// Tile Detail's own `editedConfig`: the inspector keeps no copy and no save path of its own —
+    /// The shared `TileEditSession`'s config: the inspector keeps no copy and no save path of its own —
     /// Tile Detail's debounce + `preservingStoredVisibility` save persists these edits.
     @Binding private var editedConfig: DockTileConfiguration
     /// Whether the inspector is open; guards the inspector band's toolbar content (SwiftUI builds the

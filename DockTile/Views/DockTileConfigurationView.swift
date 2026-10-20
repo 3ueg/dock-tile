@@ -2,7 +2,7 @@
 //  DockTileConfigurationView.swift
 //  DockTile
 //
-//  Screen 3: Main configuration window with sidebar and drill-down support
+//  Screen 3: Main configuration window: sidebar, detail column and the Customise inspector
 //  Swift 6 - Strict Concurrency
 //
 
@@ -324,8 +324,8 @@ struct DockTileConfigurationView: View {
     @ViewBuilder
     private var tileDetail: some View {
         if let selectedConfig = configManager.selectedConfiguration {
-            // IMPORTANT: Use .id() to force view recreation when config changes
-            // Without this, SwiftUI may reuse the view and editedConfig gets stale
+            // IMPORTANT: .id() recreates Tile Detail per tile, so its @State (name field, dirty
+            // signature, pending save) never carries over from the previous tile
             DockTileDetailView(
                 session: editSessions.session(for: selectedConfig),
                 inspectorShown: inspectorShown,

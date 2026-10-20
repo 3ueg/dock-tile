@@ -27,7 +27,7 @@ final class TileEditSession: ObservableObject {
 struct DockTileDetailView: View {
     @EnvironmentObject private var configManager: ConfigurationManager
     @ObservedObject var session: TileEditSession
-    /// The Customise inspector's open flag (owned by DockTileConfigurationView, persisted).
+    /// A snapshot of the Customise inspector's open flag, passed in by DockTileConfigurationView.
     let inspectorShown: Bool
     let onToggleInspector: () -> Void
 
