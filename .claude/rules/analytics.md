@@ -69,9 +69,9 @@ default-only key events, site in a separate property). Compare against it after 
   `tile_added_to_dock` / `tile_updated` (added 2026-10-14, Mono tile background) was registered the
   same way on 2026-10-14 ("Tile background", EVENT scope) — register any new param before the
   release that ships it, since registration is forward-only.
-  **`face` (`glyph` / `apps`) on `tile_added_to_dock` / `tile_updated` is NOT registered yet.** Register
-  it as "Tile face" (EVENT scope) BEFORE the release that ships the Apps face; events sent earlier are
-  invisible in GA4:
+  **`face` (`glyph` / `apps`) on `tile_added_to_dock` / `tile_updated` was registered 2026-10-20 as
+  "Tile face" (EVENT scope, `customDimensions/16158476110`), before 2.4.0 shipped it.** The same
+  command registers any new param:
   `TOKEN=$(gcloud auth print-access-token --account=ga4-fetch@dock-tile.iam.gserviceaccount.com --scopes=https://www.googleapis.com/auth/analytics.edit)`
   then `curl -s -X POST -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" https://analyticsadmin.googleapis.com/v1beta/properties/542196919/customDimensions -d '{"parameterName":"face","displayName":"Tile face","description":"glyph or apps — which face the tile Dock icon shows","scope":"EVENT"}'`
   (expect a body echoing `"parameterName": "face"`). The dictionary comes from the pure
