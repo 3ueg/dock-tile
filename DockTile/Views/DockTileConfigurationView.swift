@@ -380,6 +380,8 @@ final class TileEditSessionStore: ObservableObject {
 /// Observes the session so the inspector re-renders on every edit, wherever it came from.
 /// R15: SwiftUI builds inspector content while it is closed, so `CustomiseTileView` is built only
 /// while presented; otherwise every Name keystroke re-rendered the whole hidden Customise view.
+/// This `isPresented` check is the content's one gate: it also keeps the inspector band's toolbar
+/// items out of the main band while closed.
 private struct CustomiseInspectorColumn: View {
     @ObservedObject var session: TileEditSession
     let isPresented: Bool
@@ -388,13 +390,21 @@ private struct CustomiseInspectorColumn: View {
     var body: some View {
         Group {
             if isPresented {
-                CustomiseTileView(config: $session.config, isPresented: isPresented, onToggleInspector: onToggleInspector)
+                CustomiseTileView(config: $session.config, onToggleInspector: onToggleInspector)
             } else {
                 Color.clear
             }
         }
         // Pinned: AppKit throws (update-constraints loop) when the content's minimum width exceeds its column.
         .frame(width: AppDelegate.inspectorWidth)
+        // The 1 pt line between Tile Detail and the inspector, full window height including the
+        // 52 pt band. An overlay, so it never shifts the 260 pt content.
+        .overlay(alignment: .leading) {
+            Rectangle()
+                .fill(Color(nsColor: .separatorColor))
+                .frame(width: 1)
+                .ignoresSafeArea()
+        }
     }
 }
 
@@ -518,10 +528,12 @@ private struct PaneTitleLabel: View {
 
     /// The inspector band passes its own measured value (`InspectorTitleBand.titleLeadingAdjustment`).
     var leadingAdjustment: CGFloat = PaneTitleLabel.leadingAdjustment
+    /// 16 pt is the page title; the inspector band's title is one step smaller (`InspectorTitleBand`).
+    var fontSize: CGFloat = 16
 
     var body: some View {
         Text(title)
-            .font(.system(size: 16, weight: .semibold))
+            .font(.system(size: fontSize, weight: .semibold))
             .foregroundStyle(.primary)
             .lineLimit(1)
             .accessibilityAddTraits(.isHeader)
@@ -575,43 +587,43 @@ private struct PaneTitleBandWithActions<Trailing: ToolbarContent>: ViewModifier 
 }
 
 /// The Customise inspector's own band: its title, a flexible spacer and the close toggle. Not
-/// `PaneTitleBand`, on purpose (spike, 2026-10-20):
-/// a `.navigation` title is pulled into the DETAIL band, so the title is placed `.automatic`; and
-/// SwiftUI builds the inspector content while it is closed, so the whole block is guarded on
-/// `isPresented` or the inspector's items leak into the main band.
+/// `PaneTitleBand`, on purpose (spike, 2026-10-20): a `.navigation` title is pulled into the DETAIL
+/// band, so the title is placed `.automatic`. Built only while the inspector is presented —
+/// `CustomiseInspectorColumn` gates the content — or these items would leak into the main band.
 private struct InspectorTitleBand: ViewModifier {
     /// Lands "Customise Tile" on the inspector cards' leading edge. Measured by AX frame on the
     /// signed dev build (macOS 27, inspector on the NavigationSplitView): at 12 the title text sat
     /// 8 pt right of the first card (1163 vs 1155, 1200 pt window); at 4 the edges match at both
-    /// widths — 1155 vs 1155 at 1200 pt, 1115 vs 1115 at 1160 pt.
+    /// widths — 1155 vs 1155 at 1200 pt, 1115 vs 1115 at 1160 pt. Unchanged at the 14 pt title
+    /// (re-measured 2026-10-20): 1264 vs 1264 at 1028 pt, 1252 vs 1252 at 1200 pt.
     static let titleLeadingAdjustment: CGFloat = 4
 
+    /// One step below the 16 pt page title; 13 pt is the row-label size (spec Decision 11).
+    static let titleFontSize: CGFloat = 14
+
     let title: String
-    let isPresented: Bool
     let onToggle: () -> Void
 
     func body(content: Content) -> some View {
         content.toolbar {
-            if isPresented {
-                if #available(macOS 26.0, *) {
-                    ToolbarItem(placement: .automatic) {
-                        PaneTitleLabel(title: title, leadingAdjustment: Self.titleLeadingAdjustment)
-                    }
-                    .sharedBackgroundVisibility(.hidden)   // no Liquid Glass capsule around a title
-                    ToolbarSpacer(.flexible)
-                } else {
-                    ToolbarItem(placement: .automatic) {
-                        PaneTitleLabel(title: title, leadingAdjustment: Self.titleLeadingAdjustment)
-                    }
-                    ToolbarItem(placement: .automatic) { Spacer() }
+            if #available(macOS 26.0, *) {
+                ToolbarItem(placement: .automatic) {
+                    PaneTitleLabel(title: title, leadingAdjustment: Self.titleLeadingAdjustment, fontSize: Self.titleFontSize)
                 }
-                ToolbarItem(placement: .primaryAction) {
-                    Button(action: onToggle) {
-                        Image(systemName: "sidebar.trailing")
-                    }
-                    .help(AppStrings.Menu.hideInspector)
-                    .accessibilityLabel(AppStrings.Menu.hideInspector)
+                .sharedBackgroundVisibility(.hidden)   // no Liquid Glass capsule around a title
+                ToolbarSpacer(.flexible)
+            } else {
+                ToolbarItem(placement: .automatic) {
+                    PaneTitleLabel(title: title, leadingAdjustment: Self.titleLeadingAdjustment, fontSize: Self.titleFontSize)
                 }
+                ToolbarItem(placement: .automatic) { Spacer() }
+            }
+            ToolbarItem(placement: .primaryAction) {
+                Button(action: onToggle) {
+                    Image(systemName: "sidebar.trailing")
+                }
+                .help(AppStrings.Tooltip.toggleCustomiseTile)
+                .accessibilityLabel(AppStrings.Tooltip.toggleCustomiseTile)
             }
         }
     }
@@ -692,9 +704,9 @@ extension View {
         modifier(PaneTitleBand(title: title))
     }
 
-    /// The Customise inspector's band: title + close toggle, shown only while `isPresented`.
-    func inspectorTitleBand(_ title: String, isPresented: Bool, onToggle: @escaping () -> Void) -> some View {
-        modifier(InspectorTitleBand(title: title, isPresented: isPresented, onToggle: onToggle))
+    /// The Customise inspector's band: title + close toggle (the content exists only while presented).
+    func inspectorTitleBand(_ title: String, onToggle: @escaping () -> Void) -> some View {
+        modifier(InspectorTitleBand(title: title, onToggle: onToggle))
     }
 
     /// Fades a material scrim in behind the title band while content scrolls beneath it.

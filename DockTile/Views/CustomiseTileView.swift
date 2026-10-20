@@ -15,18 +15,15 @@ struct CustomiseTileView: View {
     /// The shared `TileEditSession`'s config: the inspector keeps no copy and no save path of its own —
     /// Tile Detail's debounce + `preservingStoredVisibility` save persists these edits.
     @Binding private var editedConfig: DockTileConfiguration
-    /// Whether the inspector is open; guards the inspector band's toolbar content (SwiftUI builds the
-    /// content while closed, and an unguarded inspector toolbar merges into the main band).
-    let isPresented: Bool
+    /// Built only while the inspector is presented (`CustomiseInspectorColumn` gates it).
     let onToggleInspector: () -> Void
 
     @State private var customColor: Color = .blue
     @State private var searchText: String = ""
     @State private var showWeightInfo: Bool = false
 
-    init(config: Binding<DockTileConfiguration>, isPresented: Bool, onToggleInspector: @escaping () -> Void) {
+    init(config: Binding<DockTileConfiguration>, onToggleInspector: @escaping () -> Void) {
         self._editedConfig = config
-        self.isPresented = isPresented
         self.onToggleInspector = onToggleInspector
     }
 
@@ -41,7 +38,7 @@ struct CustomiseTileView: View {
         // grey surface, and the band must have none at rest (re-checked with the inspector on the
         // NavigationSplitView: still grey without this).
         .background { NSColorBackgroundView.windowBackground.ignoresSafeArea() }
-        .inspectorTitleBand(AppStrings.Title.customiseTile, isPresented: isPresented, onToggle: onToggleInspector)
+        .inspectorTitleBand(AppStrings.Title.customiseTile, onToggle: onToggleInspector)
         // Per-control diagnostics. Colour and size change continuously (colour-panel drag /
         // stepper repeat) so they're verbose; icon selection is a discrete click.
         .onChange(of: editedConfig.tintColor) { _, newValue in
@@ -237,26 +234,26 @@ struct CustomiseTileView: View {
         }
     }
 
-    // Inspector metrics follow Icon Composer's inspector (measured from a 2× screenshot,
-    // 2026-10-19): 11 pt semibold secondary section headers ~10 pt in from the card edge and ~6 pt
-    // above it; 36 pt rows with a 13 pt label (no leading symbol); outline-less cards whose
-    // dividers are inset 10 pt from both edges.
+    // Inspector metrics follow Tile Detail's form (owner's call, 2026-10-20): group headers like
+    // "In This Tile" (13 pt semibold, primary), captions like its hint (11 pt, tertiary), and cards
+    // like its form card — 40 pt rows with a 13 pt label (no leading symbol), the card inset 10 pt
+    // horizontally, full-width 1 pt `quinaryLabel` dividers inside it.
     private static let headerInset: CGFloat = 10
     private static let headerToCard: CGFloat = 6
-    private static let rowHeight: CGFloat = 36
-    private static let rowPadding: CGFloat = 14
+    private static let rowHeight: CGFloat = 40
+    private static let cardPadding: CGFloat = 10
 
     private func groupHeader(_ title: String) -> some View {
         Text(title)
-            .font(.system(size: 11, weight: .semibold))
-            .foregroundStyle(.secondary)
+            .font(.system(size: 13, weight: .semibold))
+            .foregroundStyle(.primary)
             .padding(.horizontal, Self.headerInset)
     }
 
     private func caption(_ text: String) -> some View {
         Text(text)
             .font(.system(size: 11))
-            .foregroundStyle(.secondary)
+            .foregroundStyle(.tertiary)
             .fixedSize(horizontal: false, vertical: true)
             .padding(.horizontal, Self.headerInset)
     }
@@ -264,8 +261,7 @@ struct CustomiseTileView: View {
     private var cardHairline: some View {
         Rectangle()
             .fill(Color(nsColor: .quinaryLabel))
-            .frame(height: 0.5)
-            .padding(.horizontal, Self.headerInset)
+            .frame(height: 1)
     }
 
     /// One inspector row: the 13 pt label, then `content` — which places its own `Spacer` so a row
@@ -281,7 +277,6 @@ struct CustomiseTileView: View {
                 .layoutPriority(1)   // the label wins over a wide control (Icon Weight truncated)
             content()
         }
-        .padding(.horizontal, Self.rowPadding)
         .frame(minHeight: Self.rowHeight)
     }
 
@@ -315,7 +310,7 @@ struct CustomiseTileView: View {
                     appsFaceItems: style == .apps ? editedConfig.appItems : []
                 )
                 Text(style.label)
-                    .font(.system(size: 12, weight: .medium))
+                    .font(.system(size: 13))
                     .foregroundStyle(.primary)
                     .lineLimit(1)
                     .minimumScaleFactor(0.75)
@@ -352,6 +347,7 @@ struct CustomiseTileView: View {
                 cardHairline
                 valueRow(AppStrings.Label.appsArrangement, value: summary.arrangement)
             }
+            .padding(.horizontal, Self.cardPadding)
             .modifier(InspectorCard())
             caption(Self.appsCaption(note: summary.note, followsAppearance: monoFollowsAppearance))
         }
@@ -416,12 +412,12 @@ struct CustomiseTileView: View {
                 // Trailing header note, like Icon Composer's "All" scope control beside its headers.
                 Text(colourCaption(state))
                     .font(.system(size: 11))
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(.tertiary)
                     .multilineTextAlignment(.trailing)
                     .padding(.trailing, Self.headerInset)
             }
             colourPickerStrip
-                .padding(.horizontal, Self.rowPadding)
+                .padding(.horizontal, Self.cardPadding)
                 .padding(.vertical, 8)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .modifier(InspectorCard())
@@ -515,6 +511,7 @@ struct CustomiseTileView: View {
                 }
             }
         }
+        .padding(.horizontal, Self.cardPadding)
         .modifier(InspectorCard())
     }
 
@@ -794,10 +791,8 @@ extension Color {
             iconType: .sfSymbol,
             iconValue: "sparkles"
         )),
-        isPresented: true,
         onToggleInspector: {}
     )
-    .environmentObject(ConfigurationManager())
     .frame(width: 260, height: 700)
 }
 
