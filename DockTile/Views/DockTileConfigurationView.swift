@@ -179,7 +179,7 @@ struct DockTileConfigurationView: View {
     private func toggleInspector() {
         inspectorShown.toggle()
         DiagnosticsLog.shared.ui("Inspector → \(inspectorShown ? "shown" : "hidden")")
-        (NSApp.delegate as? AppDelegate)?.resizeConfigurationWindow(forInspectorShown: inspectorShown)
+        AppDelegate.resizeConfigurationWindow(forInspectorShown: inspectorShown)
     }
 
     private func handleAddTapped(source: AddSource) {
@@ -259,20 +259,21 @@ private struct WindowAccessor: NSViewRepresentable {
         let view = NSView()
         DispatchQueue.main.async {
             guard let window = view.window else { return }
-            configureWindow(window, animated: false)
+            configureWindow(window, clampsFrame: true)
         }
         return view
     }
 
     func updateNSView(_ nsView: NSView, context: Context) {
-        // Reconfigure on update in case window changed or the inspector toggled
+        // Reconfigure on update in case window changed or the inspector toggled. Never moves the
+        // frame: an inspector change is resized only by AppDelegate.resizeConfigurationWindow.
         DispatchQueue.main.async {
             guard let window = nsView.window else { return }
-            configureWindow(window, animated: true)
+            configureWindow(window, clampsFrame: false)
         }
     }
 
-    private func configureWindow(_ window: NSWindow, animated: Bool) {
+    private func configureWindow(_ window: NSWindow, clampsFrame: Bool) {
         // Tag the window so AppDelegate can reliably find this single configuration window
         // (for Dock-icon reopen / deep-link bring-to-front) instead of guessing by title.
         if window.identifier?.rawValue != AppDelegate.configurationWindowID {
@@ -297,8 +298,8 @@ private struct WindowAccessor: NSViewRepresentable {
             needsResize = true
         }
 
-        if needsResize {
-            window.setFrame(frame, display: true, animate: animated)
+        if clampsFrame && needsResize {
+            window.setFrame(frame, display: true, animate: false)
         }
     }
 }

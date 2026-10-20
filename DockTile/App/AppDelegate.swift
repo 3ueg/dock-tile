@@ -55,7 +55,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         return result
     }
 
-    private let minWindowHeight: CGFloat = 500
+    private static let minWindowHeight: CGFloat = 500
 
     // MARK: - Runtime Detection
 
@@ -198,7 +198,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
 
         // Bound horizontal size to the allowed range, allow vertical resize
         let inspectorShown = UserDefaults.standard.bool(forKey: UserDefaultsKeys.inspectorShown)
-        window.contentMinSize = NSSize(width: Self.clampedWindowWidth(0, inspectorShown: inspectorShown), height: minWindowHeight)
+        window.contentMinSize = NSSize(width: Self.clampedWindowWidth(0, inspectorShown: inspectorShown), height: Self.minWindowHeight)
         window.contentMaxSize = NSSize(width: Self.maxWindowWidth, height: CGFloat.greatestFiniteMagnitude)
 
         // Ensure current frame has correct width
@@ -208,16 +208,18 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             window.setFrame(frame, display: true, animate: false)
         }
 
-        print("✓ Window sizing configured: \(Self.minWindowWidth)…\(Self.maxWindowWidth)x\(minWindowHeight)+")
+        print("✓ Window sizing configured: \(Self.minWindowWidth)…\(Self.maxWindowWidth)x\(Self.minWindowHeight)+")
     }
 
     /// The ONE place that moves the frame for an inspector change. Order matters: closing lowers the
     /// minimum BEFORE the frame shrinks, opening grows the frame FIRST and raises the minimum after,
     /// so the frame change is never below the current minimum.
-    func resizeConfigurationWindow(forInspectorShown shown: Bool) {
+    /// `static`: SwiftUI's `NSApplicationDelegateAdaptor` installs its own proxy as `NSApp.delegate`,
+    /// so `NSApp.delegate as? AppDelegate` is nil and an instance call never ran.
+    static func resizeConfigurationWindow(forInspectorShown shown: Bool) {
         guard let window = NSApp.windows.first(where: { $0.identifier?.rawValue == Self.configurationWindowID }),
               let screen = window.screen ?? NSScreen.main else { return }
-        let minimum = NSSize(width: Self.clampedWindowWidth(0, inspectorShown: shown), height: minWindowHeight)
+        let minimum = NSSize(width: Self.clampedWindowWidth(0, inspectorShown: shown), height: Self.minWindowHeight)
         let target = Self.windowFrame(forInspectorShown: shown, from: window.frame, visibleFrame: screen.visibleFrame)
         if !shown { window.contentMinSize = minimum }
         window.setFrame(target, display: true, animate: !NSWorkspace.shared.accessibilityDisplayShouldReduceMotion)
@@ -229,7 +231,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     func windowWillResize(_ sender: NSWindow, to frameSize: NSSize) -> NSSize {
         // Clamp width into the allowed range during resize
         let inspectorShown = UserDefaults.standard.bool(forKey: UserDefaultsKeys.inspectorShown)
-        return NSSize(width: Self.clampedWindowWidth(frameSize.width, inspectorShown: inspectorShown), height: max(frameSize.height, minWindowHeight))
+        return NSSize(width: Self.clampedWindowWidth(frameSize.width, inspectorShown: inspectorShown), height: max(frameSize.height, Self.minWindowHeight))
     }
 
     /// Reopen decision for the single main configuration window (Dock-icon click /
