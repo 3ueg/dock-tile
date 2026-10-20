@@ -261,7 +261,10 @@ Popover, Dock Lock) · Dock Tile (About)** — the old accordion `@AppStorage` e
     tile row (`inspectorCommandIsEnabled`, `InspectorEntryPointTests`).
   - **Hero**: canonical Default/Dark while the inspector is open, live `TileFace` while closed
     (`DockTileDetailView.heroForcedStyle`, `InspectorEntryPointTests`).
-  - **No `onAppear` work in the inspector**: SwiftUI instantiates its content while it is closed.
+  - **Content only while presented (R15)**: SwiftUI instantiates inspector content while it is closed,
+    so `CustomiseInspectorColumn` builds `CustomiseTileView` only while presented (an empty
+    placeholder otherwise); built while closed, every Name keystroke re-rendered the whole hidden Customise view.
+    Still no `onAppear` work in the inspector.
   Design handoff (superseded where it describes a screen): `docs/design_handoff_customise_tile/README.md`.
 - **Two defaults for the tile face (critical)**: a NEW tile starts on App Grid
   (`ConfigurationDefaults.iconFace = .apps`), while a stored config missing the `iconFace` key loads as

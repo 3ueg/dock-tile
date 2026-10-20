@@ -368,15 +368,23 @@ final class TileEditSessionStore: ObservableObject {
 }
 
 /// Observes the session so the inspector re-renders on every edit, wherever it came from.
+/// R15: SwiftUI builds inspector content while it is closed, so `CustomiseTileView` is built only
+/// while presented; otherwise every Name keystroke re-rendered the whole hidden Customise view.
 private struct CustomiseInspectorColumn: View {
     @ObservedObject var session: TileEditSession
     let isPresented: Bool
     let onToggleInspector: () -> Void
 
     var body: some View {
-        CustomiseTileView(config: $session.config, isPresented: isPresented, onToggleInspector: onToggleInspector)
-            // Pinned: AppKit throws (update-constraints loop) when the content's minimum width exceeds its column.
-            .frame(width: AppDelegate.inspectorWidth)
+        Group {
+            if isPresented {
+                CustomiseTileView(config: $session.config, isPresented: isPresented, onToggleInspector: onToggleInspector)
+            } else {
+                Color.clear
+            }
+        }
+        // Pinned: AppKit throws (update-constraints loop) when the content's minimum width exceeds its column.
+        .frame(width: AppDelegate.inspectorWidth)
     }
 }
 
