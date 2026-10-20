@@ -155,12 +155,6 @@ enum AppStrings {
             comment: "Button to add tile to Dock"
         )
 
-        static let selectApps = NSLocalizedString(
-            "button.selectApps",
-            value: "Select Apps",
-            comment: "Customise Tile: floating pill that returns to Tile Detail"
-        )
-
         static let resetToDefaults = NSLocalizedString(
             "button.resetToDefaults",
             value: "Reset to Defaults",
@@ -381,16 +375,6 @@ enum AppStrings {
             "label.colour.hint.deepened",
             value: "Deepened slightly so the symbol stays clear",
             comment: "Customise Tile: colour hint when the fill was darkened for contrast"
-        )
-        static let previewLight = NSLocalizedString(
-            "label.preview.light",
-            value: "Light",
-            comment: "Customise Tile: caption under the Light Mode preview"
-        )
-        static let previewDark = NSLocalizedString(
-            "label.preview.dark",
-            value: "Dark",
-            comment: "Customise Tile: caption under the Dark Mode preview"
         )
         static let tileColour = NSLocalizedString(
             "label.tileColour",

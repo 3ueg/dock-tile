@@ -50,7 +50,6 @@ Keep `%@`-style placeholders exactly as they are. `\n` means a line break, `\|` 
 | `button.save` | Save | Enregistrer | machine | Primary toolbar button that commits the popover appearance settings |
 | `button.saving` | Applying… | Mise à jour… | machine | Loading label on the Save button while applying settings to Dock tiles |
 | `button.scanForMissingApps` | Scan | Analyser | machine | Settings button that scans tiles for moved/uninstalled apps |
-| `button.selectApps` | Select Apps | Choisir les apps | machine | Customise Tile: floating pill that returns to Tile Detail |
 | `button.update` | Update | Mettre à jour | machine | Update button when tile is already in Dock |
 | `button.useThisTile` | Use This Tile | Utiliser cette tuile | machine | Smart Add sheet — button that creates a pre-filled tile from a suggestion |
 | `emojiCategory.activity` | Activity | Activités | machine | Emoji picker: section header |
@@ -123,8 +122,6 @@ Keep `%@`-style placeholders exactly as they are. `\n` means a line break, `\|` 
 | `label.popover.size` | Popover Size | Taille de la fenêtre | machine | Label for the popover size segmented control |
 | `label.popover.spacing` | Spacing | Espacement | machine | Label for the popover item spacing segmented control |
 | `label.popover.tileSize` | Tile Size | Taille des tuiles | machine | Label for the icon/cell size control inside the popover |
-| `label.preview.dark` | Dark | Sombre | machine | Customise Tile: caption under the Dark Mode preview |
-| `label.preview.light` | Light | Clair | machine | Customise Tile: caption under the Light Mode preview |
 | `label.shareAnalytics` | Share anonymous usage data | Partager des données d’utilisation anonymes | machine | Label for the analytics opt-out toggle in Settings |
 | `label.shareAnalyticsDescription` | Help improve Dock Tile by sending anonymous usage and crash reports. No personal data is collected. | Aidez à améliorer Dock Tile en envoyant des données d’utilisation et des rapports de plantage anonymes. Aucune donnée personnelle n’est collectée. | machine | Explanation under the analytics toggle |
 | `label.addAppsAndFolders` | Add Apps & Folders | Ajouter des apps et des dossiers | machine | Tooltip on the Add button in Tile Detail's In This Tile section |
@@ -162,7 +159,6 @@ Keep `%@`-style placeholders exactly as they are. `\n` means a line break, `\|` 
 | `menu.options` | Options | Options | machine | Section divider in menu |
 | `menu.settings` | Settings… | Réglages… | machine | App menu item that opens the inline Settings pane (⌘,) |
 | `menu.showInspector` | Show Inspector | Afficher l’inspecteur | machine | View menu item, and tooltip and accessibility label of the inspector toggle, that opens the Customise Tile inspector |
-| `navigation.customiseTile` | Customise Tile | Personnaliser la tuile | machine | Navigation title for customise tile view |
 | `popover.option.animation.default` | Default | Par défaut | machine | Animation tier — default |
 | `popover.option.animation.fast` | Fast | Rapide | machine | Animation tier — fast |
 | `popover.option.animation.none` | None | Aucune | machine | Animation tier — none |

@@ -51,7 +51,6 @@
 		AAHMM01 /* HelperMigrationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAHMM02 /* HelperMigrationManager.swift */; };
 		AAICND01 /* AppIcon-Dev.icon in Resources */ = {isa = PBXBuildFile; fileRef = AAICND02 /* AppIcon-Dev.icon */; };
 		AAICON01 /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = AAICON02 /* AppIcon.icon */; };
-		AAIGOV02 /* IconGridOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAIGOV01 /* IconGridOverlay.swift */; };
 		AAILB01 /* AppIconLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAILB02 /* AppIconLoader.swift */; };
 		AAISM001 /* IconStyleManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAISM002 /* IconStyleManager.swift */; };
 		AALAD02 /* com.docktile.dev.app.tilelauncher.plist in Copy Login Item Launcher */ = {isa = PBXBuildFile; fileRef = AALAD01 /* com.docktile.dev.app.tilelauncher.plist */; };
@@ -160,7 +159,6 @@
 		AAHMM02 /* HelperMigrationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelperMigrationManager.swift; sourceTree = "<group>"; };
 		AAICND02 /* AppIcon-Dev.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.icon; path = "AppIcon-Dev.icon"; sourceTree = "<group>"; };
 		AAICON02 /* AppIcon.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.icon; path = AppIcon.icon; sourceTree = "<group>"; };
-		AAIGOV01 /* IconGridOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IconGridOverlay.swift; sourceTree = "<group>"; };
 		AAILB02 /* AppIconLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppIconLoader.swift; sourceTree = "<group>"; };
 		AAISM002 /* IconStyleManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IconStyleManager.swift; sourceTree = "<group>"; };
 		AALAD01 /* com.docktile.dev.app.tilelauncher.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = com.docktile.dev.app.tilelauncher.plist; sourceTree = "<group>"; };
@@ -317,7 +315,6 @@
 			children = (
 				AA547156 /* DockTileIconPreview.swift */,
 				AAC2BA1B /* DockTileIconPreview.swift */,
-				AAIGOV01 /* IconGridOverlay.swift */,
 				AASPGV01 /* SymbolPickerGrid.swift */,
 				AAEPGV01 /* EmojiPickerGrid.swift */,
 				AANBV02 /* NativeBackgroundViews.swift */,
@@ -657,7 +654,6 @@
 				AAENV002 /* Environment.swift in Sources */,
 				AA09AE0F /* ConfigurationModels.swift in Sources */,
 				AACFS001 /* ConfigurationSchema.swift in Sources */,
-				AAIGOV02 /* IconGridOverlay.swift in Sources */,
 				AASPGV02 /* SymbolPickerGrid.swift in Sources */,
 				AAEPGV02 /* EmojiPickerGrid.swift in Sources */,
 				AAAPM001 /* AppearanceManager.swift in Sources */,

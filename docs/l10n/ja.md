@@ -50,7 +50,6 @@ Keep `%@`-style placeholders exactly as they are. `\n` means a line break, `\|` 
 | `button.save` | Save | 保存 | machine | Primary toolbar button that commits the popover appearance settings |
 | `button.saving` | Applying… | 適用中… | machine | Loading label on the Save button while applying settings to Dock tiles |
 | `button.scanForMissingApps` | Scan | スキャン | machine | Settings button that scans tiles for moved/uninstalled apps |
-| `button.selectApps` | Select Apps | アプリを選択 | machine | Customise Tile: floating pill that returns to Tile Detail |
 | `button.update` | Update | 更新 | machine | Update button when tile is already in Dock |
 | `button.useThisTile` | Use This Tile | このタイルを使用 | machine | Smart Add sheet — button that creates a pre-filled tile from a suggestion |
 | `emojiCategory.activity` | Activity | 活動 | machine | Emoji picker: section header |
@@ -123,8 +122,6 @@ Keep `%@`-style placeholders exactly as they are. `\n` means a line break, `\|` 
 | `label.popover.size` | Popover Size | ポップオーバーのサイズ | machine | Label for the popover size segmented control |
 | `label.popover.spacing` | Spacing | 間隔 | machine | Label for the popover item spacing segmented control |
 | `label.popover.tileSize` | Tile Size | タイルのサイズ | machine | Label for the icon/cell size control inside the popover |
-| `label.preview.dark` | Dark | ダーク | machine | Customise Tile: caption under the Dark Mode preview |
-| `label.preview.light` | Light | ライト | machine | Customise Tile: caption under the Light Mode preview |
 | `label.shareAnalytics` | Share anonymous usage data | 匿名の使用状況データを共有 | machine | Label for the analytics opt-out toggle in Settings |
 | `label.shareAnalyticsDescription` | Help improve Dock Tile by sending anonymous usage and crash reports. No personal data is collected. | 匿名の使用状況データとクラッシュレポートを送信して、Dock Tileの改善にご協力ください。個人データは収集されません。 | machine | Explanation under the analytics toggle |
 | `label.addAppsAndFolders` | Add Apps & Folders | アプリとフォルダを追加 | machine | Tooltip on the Add button in Tile Detail's In This Tile section |
@@ -162,7 +159,6 @@ Keep `%@`-style placeholders exactly as they are. `\n` means a line break, `\|` 
 | `menu.options` | Options | オプション | machine | Section divider in menu |
 | `menu.settings` | Settings… | 設定… | machine | App menu item that opens the inline Settings pane (⌘,) |
 | `menu.showInspector` | Show Inspector | インスペクタを表示 | machine | View menu item, and tooltip and accessibility label of the inspector toggle, that opens the Customise Tile inspector |
-| `navigation.customiseTile` | Customise Tile | タイルをカスタマイズ | machine | Navigation title for customise tile view |
 | `popover.option.animation.default` | Default | デフォルト | machine | Animation tier — default |
 | `popover.option.animation.fast` | Fast | 高速 | machine | Animation tier — fast |
 | `popover.option.animation.none` | None | なし | machine | Animation tier — none |

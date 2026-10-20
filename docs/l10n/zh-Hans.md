@@ -50,7 +50,6 @@ Keep `%@`-style placeholders exactly as they are. `\n` means a line break, `\|` 
 | `button.save` | Save | 保存 | machine | Primary toolbar button that commits the popover appearance settings |
 | `button.saving` | Applying… | 正在应用… | machine | Loading label on the Save button while applying settings to Dock tiles |
 | `button.scanForMissingApps` | Scan | 扫描 | machine | Settings button that scans tiles for moved/uninstalled apps |
-| `button.selectApps` | Select Apps | 选择App | machine | Customise Tile: floating pill that returns to Tile Detail |
 | `button.update` | Update | 更新 | machine | Update button when tile is already in Dock |
 | `button.useThisTile` | Use This Tile | 使用此磁贴 | machine | Smart Add sheet — button that creates a pre-filled tile from a suggestion |
 | `emojiCategory.activity` | Activity | 活动 | machine | Emoji picker: section header |
@@ -123,8 +122,6 @@ Keep `%@`-style placeholders exactly as they are. `\n` means a line break, `\|` 
 | `label.popover.size` | Popover Size | 弹出面板大小 | machine | Label for the popover size segmented control |
 | `label.popover.spacing` | Spacing | 间距 | machine | Label for the popover item spacing segmented control |
 | `label.popover.tileSize` | Tile Size | 项目大小 | machine | Label for the icon/cell size control inside the popover |
-| `label.preview.dark` | Dark | 深色 | machine | Customise Tile: caption under the Dark Mode preview |
-| `label.preview.light` | Light | 浅色 | machine | Customise Tile: caption under the Light Mode preview |
 | `label.shareAnalytics` | Share anonymous usage data | 共享匿名使用数据 | machine | Label for the analytics opt-out toggle in Settings |
 | `label.shareAnalyticsDescription` | Help improve Dock Tile by sending anonymous usage and crash reports. No personal data is collected. | 发送匿名使用情况和崩溃报告，帮助改进Dock Tile。不会收集任何个人数据。 | machine | Explanation under the analytics toggle |
 | `label.addAppsAndFolders` | Add Apps & Folders | 添加App和文件夹 | machine | Tooltip on the Add button in Tile Detail's In This Tile section |
@@ -162,7 +159,6 @@ Keep `%@`-style placeholders exactly as they are. `\n` means a line break, `\|` 
 | `menu.options` | Options | 选项 | machine | Section divider in menu |
 | `menu.settings` | Settings… | 设置… | machine | App menu item that opens the inline Settings pane (⌘,) |
 | `menu.showInspector` | Show Inspector | 显示检查器 | machine | View menu item, and tooltip and accessibility label of the inspector toggle, that opens the Customise Tile inspector |
-| `navigation.customiseTile` | Customise Tile | 自定义磁贴 | machine | Navigation title for customise tile view |
 | `popover.option.animation.default` | Default | 默认 | machine | Animation tier — default |
 | `popover.option.animation.fast` | Fast | 快速 | machine | Animation tier — fast |
 | `popover.option.animation.none` | None | 无 | machine | Animation tier — none |

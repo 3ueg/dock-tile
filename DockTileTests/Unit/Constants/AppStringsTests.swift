@@ -335,7 +335,6 @@ struct AppStringsTests {
                     "label.background.colour.accessibility", "label.background.mono.accessibility",
                     "label.symbolColour", "label.colour.hint.fills", "label.colour.hint.deepened",
                     "label.colour.hint.toned", "label.colour.hint.emoji",
-                    "label.preview.light", "label.preview.dark",
                     "label.background.hint.mono.static", "label.background.mono.static.accessibility",
                     "label.colour.hint.toned.static"]
         for key in keys {
@@ -348,7 +347,6 @@ struct AppStringsTests {
         #expect(localizedString(for: "label.background", locale: "en-GB") == "Background")
         #expect(localizedString(for: "label.background.hint.mono", locale: "en-GB") == "White in Light Mode, black in Dark Mode")
         #expect(localizedString(for: "label.symbolColour", locale: "en-US") == "Symbol Color")
-        #expect(localizedString(for: "label.preview.dark", locale: "en-AU") == "Dark")
         #expect(localizedString(for: "label.background.hint.mono.static", locale: "en-GB") == "White tile with a coloured symbol")
         #expect(localizedString(for: "label.background.hint.mono.static", locale: "en-US") == "White tile with a colored symbol")
         #expect(localizedString(for: "label.background.mono.static.accessibility", locale: "en-AU") == "Mono, a white tile with a coloured symbol")
@@ -367,7 +365,6 @@ struct AppStringsTests {
             #expect(localizedString(for: key, locale: "en-AU").localizedCaseInsensitiveContains("colour"), "\(key) en-AU")
         }
         #expect(!AppStrings.Label.symbolColour.isEmpty)
-        #expect(!AppStrings.Label.previewDark.isEmpty)
     }
 
     // MARK: - Helper Functions

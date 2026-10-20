@@ -50,7 +50,6 @@ Keep `%@`-style placeholders exactly as they are. `\n` means a line break, `\|` 
 | `button.save` | Save | Сохранить | machine | Primary toolbar button that commits the popover appearance settings |
 | `button.saving` | Applying… | Применение… | machine | Loading label on the Save button while applying settings to Dock tiles |
 | `button.scanForMissingApps` | Scan | Проверить | machine | Settings button that scans tiles for moved/uninstalled apps |
-| `button.selectApps` | Select Apps | Выбрать приложения | machine | Customise Tile: floating pill that returns to Tile Detail |
 | `button.update` | Update | Обновить | machine | Update button when tile is already in Dock |
 | `button.useThisTile` | Use This Tile | Использовать | machine | Smart Add sheet — button that creates a pre-filled tile from a suggestion |
 | `emojiCategory.activity` | Activity | Активность | machine | Emoji picker: section header |
@@ -123,8 +122,6 @@ Keep `%@`-style placeholders exactly as they are. `\n` means a line break, `\|` 
 | `label.popover.size` | Popover Size | Размер панели | machine | Label for the popover size segmented control |
 | `label.popover.spacing` | Spacing | Интервалы | machine | Label for the popover item spacing segmented control |
 | `label.popover.tileSize` | Tile Size | Размер плиток | machine | Label for the icon/cell size control inside the popover |
-| `label.preview.dark` | Dark | Темное | machine | Customise Tile: caption under the Dark Mode preview |
-| `label.preview.light` | Light | Светлое | machine | Customise Tile: caption under the Light Mode preview |
 | `label.shareAnalytics` | Share anonymous usage data | Отправлять анонимную статистику | machine | Label for the analytics opt-out toggle in Settings |
 | `label.shareAnalyticsDescription` | Help improve Dock Tile by sending anonymous usage and crash reports. No personal data is collected. | Помогите улучшить Dock Tile, отправляя анонимные данные об использовании и отчеты о сбоях. Личные данные не собираются. | machine | Explanation under the analytics toggle |
 | `label.addAppsAndFolders` | Add Apps & Folders | Добавить приложения и папки | machine | Tooltip on the Add button in Tile Detail's In This Tile section |
@@ -162,7 +159,6 @@ Keep `%@`-style placeholders exactly as they are. `\n` means a line break, `\|` 
 | `menu.options` | Options | Параметры | machine | Section divider in menu |
 | `menu.settings` | Settings… | Настройки… | machine | App menu item that opens the inline Settings pane (⌘,) |
 | `menu.showInspector` | Show Inspector | Показать инспектор | machine | View menu item, and tooltip and accessibility label of the inspector toggle, that opens the Customise Tile inspector |
-| `navigation.customiseTile` | Customise Tile | Настройка плитки | machine | Navigation title for customise tile view |
 | `popover.option.animation.default` | Default | По умолчанию | machine | Animation tier — default |
 | `popover.option.animation.fast` | Fast | Быстро | machine | Animation tier — fast |
 | `popover.option.animation.none` | None | Нет | machine | Animation tier — none |
