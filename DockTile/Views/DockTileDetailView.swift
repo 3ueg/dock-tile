@@ -390,6 +390,15 @@ struct DockTileDetailView: View {
         }
     }
 
+    /// The App Store's product-page icon treatment (macOS 27, compared by eye 2026-10-20): a thin
+    /// rim that catches light along the top edge and fades down the sides, plus a soft lift shadow,
+    /// so the tile's outline reads even when its face is close to the window background (a white
+    /// Mono tile in Light Mode, a near-black one in Dark Mode). Light Mode swaps the bright rim for a
+    /// faint dark hairline — a white rim on a white page is invisible.
+    private var heroLift: HeroIconLift {
+        HeroIconLift(size: Self.heroIconSize, isDark: colorScheme == .dark)
+    }
+
     private func toggleInspectorFromHero() {
         DiagnosticsLog.shared.ui("Tile Detail → hero icon tapped (toggle Customise Tile) '\(editedConfig.name)'")
         onToggleInspector()
@@ -401,6 +410,7 @@ struct DockTileDetailView: View {
             // 122 pt), so the two align top and bottom. The preview fills its frame (no icon-grid
             // margin — an artifact fact, not a UI-slot fact). Clicking it toggles Customise Tile.
             heroFace
+                .modifier(heroLift)
                 .contentShape(RoundedRectangle(cornerRadius: Self.heroIconSize * 0.225, style: .continuous))
                 .onHover { hovering in
                     if hovering {
@@ -858,6 +868,34 @@ struct AppIconView: View {
 }
 
 // FormGroupBackground replaced by shared NSColorBackgroundView.formGroup
+
+// MARK: - Hero icon lift
+
+/// Rim + lift shadow for the Tile Detail hero (see `DockTileDetailView.heroLift`). The rim is drawn
+/// inside the squircle (`strokeBorder`) so it never changes the hero's 122 pt footprint; the shadow
+/// is cast from the composited tile, not from each layer inside it.
+struct HeroIconLift: ViewModifier {
+    let size: CGFloat
+    let isDark: Bool
+
+    func body(content: Content) -> some View {
+        let shape = RoundedRectangle(cornerRadius: size * 0.225, style: .continuous)
+        content
+            .overlay {
+                if isDark {
+                    // Light catching the top edge, fading down the sides.
+                    shape.strokeBorder(
+                        LinearGradient(colors: [.white.opacity(0.34), .white.opacity(0.06)],
+                                       startPoint: .top, endPoint: .bottom),
+                        lineWidth: 1)
+                } else {
+                    shape.strokeBorder(Color.black.opacity(0.10), lineWidth: 0.5)
+                }
+            }
+            .compositingGroup()
+            .shadow(color: .black.opacity(isDark ? 0.45 : 0.16), radius: 8, x: 0, y: 4)
+    }
+}
 
 // MARK: - Preview
 
