@@ -38,7 +38,8 @@ struct CustomiseTileView: View {
         }
         .paneScrollEdgeEffect()
         // Under the band too: the inspector column's own background otherwise shows there as a
-        // grey surface, and the band must have none at rest.
+        // grey surface, and the band must have none at rest (re-checked with the inspector on the
+        // NavigationSplitView: still grey without this).
         .background { NSColorBackgroundView.windowBackground.ignoresSafeArea() }
         .inspectorTitleBand(AppStrings.Title.customiseTile, isPresented: isPresented, onToggle: onToggleInspector)
         // Per-control diagnostics. Colour and size change continuously (colour-panel drag /

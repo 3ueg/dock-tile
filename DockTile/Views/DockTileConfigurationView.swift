@@ -31,6 +31,8 @@ struct DockTileConfigurationView: View {
     @EnvironmentObject private var configManager: ConfigurationManager
     @EnvironmentObject private var smartAddEngine: SmartAddEngine
     @AppStorage(UserDefaultsKeys.inspectorShown) private var inspectorShown = false
+    /// The selected tile's edit session, shared by Tile Detail and the Customise inspector.
+    @StateObject private var editSessions = TileEditSessionStore()
 
     /// Smart Add sheet state. Driven by `.sheet(item:)` — NOT `isPresented` + a separate array.
     /// With a separate `Bool` + array, SwiftUI can evaluate the sheet content while the array is
@@ -68,6 +70,23 @@ struct DockTileConfigurationView: View {
             detailColumn
         }
         .navigationSplitViewStyle(.balanced)
+        // On the NavigationSplitView itself, not inside Tile Detail: only here does the toolbar get
+        // an inspector section, so the inspector's own band lands over its column (R10, 2026-10-20).
+        // R9: the setter toggles only when SwiftUI writes a value that differs from what is
+        // PRESENTED. SwiftUI echoes every change back through it, and on a Settings pane the
+        // presented value is `false` while the stored flag stays `true`, which must not toggle.
+        // The flag is read from UserDefaults: `@AppStorage` read here returned the old value
+        // (logged 2026-10-20: set true, appStorage=false, stored=true), which toggled twice per press.
+        .inspector(isPresented: Binding(
+            get: { Self.inspectorIsPresented(stored: inspectorShown, selection: selection) },
+            set: {
+                let stored = UserDefaults.standard.bool(forKey: UserDefaultsKeys.inspectorShown)
+                if $0 != Self.inspectorIsPresented(stored: stored, selection: selection) { toggleInspector() }
+            }
+        )) {
+            inspectorColumn
+                .inspectorColumnWidth(AppDelegate.inspectorWidth)
+        }
         // v2 chrome: the 52pt title band IS the page header. No window title, no sidebar toggle,
         // no toolbar surface — each pane hosts its title + actions as toolbar items (PaneTitleBand).
         // The toggle is removed once, on the sidebar's own `List` (DockTileSidebarView) — that is the
@@ -110,6 +129,9 @@ struct DockTileConfigurationView: View {
             case .none:
                 break
             }
+            // Coming back to a tile starts a fresh edit seeded from configManager, as the old
+            // `.id` recreation of Tile Detail did.
+            if case .tile = newValue {} else { editSessions.clear() }
         }
         // External changes (create / delete / duplicate) jump the sidebar to that tile,
         // pulling focus out of a Settings pane if one was open. When the last tile is deleted
@@ -176,11 +198,33 @@ struct DockTileConfigurationView: View {
         case emptyState = "empty state"
     }
 
+    /// The inspector shows only while a tile row is selected; the stored flag survives Settings.
+    nonisolated static func inspectorIsPresented(stored: Bool, selection: SidebarSelection?) -> Bool {
+        guard stored, case .tile = selection else { return false }
+        return true
+    }
+
     private func toggleInspector() {
         inspectorShown.toggle()
         DiagnosticsLog.shared.ui("Inspector → \(inspectorShown ? "shown" : "hidden")")
-        AppDelegate.resizeConfigurationWindow(forInspectorShown: inspectorShown)
+        guard !inspectorShown else {
+            AppDelegate.resizeConfigurationWindow(forInspectorShown: true)
+            return
+        }
+        // Shrink only once the inspector column has collapsed. Shrinking in the same turn (or the
+        // next run-loop turn, or before hiding) sent AppKit into an Update Constraints loop through
+        // SwiftUI's toolbar bridge and crashed the app ~20 s later, every time; 0.3 s and 0.5 s
+        // later never did (2026-10-20, macOS 27, survival checked 33 s after closing).
+        DispatchQueue.main.asyncAfter(deadline: .now() + Self.inspectorCollapseDelay) {
+            // A reopen inside the delay keeps the window as it is. Read the stored flag:
+            // `@AppStorage` read inside an escaping closure returned the old value.
+            guard !UserDefaults.standard.bool(forKey: UserDefaultsKeys.inspectorShown) else { return }
+            AppDelegate.resizeConfigurationWindow(forInspectorShown: false)
+        }
     }
+
+    /// How long the window waits for the inspector column to collapse before it shrinks.
+    private static let inspectorCollapseDelay: TimeInterval = 0.5
 
     private func handleAddTapped(source: AddSource) {
         // Smart Add OFF skips the dialog entirely: a sheet holding only the blank-tile row is a
@@ -232,8 +276,8 @@ struct DockTileConfigurationView: View {
             // IMPORTANT: Use .id() to force view recreation when config changes
             // Without this, SwiftUI may reuse the view and editedConfig gets stale
             DockTileDetailView(
-                config: selectedConfig,
-                inspectorShown: $inspectorShown,
+                session: editSessions.session(for: selectedConfig),
+                inspectorShown: inspectorShown,
                 onToggleInspector: toggleInspector
             )
             .id(selectedConfig.id)
@@ -243,6 +287,48 @@ struct DockTileConfigurationView: View {
             // Empty state — routes through the same Smart Add flow as the sidebar +.
             EmptyConfigurationView(onAdd: { handleAddTapped(source: .emptyState) })
         }
+    }
+
+    /// Customise Tile for the selected tile, editing the same session as Tile Detail.
+    @ViewBuilder
+    private var inspectorColumn: some View {
+        if case .tile = selection, let selectedConfig = configManager.selectedConfiguration {
+            CustomiseInspectorColumn(
+                session: editSessions.session(for: selectedConfig),
+                isPresented: Self.inspectorIsPresented(stored: inspectorShown, selection: selection),
+                onToggleInspector: toggleInspector
+            )
+            .id(selectedConfig.id)
+        }
+    }
+}
+
+/// Holds the selected tile's `TileEditSession`: the same one while that tile stays selected, a
+/// fresh one per tile. Not published — handing out a session never re-renders anything.
+@MainActor
+final class TileEditSessionStore: ObservableObject {
+    private var current: TileEditSession?
+
+    func session(for config: DockTileConfiguration) -> TileEditSession {
+        if let current, current.id == config.id { return current }
+        let session = TileEditSession(config: config)
+        current = session
+        return session
+    }
+
+    func clear() { current = nil }
+}
+
+/// Observes the session so the inspector re-renders on every edit, wherever it came from.
+private struct CustomiseInspectorColumn: View {
+    @ObservedObject var session: TileEditSession
+    let isPresented: Bool
+    let onToggleInspector: () -> Void
+
+    var body: some View {
+        CustomiseTileView(config: $session.config, isPresented: isPresented, onToggleInspector: onToggleInspector)
+            // Pinned: AppKit throws (update-constraints loop) when the content's minimum width exceeds its column.
+            .frame(width: AppDelegate.inspectorWidth)
     }
 }
 
@@ -428,13 +514,11 @@ private struct PaneTitleBandWithActions<Trailing: ToolbarContent>: ViewModifier 
 /// SwiftUI builds the inspector content while it is closed, so the whole block is guarded on
 /// `isPresented` or the inspector's items leak into the main band.
 private struct InspectorTitleBand: ViewModifier {
-    /// Meant to land "Customise Tile" on the inspector cards' leading edge. NOT yet measurable
-    /// (2026-10-20, signed dev build, macOS 27): the window toolbar has no inspector tracking
-    /// separator (its only `NSTrackingSeparatorToolbarItem` is the sidebar's), so the title sits in
-    /// the detail band beside Update: title text AX x 936 vs first card 1155 in a 1200 pt window,
-    /// 916 vs 1115 at 1160 pt — the gap moves with the window width, so no constant can close it.
-    /// Kept at the panes' value until the band is placed.
-    static let titleLeadingAdjustment: CGFloat = 12
+    /// Lands "Customise Tile" on the inspector cards' leading edge. Measured by AX frame on the
+    /// signed dev build (macOS 27, inspector on the NavigationSplitView): at 12 the title text sat
+    /// 8 pt right of the first card (1163 vs 1155, 1200 pt window); at 4 the edges match at both
+    /// widths — 1155 vs 1155 at 1200 pt, 1115 vs 1115 at 1160 pt.
+    static let titleLeadingAdjustment: CGFloat = 4
 
     let title: String
     let isPresented: Bool

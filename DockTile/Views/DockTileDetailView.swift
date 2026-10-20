@@ -10,14 +10,31 @@
 import SwiftUI
 import AppKit
 
+/// The one in-memory edit of the selected tile, shared by Tile Detail and the Customise inspector
+/// (which lives on the NavigationSplitView, outside Tile Detail, so the toolbar gets a real
+/// inspector section). One copy, one save path: Tile Detail's debounce persists every edit.
+@MainActor
+final class TileEditSession: ObservableObject {
+    let id: UUID
+    @Published var config: DockTileConfiguration
+
+    init(config: DockTileConfiguration) {
+        self.id = config.id
+        self.config = config
+    }
+}
+
 struct DockTileDetailView: View {
     @EnvironmentObject private var configManager: ConfigurationManager
-    let config: DockTileConfiguration
+    @ObservedObject var session: TileEditSession
     /// The Customise inspector's open flag (owned by DockTileConfigurationView, persisted).
-    let inspectorShown: Binding<Bool>
+    let inspectorShown: Bool
     let onToggleInspector: () -> Void
 
-    @State private var editedConfig: DockTileConfiguration
+    private var editedConfig: DockTileConfiguration {
+        get { session.config }
+        nonmutating set { session.config = newValue }
+    }
     @State private var tileName: String  // Separate state for TextField to avoid struct churn
     @State private var isProcessing = false
     @State private var errorMessage: String?
@@ -132,13 +149,12 @@ struct DockTileDetailView: View {
         }
     }
 
-    init(config: DockTileConfiguration, inspectorShown: Binding<Bool>, onToggleInspector: @escaping () -> Void) {
-        self.config = config
+    init(session: TileEditSession, inspectorShown: Bool, onToggleInspector: @escaping () -> Void) {
+        self.session = session
         self.inspectorShown = inspectorShown
         self.onToggleInspector = onToggleInspector
-        self._editedConfig = State(initialValue: config)
-        self._tileName = State(initialValue: config.name)
-        self._appliedContentSignature = State(initialValue: Self.contentSignature(of: config))
+        self._tileName = State(initialValue: session.config.name)
+        self._appliedContentSignature = State(initialValue: Self.contentSignature(of: session.config))
     }
 
     var body: some View {
@@ -181,22 +197,6 @@ struct DockTileDetailView: View {
 
                 actionButton
             }
-        }
-        // Customise Tile edits THIS view's editedConfig through a binding, so its edits ride the
-        // debounced save below — one copy, one save path.
-        // Writes go through the toggle: if SwiftUI ever dismisses the inspector itself, the flag must not change without the window shrinking.
-        // Compared against the STORED flag: SwiftUI echoes every toggle back through this setter while
-        // the captured binding still reads the old value (logged 2026-10-20: set true, binding=false,
-        // stored=true), and comparing against the binding toggled twice — two resizes per press.
-        .inspector(isPresented: Binding(
-            get: { inspectorShown.wrappedValue },
-            set: { if $0 != UserDefaults.standard.bool(forKey: UserDefaultsKeys.inspectorShown) { onToggleInspector() } }
-        )) {
-            CustomiseTileView(config: $editedConfig, isPresented: inspectorShown.wrappedValue,
-                              onToggleInspector: onToggleInspector)
-                // Pinned: AppKit throws (update-constraints loop) when the content's minimum width exceeds its column.
-                .frame(width: AppDelegate.inspectorWidth)
-                .inspectorColumnWidth(AppDelegate.inspectorWidth)
         }
         .alert(AppStrings.Title.deleteTile, isPresented: $showDeleteConfirmation) {
             Button(AppStrings.Button.cancel, role: .cancel) {
@@ -375,7 +375,7 @@ struct DockTileDetailView: View {
                 }
                 .onTapGesture {
                     // Opens only, never closes (the inspector's own toggle closes it).
-                    if inspectorShown.wrappedValue {
+                    if inspectorShown {
                         DiagnosticsLog.shared.ui("Tile Detail → Customise (icon tapped) '\(editedConfig.name)' — already open")
                     } else {
                         DiagnosticsLog.shared.ui("Tile Detail → Customise (icon tapped) '\(editedConfig.name)'")
@@ -384,7 +384,7 @@ struct DockTileDetailView: View {
                 }
 
                 SubtleButton(title: AppStrings.Button.customise, width: 90, action: {
-                    if inspectorShown.wrappedValue {
+                    if inspectorShown {
                         DiagnosticsLog.shared.ui("Tile Detail → Customise button '\(editedConfig.name)' — already open")
                     } else {
                         DiagnosticsLog.shared.ui("Tile Detail → Customise button '\(editedConfig.name)'")
@@ -417,7 +417,7 @@ struct DockTileDetailView: View {
                 formRow(isLast: false) {
                     Text(AppStrings.Label.showTile)
                     Spacer()
-                    Toggle("", isOn: $editedConfig.isVisibleInDock)
+                    Toggle("", isOn: $session.config.isVisibleInDock)
                         .tileSwitch()
                 }
 
@@ -432,7 +432,7 @@ struct DockTileDetailView: View {
                 formRow(isLast: true) {
                     Text(AppStrings.Label.showInAppSwitcher)
                     Spacer()
-                    Toggle("", isOn: $editedConfig.showInAppSwitcher)
+                    Toggle("", isOn: $session.config.showInAppSwitcher)
                         .tileSwitch()
                         .disabled(!editedConfig.isVisibleInDock)
                 }
@@ -495,7 +495,7 @@ struct DockTileDetailView: View {
                     Text(AppStrings.Label.editorHint).font(.system(size: 11)).foregroundStyle(.tertiary)
                 }
                 Spacer()
-                Picker("", selection: $editedConfig.layoutMode) {
+                Picker("", selection: $session.config.layoutMode) {
                     Text(AppStrings.Layout.grid).tag(LayoutMode.grid)
                     Text(AppStrings.Layout.list).tag(LayoutMode.list)
                 }
@@ -872,7 +872,7 @@ private struct SubtleButton: View {
 
 #Preview {
     DockTileDetailView(
-        config: DockTileConfiguration(
+        session: TileEditSession(config: DockTileConfiguration(
             name: "AI Tile",
             tintColor: .green,
             symbolEmoji: "✨",
@@ -881,8 +881,8 @@ private struct SubtleButton: View {
                 AppItem(bundleIdentifier: "com.google.gemini", name: "Google Gemini"),
                 AppItem(bundleIdentifier: "com.anthropic.claude", name: "Claude AI")
             ]
-        ),
-        inspectorShown: .constant(false),
+        )),
+        inspectorShown: false,
         onToggleInspector: {}
     )
     .environmentObject(ConfigurationManager())
