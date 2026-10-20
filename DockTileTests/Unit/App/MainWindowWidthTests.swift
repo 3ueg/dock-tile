@@ -22,9 +22,9 @@ struct MainWindowWidthTests {
         #expect(AppDelegate.maxWindowWidth == 1200)
     }
 
-    @Test("UserDefaults key is stable", arguments: ["inspectorShown"])
-    func key(expected: String) {
-        #expect(UserDefaultsKeys.inspectorShown == expected)
+    @Test("UserDefaults key is stable")
+    func key() {
+        #expect(UserDefaultsKeys.inspectorShown == "inspectorShown")
     }
 
     @Test("Clamps into the range", arguments: [
@@ -65,6 +65,12 @@ struct MainWindowWidthTests {
     func openShiftsLeft() {
         let result = open(CGRect(x: 1500, y: 200, width: 800, height: 600), on: screen)
         #expect(result == CGRect(x: 972, y: 200, width: 1028, height: 600))
+    }
+
+    @Test("Opening past the left edge shifts right to fit")
+    func openShiftsRight() {
+        let result = open(CGRect(x: -100, y: 200, width: 800, height: 600), on: screen)
+        #expect(result == CGRect(x: 0, y: 200, width: 1028, height: 600))
     }
 
     @Test("Opening on a screen narrower than 1028 fits the screen")
