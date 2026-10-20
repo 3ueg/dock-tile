@@ -62,6 +62,7 @@ struct SmartAddSheet: View {
             DockTileIconPreview(tintColor: ConfigurationDefaults.tintColor, iconType: ConfigurationDefaults.iconType,
                                 iconValue: ConfigurationDefaults.iconValue, iconScale: ConfigurationDefaults.iconScale,
                                 iconWeight: ConfigurationDefaults.iconWeight, background: .colour, size: 44)
+                .iconLift(size: 44)
                 .accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 2) {
                 Text(AppStrings.SmartAdd.blankTitle).font(.system(size: 13, weight: .semibold))
@@ -168,7 +169,7 @@ private struct SuggestionCard: View {
                 background: .colour,
                 size: 58
             )
-            .shadow(color: suggestion.tint.color.opacity(0.35), radius: 6, y: 3)
+            .iconLift(size: 58)
 
             Text(suggestion.name)
                 .font(.system(size: 13.5, weight: .semibold))

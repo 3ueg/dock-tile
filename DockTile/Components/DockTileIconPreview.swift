@@ -477,6 +477,74 @@ struct TileFace: View {
     }
 }
 
+// MARK: - Icon lift (App Store style)
+
+/// The App Store's icon treatment (macOS 27, compared by eye 2026-10-20 on its product page and its
+/// search results): a thin rim that catches light along the top edge and fades down the sides, plus
+/// a soft lift shadow, so a tile's outline reads even when its face is close to the background (a
+/// white Mono tile in Light Mode, a near-black one in Dark Mode). Light Mode swaps the bright rim for
+/// a faint dark hairline — a white rim on a white page is invisible. Small icons keep the same two
+/// layers, scaled: a hairline rim and a smaller, fainter shadow. Applied to every tile icon the app
+/// draws (Tile Detail hero, sidebar rows, the inspector's Style cards and Background chips, Smart Add)
+/// — never to the popover preview, which must match the shipped popover. The rim is drawn inside the
+/// squircle (`strokeBorder`), so the icon's footprint never changes.
+struct IconLift: ViewModifier {
+    /// Light Mode's dark hairline, the same at every size.
+    nonisolated static let lightHairline: CGFloat = 0.5
+
+    struct Metrics: Equatable {
+        /// The Dark Mode light-catching rim (Light Mode uses `lightHairline`).
+        let rimWidth: CGFloat
+        let shadowRadius: CGFloat
+        let shadowY: CGFloat
+        let darkOpacity: Double
+        let lightOpacity: Double
+    }
+
+    /// Pure seam (`IconLiftTests`): 64 pt and up draw like the hero; below, a hairline rim and a
+    /// fainter shadow. Radius ≈ 6.5% and offset ≈ 3.3% of the size, rounded to half points.
+    nonisolated static func metrics(size: CGFloat) -> Metrics {
+        let large = size >= 64
+        return Metrics(
+            rimWidth: large ? 1 : 0.5,
+            shadowRadius: max(1.5, (size * 0.065 * 2).rounded() / 2),
+            shadowY: max(1, (size * 0.033 * 2).rounded() / 2),
+            darkOpacity: large ? 0.45 : 0.32,
+            lightOpacity: large ? 0.16 : 0.14)
+    }
+
+    let size: CGFloat
+    @Environment(\.colorScheme) private var colorScheme
+
+    func body(content: Content) -> some View {
+        let m = Self.metrics(size: size)
+        let isDark = colorScheme == .dark
+        let shape = RoundedRectangle(cornerRadius: size * 0.225, style: .continuous)
+        content
+            .overlay {
+                if isDark {
+                    shape.strokeBorder(
+                        LinearGradient(colors: [.white.opacity(0.34), .white.opacity(0.06)],
+                                       startPoint: .top, endPoint: .bottom),
+                        lineWidth: m.rimWidth)
+                } else {
+                    // Light Mode's dark hairline stays 0.5 at every size (the shipped hero's value).
+                    shape.strokeBorder(Color.black.opacity(0.10), lineWidth: Self.lightHairline)
+                }
+            }
+            .compositingGroup()
+            .shadow(color: .black.opacity(isDark ? m.darkOpacity : m.lightOpacity),
+                    radius: m.shadowRadius, x: 0, y: m.shadowY)
+    }
+}
+
+extension View {
+    /// App Store-style rim + lift shadow for a tile icon drawn at `size` points. See `IconLift`.
+    func iconLift(size: CGFloat) -> some View {
+        modifier(IconLift(size: size))
+    }
+}
+
 // MARK: - Previews
 
 #Preview("Default Style") {

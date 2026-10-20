@@ -309,6 +309,7 @@ struct CustomiseTileView: View {
                     size: 32,
                     appsFaceItems: style == .apps ? editedConfig.appItems : []
                 )
+                .iconLift(size: 32)
                 Text(style.label)
                     .font(.system(size: 13))
                     .foregroundStyle(.primary)
@@ -814,6 +815,7 @@ private struct BackgroundChip: View {
             HStack(spacing: 8) {
                 thumbnail
                     .frame(width: side, height: side)
+                    .iconLift(size: side)
                 Text(option == .colour ? AppStrings.Label.backgroundColour : AppStrings.Label.backgroundMono)
                     .font(.system(size: 13, weight: isSelected ? .semibold : .regular))
                     .foregroundStyle(.primary)
