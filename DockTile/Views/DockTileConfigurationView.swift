@@ -72,16 +72,18 @@ struct DockTileConfigurationView: View {
         .navigationSplitViewStyle(.balanced)
         // On the NavigationSplitView itself, not inside Tile Detail: only here does the toolbar get
         // an inspector section, so the inspector's own band lands over its column (R10, 2026-10-20).
-        // R9: the setter toggles only when SwiftUI writes a value that differs from what is
-        // PRESENTED. SwiftUI echoes every change back through it, and on a Settings pane the
-        // presented value is `false` while the stored flag stays `true`, which must not toggle.
-        // The flag is read from UserDefaults: `@AppStorage` read here returned the old value
-        // (logged 2026-10-20: set true, appStorage=false, stored=true), which toggled twice per press.
+        // R9: the setter acts only when SwiftUI writes a value that differs from what is PRESENTED,
+        // and then sets exactly that value (never a toggle). SwiftUI echoes every change back
+        // through it, and on a Settings pane the presented value is `false` while the stored flag
+        // stays `true`, which must not change anything. The flag is read from UserDefaults:
+        // `@AppStorage` read here returned the old value (logged 2026-10-20: set true,
+        // appStorage=false, stored=true), which toggled twice per press.
         .inspector(isPresented: Binding(
             get: { Self.inspectorIsPresented(stored: inspectorShown, selection: selection) },
-            set: {
-                let stored = UserDefaults.standard.bool(forKey: UserDefaultsKeys.inspectorShown)
-                if $0 != Self.inspectorIsPresented(stored: stored, selection: selection) { toggleInspector() }
+            set: { newValue in
+                if newValue != Self.inspectorIsPresented(stored: Self.storedInspectorShown, selection: selection) {
+                    setInspectorShown(newValue)
+                }
             }
         )) {
             inspectorColumn
@@ -204,10 +206,21 @@ struct DockTileConfigurationView: View {
         return true
     }
 
+    /// The button / menu entry point. Negates the STORED flag — the one source the R9 setter
+    /// reads too — so a stale `@AppStorage` copy in an escaping closure can't flip the wrong way.
     private func toggleInspector() {
-        inspectorShown.toggle()
-        DiagnosticsLog.shared.ui("Inspector → \(inspectorShown ? "shown" : "hidden")")
-        AppDelegate.resizeConfigurationWindow(forInspectorShown: inspectorShown)
+        setInspectorShown(!Self.storedInspectorShown)
+    }
+
+    /// Writes the flag to exactly `shown`, logs, and applies the window minimum / growth.
+    private func setInspectorShown(_ shown: Bool) {
+        inspectorShown = shown
+        DiagnosticsLog.shared.ui("Inspector → \(shown ? "shown" : "hidden")")
+        AppDelegate.resizeConfigurationWindow(forInspectorShown: shown)
+    }
+
+    private static var storedInspectorShown: Bool {
+        UserDefaults.standard.bool(forKey: UserDefaultsKeys.inspectorShown)
     }
 
     private func handleAddTapped(source: AddSource) {
