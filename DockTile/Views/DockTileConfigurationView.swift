@@ -302,7 +302,8 @@ private struct WindowAccessor: NSViewRepresentable {
         let minHeight = isCustomising ? customiseMinHeight : defaultMinHeight
 
         // Bound horizontal size to the allowed range, allow vertical resize
-        window.contentMinSize = NSSize(width: AppDelegate.minWindowWidth, height: minHeight)
+        let inspectorShown = UserDefaults.standard.bool(forKey: UserDefaultsKeys.inspectorShown)
+        window.contentMinSize = NSSize(width: inspectorShown ? AppDelegate.minWindowWidth + AppDelegate.inspectorWidth : AppDelegate.minWindowWidth, height: minHeight)
         window.contentMaxSize = NSSize(width: AppDelegate.maxWindowWidth, height: CGFloat.greatestFiniteMagnitude)
 
         // Set current size if needed
@@ -310,8 +311,8 @@ private struct WindowAccessor: NSViewRepresentable {
         var needsResize = false
 
         // Clamp width into the allowed range
-        if frame.width != AppDelegate.clampedWindowWidth(frame.width) {
-            frame.size.width = AppDelegate.clampedWindowWidth(frame.width)
+        if frame.width != AppDelegate.clampedWindowWidth(frame.width, inspectorShown: inspectorShown) {
+            frame.size.width = AppDelegate.clampedWindowWidth(frame.width, inspectorShown: inspectorShown)
             needsResize = true
         }
 

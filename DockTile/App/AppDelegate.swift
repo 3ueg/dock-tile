@@ -26,12 +26,33 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     var openConfigurationWindow: (() -> Void)?
 
     // Window width range: horizontally resizable, height unbounded
-    nonisolated static let minWindowWidth: CGFloat = 782
+    nonisolated static let minWindowWidth: CGFloat = 768
     nonisolated static let maxWindowWidth: CGFloat = 1200
+    /// Width of the trailing Customise inspector; the window grows by this much while it is open.
+    nonisolated static let inspectorWidth: CGFloat = 260
 
     /// Pure clamp into the allowed window width range (shared by every width fix-up site).
-    nonisolated static func clampedWindowWidth(_ width: CGFloat) -> CGFloat {
-        min(max(width, minWindowWidth), maxWindowWidth)
+    /// With the inspector open the minimum is `minWindowWidth + inspectorWidth`.
+    nonisolated static func clampedWindowWidth(_ width: CGFloat, inspectorShown: Bool) -> CGFloat {
+        let minimum = inspectorShown ? minWindowWidth + inspectorWidth : minWindowWidth
+        return min(max(width, minimum), maxWindowWidth)
+    }
+
+    /// Frame after opening/closing the inspector (AppKit coordinates). Height and y never change.
+    /// Opening grows by `inspectorWidth` keeping the leading edge, clamps to the open range and to
+    /// the screen, then shifts left so the window stays inside `visibleFrame`. Closing shrinks by
+    /// `inspectorWidth`, never below `minWindowWidth`.
+    nonisolated static func windowFrame(forInspectorShown shown: Bool, from frame: CGRect, visibleFrame: CGRect) -> CGRect {
+        var result = frame
+        if shown {
+            let width = min(clampedWindowWidth(frame.width + inspectorWidth, inspectorShown: true), visibleFrame.width)
+            result.size.width = width
+            if result.maxX > visibleFrame.maxX { result.origin.x = visibleFrame.maxX - width }
+            if result.minX < visibleFrame.minX { result.origin.x = visibleFrame.minX }
+        } else {
+            result.size.width = max(frame.width - inspectorWidth, minWindowWidth)
+        }
+        return result
     }
 
     private let minWindowHeight: CGFloat = 500
@@ -176,13 +197,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         window.delegate = self
 
         // Bound horizontal size to the allowed range, allow vertical resize
-        window.contentMinSize = NSSize(width: Self.minWindowWidth, height: minWindowHeight)
+        let inspectorShown = UserDefaults.standard.bool(forKey: UserDefaultsKeys.inspectorShown)
+        window.contentMinSize = NSSize(width: inspectorShown ? Self.minWindowWidth + Self.inspectorWidth : Self.minWindowWidth, height: minWindowHeight)
         window.contentMaxSize = NSSize(width: Self.maxWindowWidth, height: CGFloat.greatestFiniteMagnitude)
 
         // Ensure current frame has correct width
         var frame = window.frame
-        if frame.width != Self.clampedWindowWidth(frame.width) {
-            frame.size.width = Self.clampedWindowWidth(frame.width)
+        if frame.width != Self.clampedWindowWidth(frame.width, inspectorShown: inspectorShown) {
+            frame.size.width = Self.clampedWindowWidth(frame.width, inspectorShown: inspectorShown)
             window.setFrame(frame, display: true, animate: false)
         }
 
@@ -193,7 +215,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
 
     func windowWillResize(_ sender: NSWindow, to frameSize: NSSize) -> NSSize {
         // Clamp width into the allowed range during resize
-        return NSSize(width: Self.clampedWindowWidth(frameSize.width), height: max(frameSize.height, minWindowHeight))
+        let inspectorShown = UserDefaults.standard.bool(forKey: UserDefaultsKeys.inspectorShown)
+        return NSSize(width: Self.clampedWindowWidth(frameSize.width, inspectorShown: inspectorShown), height: max(frameSize.height, minWindowHeight))
     }
 
     /// Reopen decision for the single main configuration window (Dock-icon click /

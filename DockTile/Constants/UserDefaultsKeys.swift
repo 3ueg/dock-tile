@@ -17,6 +17,10 @@ enum UserDefaultsKeys {
     static let lastSelectedConfigId = "lastSelectedConfigId"
     static let lastMigratedAppVersion = "lastMigratedAppVersion"
 
+    /// The Customise inspector is open. Main-app domain; default false (absent) = closed. The
+    /// window's minimum width follows this stored flag.
+    static let inspectorShown = "inspectorShown"
+
     /// User dismissed the launch-time "move to Applications" nudge with "Don't ask again". Main-app
     /// domain (the nudge is main-app only). The *blocking* prompt shown when a helper op is actually
     /// refused ignores this — a broken location must keep asking until the app is moved.
