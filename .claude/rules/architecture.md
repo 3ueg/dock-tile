@@ -238,7 +238,10 @@ Popover, Dock Lock) · Dock Tile (About)** — the old accordion `@AppStorage` e
   (2026-10-20): the inspector was clipped off the right edge, and opening at 988–994 pt (or resizing an open window to 1010) threw in AppKit's
   update-constraints pass. So Tile Detail reports `AppDelegate.detailColumnMinWidth` (150) through
   `.frame(minWidth:)` in `DockTileConfigurationView.tileDetail`, below its content's own minimum on
-  purpose; the content's room comes from the window minimums (at least 420 pt: 700 − 280, or
+  purpose — and so does EVERY Settings pane (`detailColumn`'s `.settings` branch): the inspector
+  collapses on the way to a Settings pane and is still counted twice while it collapses, so the
+  Popover pane's own width froze the app in an endless layout pass and then threw (2026-10-21;
+  General happened to fit, Popover did not, the bug predated that day's Popover edits); the content's room comes from the window minimums (at least 420 pt: 700 − 280, or
   960 − 280 − 260, which holds the 406 pt hero row). `.navigationSplitViewColumnWidth(min:)` alone
   does NOT lower that minimum (measured: the item's `minimumThickness` changed, the floor did not).
   The sidebar range is `sidebarMinWidth` / `sidebarMaxWidth` (220 / 280); the inequalities with the

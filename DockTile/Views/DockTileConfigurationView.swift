@@ -296,7 +296,12 @@ struct DockTileConfigurationView: View {
     private var detailColumn: some View {
         switch selection {
         case .settings(let pane):
+            // Same reported minimum as Tile Detail: while the inspector collapses on the way to a
+            // Settings pane, the split view still counts it twice, and the Popover pane's own width
+            // (its segmented rows) then overflowed the window — an endless layout pass and an
+            // NSException (2026-10-21; General survived, Popover crashed).
             settingsDetail(pane)
+                .frame(minWidth: AppDelegate.detailColumnMinWidth, maxWidth: .infinity, maxHeight: .infinity)
         case .tile, .tilesPlaceholder, .none:
             tileDetail
         }
