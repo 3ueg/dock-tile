@@ -87,7 +87,7 @@ row overflow phones and forced the (since removed) hamburger.
   orphaned components reference `font-display`. Haskoy was trialled and reverted (sources in
   `docs/website/haskoy/`) — don't re-suggest it.
 - Caption canon: `text-[12px] font-bold uppercase tracking-[0.2em]` at ~60% foreground (the hero
-  "For macOS 26+" eyebrow). Reuse it; don't invent new caption styles.
+  eyebrow, `heroEyebrow` in `lib/i18n.ts`). Reuse it; don't invent new caption styles.
 - The heading scale was deliberately stepped down a notch site-wide — don't "fix" headings bigger.
 
 ## Motion
