@@ -48,9 +48,14 @@ hid the rest of the tile while editing. Apple's own pattern for "how this thing 
    Tile Detail's HStack; the rest of this document still applies.
 2. **Window width.** The closed minimum returns to **768 pt** (the pre-Customise value; 782 was
    raised only for the two-column Customise screen). With the inspector open the minimum is
-   **768 + 260 = 1028 pt**; max stays 1200. Opening grows the window by the inspector width,
-   closing shrinks it back (Finder / Xcode behaviour). If the screen cannot fit the growth the
-   window grows as far as it can and the detail column absorbs the rest.
+   **768 + 260 = 1028 pt**; max stays 1200. **Amended by Karthik 2026-10-20 (during
+   implementation): the window keeps its width when the inspector opens or closes, as Xcode,
+   Pages and Keynote do — the detail column absorbs the 260 pt.** Opening grows the window only
+   when it is narrower than 1028 (to exactly 1028, keeping the leading edge, shifted to fit the
+   screen); closing never changes the frame, it only lowers the minimum back to 768. The earlier
+   text ("grows by the inspector width, closing shrinks it back — Finder / Xcode behaviour") rested
+   on a wrong claim about those apps, and shrinking in the same turn as the inspector collapsed
+   crashed AppKit's constraint pass.
 3. **Height.** The inspector **scrolls as a whole**; the symbol / emoji picker card has a **fixed
    grid height of 320 pt**. The window minimum height stays 500 pt; the 700 pt Customise special
    case in `WindowAccessor` is deleted. Iterate later if the picker feels short.
