@@ -203,8 +203,8 @@ struct DockTileDetailView: View {
                         Image(systemName: "sidebar.trailing")
                     }
                     .buttonStyle(.bordered)
-                    .help(AppStrings.Menu.showInspector)
-                    .accessibilityLabel(AppStrings.Menu.showInspector)
+                    .help(AppStrings.Tooltip.toggleCustomiseTile)
+                    .accessibilityLabel(AppStrings.Tooltip.toggleCustomiseTile)
                 }
             }
         }
@@ -373,28 +373,26 @@ struct DockTileDetailView: View {
         return colorScheme == .dark && followsAppearance ? .dark : .defaultStyle
     }
 
+    /// The hero fills the hero row's height: the Tile Name card beside it is three `formRow`s
+    /// (40 pt each) and two 1 pt `formRow` dividers.
+    nonisolated static let heroIconSize: CGFloat = 3 * 40 + 2 * 1
+
     @ViewBuilder private var heroFace: some View {
         if let forced = Self.heroForcedStyle(inspectorShown: inspectorShown, colorScheme: colorScheme,
                                              followsAppearance: IconPipeline.isDeclarative) {
-            DockTileIconPreview.fromConfig(editedConfig, size: 90).forcing(forced)
+            DockTileIconPreview.fromConfig(editedConfig, size: Self.heroIconSize).forcing(forced)
         } else {
-            TileFace(config: editedConfig, size: 90)
+            TileFace(config: editedConfig, size: Self.heroIconSize)
         }
     }
 
     private var heroSection: some View {
         HStack(alignment: .center, spacing: 16) {
-            // Left column: Icon preview with Customise button.
-            // The column must fit INSIDE the form card beside it: 3 rows × 40pt + 2 separators
-            // = 122pt. Since the preview fills its frame (no icon-grid margin — an artifact
-            // fact, not a UI-slot fact), a 96pt slot made the column 96+12+24 = 132pt and the
-            // icon/button overhung the card. 90pt icon + 6pt gap + 24pt button = 120pt keeps
-            // it within the card bounds while the icon reads as large as the budget allows.
-            VStack(alignment: .center, spacing: 6) {
-                // Appearance-aware tile face (the system's own render under Tinted — TileFace)
-                // Tappable to open customise view
-                heroFace
-                .contentShape(RoundedRectangle(cornerRadius: 90 * 0.225, style: .continuous))
+            // Left column: the icon preview, as tall as the form card beside it (`heroIconSize`,
+            // 122 pt), so the two align top and bottom. The preview fills its frame (no icon-grid
+            // margin — an artifact fact, not a UI-slot fact). Clicking it toggles Customise Tile.
+            heroFace
+                .contentShape(RoundedRectangle(cornerRadius: Self.heroIconSize * 0.225, style: .continuous))
                 .onHover { hovering in
                     if hovering {
                         NSCursor.pointingHand.push()
@@ -403,24 +401,12 @@ struct DockTileDetailView: View {
                     }
                 }
                 .onTapGesture {
-                    // Opens only, never closes (the inspector's own toggle closes it).
-                    if inspectorShown {
-                        DiagnosticsLog.shared.ui("Tile Detail → Customise (icon tapped) '\(editedConfig.name)' — already open")
-                    } else {
-                        DiagnosticsLog.shared.ui("Tile Detail → Customise (icon tapped) '\(editedConfig.name)'")
-                        onToggleInspector()
-                    }
+                    DiagnosticsLog.shared.ui("Tile Detail → hero icon tapped (toggle Customise Tile) '\(editedConfig.name)'")
+                    onToggleInspector()
                 }
-
-                SubtleButton(title: AppStrings.Button.customise, width: 90, action: {
-                    if inspectorShown {
-                        DiagnosticsLog.shared.ui("Tile Detail → Customise button '\(editedConfig.name)' — already open")
-                    } else {
-                        DiagnosticsLog.shared.ui("Tile Detail → Customise button '\(editedConfig.name)'")
-                        onToggleInspector()
-                    }
-                })
-            }
+                .help(AppStrings.Tooltip.toggleCustomiser)
+                .accessibilityLabel(AppStrings.Tooltip.toggleCustomiser)
+                .accessibilityAddTraits(.isButton)
 
             // Right column: Custom Form Group
             VStack(spacing: 0) {
@@ -479,6 +465,7 @@ struct DockTileDetailView: View {
 
     /// Renders a single row in a form group with optional bottom separator.
     /// - Parameter isLast: When `true`, omits the bottom separator (last row in group).
+    /// `heroIconSize` is three of these rows: keep its 40 and 1 in step with the ones here.
     @ViewBuilder
     private func formRow<Content: View>(isLast: Bool, @ViewBuilder content: () -> Content) -> some View {
         VStack(spacing: 0) {
@@ -858,39 +845,6 @@ struct AppIconView: View {
         } else {
             Image(systemName: item.isFolder ? "folder.fill" : "app.fill")
                 .foregroundStyle(.secondary)
-        }
-    }
-}
-
-// MARK: - Subtle Button Component
-
-/// A reusable button with subtle 5% black background overlay
-/// Used for secondary actions like "Customise" and "Remove"
-private struct SubtleButton: View {
-    let title: String
-    var textColor: Color = .primary
-    var width: CGFloat? = nil
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            Text(title)
-                .font(.system(size: 12))
-                .multilineTextAlignment(.center)
-                .foregroundColor(textColor)
-        }
-        .buttonStyle(.plain)
-        .frame(width: width, height: 24)
-        .frame(maxWidth: width == nil ? nil : .none)
-        .padding(.horizontal, width == nil ? 12 : 0)
-        .background(Color.black.opacity(0.05))
-        .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
-        .onHover { hovering in
-            if hovering {
-                NSCursor.pointingHand.push()
-            } else {
-                NSCursor.pop()
-            }
         }
     }
 }

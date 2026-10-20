@@ -209,12 +209,6 @@ enum AppStrings {
             comment: "Dismiss button for the non-blocking move-to-Applications nudge"
         )
 
-        static let customise = NSLocalizedString(
-            "button.customise",
-            value: "Customise",
-            comment: "Button to open customization view"
-        )
-
         static let delete = NSLocalizedString(
             "button.delete",
             value: "Delete",
@@ -1381,6 +1375,18 @@ enum AppStrings {
             "tooltip.deleteTile",
             value: "Delete Tile",
             comment: "Tile Detail: trash button tooltip"
+        )
+
+        static let toggleCustomiseTile = NSLocalizedString(
+            "tooltip.toggleCustomiseTile",
+            value: "Toggle Customise Tile",
+            comment: "Tooltip and accessibility label of the toolbar button that opens or closes the Customise Tile inspector"
+        )
+
+        static let toggleCustomiser = NSLocalizedString(
+            "tooltip.toggleCustomiser",
+            value: "Toggle Customiser",
+            comment: "Tooltip and accessibility label of the Tile Detail icon, which opens or closes the Customise Tile inspector when clicked"
         )
     }
 

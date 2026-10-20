@@ -65,7 +65,6 @@ struct AppStringsTests {
         #expect(AppStrings.Button.checkNow == "Check Now")
         #expect(!AppStrings.Button.checkForUpdates.isEmpty)
         #expect(!AppStrings.Button.confirm.isEmpty)
-        #expect(!AppStrings.Button.customise.isEmpty)
         #expect(!AppStrings.Button.delete.isEmpty)
         #expect(!AppStrings.Button.done.isEmpty)
         #expect(!AppStrings.Button.duplicate.isEmpty)
@@ -243,6 +242,8 @@ struct AppStringsTests {
         #expect(!AppStrings.Title.customiseTile.isEmpty)
         #expect(!AppStrings.Menu.showInspector.isEmpty)
         #expect(!AppStrings.Menu.hideInspector.isEmpty)
+        #expect(!AppStrings.Tooltip.toggleCustomiseTile.isEmpty)
+        #expect(!AppStrings.Tooltip.toggleCustomiser.isEmpty)
     }
 
     @Test("Inspector title spelling follows the English variant")
@@ -252,22 +253,30 @@ struct AppStringsTests {
         #expect(localizedString(for: "title.customiseTile", locale: "en-US") == "Customize Tile")
     }
 
+    @Test("Inspector toggle labels follow the English variant")
+    func inspectorToggleSpelling() {
+        #expect(localizedString(for: "tooltip.toggleCustomiseTile", locale: "en-GB") == "Toggle Customise Tile")
+        #expect(localizedString(for: "tooltip.toggleCustomiseTile", locale: "en-US") == "Toggle Customize Tile")
+        #expect(localizedString(for: "tooltip.toggleCustomiser", locale: "en-GB") == "Toggle Customiser")
+        #expect(localizedString(for: "tooltip.toggleCustomiser", locale: "en-US") == "Toggle Customizer")
+    }
+
     // MARK: - Locale-Specific Tests
 
     @Test("UK English spelling used for 'Customise' in en-GB locale")
     func ukEnglishCustomiseSpelling() {
         // Test that UK English locale uses "Customise" not "Customize"
-        let customiseButton = localizedString(for: "button.customise", locale: "en-GB")
-        #expect(customiseButton.contains("Customise"))
-        #expect(!customiseButton.contains("Customize"))
+        let customiseTitle = localizedString(for: "title.customiseTile", locale: "en-GB")
+        #expect(customiseTitle.contains("Customise"))
+        #expect(!customiseTitle.contains("Customize"))
     }
 
     @Test("US English spelling used for 'Customize' in en-US locale")
     func usEnglishCustomizeSpelling() {
         // Test that US English locale uses "Customize" not "Customise"
-        let customizeButton = localizedString(for: "button.customise", locale: "en-US")
-        #expect(customizeButton.contains("Customize"))
-        #expect(!customizeButton.contains("Customise"))
+        let customizeTitle = localizedString(for: "title.customiseTile", locale: "en-US")
+        #expect(customizeTitle.contains("Customize"))
+        #expect(!customizeTitle.contains("Customise"))
     }
 
     @Test("UK English spelling used for 'Colour' in en-GB locale")
@@ -297,9 +306,9 @@ struct AppStringsTests {
     @Test("Australian English uses UK spelling (Customise)")
     func auEnglishCustomiseSpelling() {
         // Test that AU English uses UK spelling
-        let customiseButton = localizedString(for: "button.customise", locale: "en-AU")
-        #expect(customiseButton.contains("Customise"))
-        #expect(!customiseButton.contains("Customize"))
+        let customiseTitle = localizedString(for: "title.customiseTile", locale: "en-AU")
+        #expect(customiseTitle.contains("Customise"))
+        #expect(!customiseTitle.contains("Customize"))
     }
 
     @Test("Australian English uses UK spelling (Colour)")
@@ -315,9 +324,9 @@ struct AppStringsTests {
         // Test that non-English locales (e.g., French) fall back to UK English (en-GB)
         // Since .xcstrings has sourceLanguage = "en-GB", any missing locale falls back to en-GB
         // We verify this by checking that en-GB has the UK spelling
-        let customiseButton = localizedString(for: "button.customise", locale: "en-GB")
-        #expect(customiseButton.contains("Customise"))
-        #expect(!customiseButton.contains("Customize"))
+        let customiseTitle = localizedString(for: "title.customiseTile", locale: "en-GB")
+        #expect(customiseTitle.contains("Customise"))
+        #expect(!customiseTitle.contains("Customize"))
 
         let colourLabel = localizedString(for: "label.colour", locale: "en-GB")
         #expect(colourLabel.contains("Colour"))

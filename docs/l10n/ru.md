@@ -32,7 +32,6 @@ Keep `%@`-style placeholders exactly as they are. `\n` means a line break, `\|` 
 | `button.checkNow` | Check Now | Проверить сейчас | machine | Settings → Software Update: button that triggers a manual Sparkle update check |
 | `button.confirm` | Confirm | Подтвердить | machine | Confirm button for alert dialogs |
 | `button.createNewTile` | Create New Tile | Создать плитку | machine | Smart Add sheet — neutral button that starts a blank tile instead of a suggestion |
-| `button.customise` | Customise | Настроить | machine | Button to open customization view |
 | `button.delete` | Delete | Удалить | machine | Delete button |
 | `button.done` | Done | Готово | machine | Done button |
 | `button.duplicate` | Duplicate | Дублировать | machine | Duplicate button in context menu |
@@ -292,6 +291,8 @@ Keep `%@`-style placeholders exactly as they are. `\n` means a line break, `\|` 
 | `about.diagnosticsTitle` | Diagnostics | Диагностика | machine | About: Copy Diagnostics row label. |
 | `button.copy` | Copy | Скопировать | machine | Generic Copy button label. |
 | `tooltip.openSettings` | Settings | Настройки | machine | Tooltip for the settings toolbar button |
+| `tooltip.toggleCustomiseTile` | Toggle Customise Tile | Показать/скрыть «Настройка плитки» | machine | Tooltip and accessibility label of the toolbar button that opens or closes the Customise Tile inspector |
+| `tooltip.toggleCustomiser` | Toggle Customiser | Показать/скрыть настройки | machine | Tooltip and accessibility label of the Tile Detail icon, which opens or closes the Customise Tile inspector when clicked |
 | `translation.helpImprove` | Help Improve… | Помочь улучшить… | machine | Button: opens the language's review sheet on GitHub |
 | `translation.invite.message` | This translation was made by a machine and has not yet been checked by a native speaker. If something reads wrong, you can fix it on GitHub — no coding needed. | Этот перевод выполнен машиной и еще не проверен носителем языка. Если что-то звучит неправильно, вы можете исправить это на GitHub — программировать не нужно. | machine | One-time alert message inviting translation review |
 | `translation.invite.title` | Dock Tile now speaks your language | Dock Tile теперь говорит по-русски | machine | One-time alert title on first launch in a machine-translated language |

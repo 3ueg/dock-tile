@@ -1351,60 +1351,6 @@
         }
       }
     },
-    "button.customise": {
-      "comment": "Button to open customization view",
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Anpassen"
-          }
-        },
-        "en-AU": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Customise"
-          }
-        },
-        "en-GB": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Customise"
-          }
-        },
-        "en-US": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Customize"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Personnaliser"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "カスタマイズ"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Настроить"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "自定义"
-          }
-        }
-      }
-    },
     "button.delete": {
       "comment": "Delete button",
       "extractionState": "manual",
@@ -15387,6 +15333,114 @@
           "stringUnit": {
             "state": "needs_review",
             "value": "设置"
+          }
+        }
+      }
+    },
+    "tooltip.toggleCustomiseTile": {
+      "comment": "Tooltip and accessibility label of the toolbar button that opens or closes the Customise Tile inspector",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Kachel anpassen ein-/ausblenden"
+          }
+        },
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Toggle Customise Tile"
+          }
+        },
+        "en-AU": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Toggle Customise Tile"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Toggle Customize Tile"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Afficher/masquer « Personnaliser la tuile »"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "「タイルをカスタマイズ」の表示/非表示を切り替え"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Показать/скрыть «Настройка плитки»"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "显示/隐藏“自定义磁贴”"
+          }
+        }
+      }
+    },
+    "tooltip.toggleCustomiser": {
+      "comment": "Tooltip and accessibility label of the Tile Detail icon, which opens or closes the Customise Tile inspector when clicked",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Anpassungsbereich ein-/ausblenden"
+          }
+        },
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Toggle Customiser"
+          }
+        },
+        "en-AU": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Toggle Customiser"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Toggle Customizer"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Afficher/masquer la personnalisation"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "カスタマイズパネルの表示/非表示を切り替え"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Показать/скрыть настройки"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "显示/隐藏自定义面板"
           }
         }
       }

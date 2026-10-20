@@ -32,7 +32,6 @@ Keep `%@`-style placeholders exactly as they are. `\n` means a line break, `\|` 
 | `button.checkNow` | Check Now | Vérifier maintenant | machine | Settings → Software Update: button that triggers a manual Sparkle update check |
 | `button.confirm` | Confirm | Confirmer | machine | Confirm button for alert dialogs |
 | `button.createNewTile` | Create New Tile | Créer une tuile | machine | Smart Add sheet — neutral button that starts a blank tile instead of a suggestion |
-| `button.customise` | Customise | Personnaliser | machine | Button to open customization view |
 | `button.delete` | Delete | Supprimer | machine | Delete button |
 | `button.done` | Done | Terminé | machine | Done button |
 | `button.duplicate` | Duplicate | Dupliquer | machine | Duplicate button in context menu |
@@ -292,6 +291,8 @@ Keep `%@`-style placeholders exactly as they are. `\n` means a line break, `\|` 
 | `about.diagnosticsTitle` | Diagnostics | Diagnostics | machine | About: Copy Diagnostics row label. |
 | `button.copy` | Copy | Copier | machine | Generic Copy button label. |
 | `tooltip.openSettings` | Settings | Réglages | machine | Tooltip for the settings toolbar button |
+| `tooltip.toggleCustomiseTile` | Toggle Customise Tile | Afficher/masquer « Personnaliser la tuile » | machine | Tooltip and accessibility label of the toolbar button that opens or closes the Customise Tile inspector |
+| `tooltip.toggleCustomiser` | Toggle Customiser | Afficher/masquer la personnalisation | machine | Tooltip and accessibility label of the Tile Detail icon, which opens or closes the Customise Tile inspector when clicked |
 | `translation.helpImprove` | Help Improve… | Aider à améliorer… | machine | Button: opens the language's review sheet on GitHub |
 | `translation.invite.message` | This translation was made by a machine and has not yet been checked by a native speaker. If something reads wrong, you can fix it on GitHub — no coding needed. | Cette traduction a été réalisée automatiquement et n’a pas encore été vérifiée par une personne de langue maternelle française. Si quelque chose vous semble incorrect, vous pouvez le corriger sur GitHub — sans aucune connaissance en programmation. | machine | One-time alert message inviting translation review |
 | `translation.invite.title` | Dock Tile now speaks your language | Dock Tile parle désormais votre langue | machine | One-time alert title on first launch in a machine-translated language |

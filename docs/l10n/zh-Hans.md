@@ -32,7 +32,6 @@ Keep `%@`-style placeholders exactly as they are. `\n` means a line break, `\|` 
 | `button.checkNow` | Check Now | 立即检查 | machine | Settings → Software Update: button that triggers a manual Sparkle update check |
 | `button.confirm` | Confirm | 确认 | machine | Confirm button for alert dialogs |
 | `button.createNewTile` | Create New Tile | 新建磁贴 | machine | Smart Add sheet — neutral button that starts a blank tile instead of a suggestion |
-| `button.customise` | Customise | 自定义 | machine | Button to open customization view |
 | `button.delete` | Delete | 删除 | machine | Delete button |
 | `button.done` | Done | 完成 | machine | Done button |
 | `button.duplicate` | Duplicate | 复制 | machine | Duplicate button in context menu |
@@ -292,6 +291,8 @@ Keep `%@`-style placeholders exactly as they are. `\n` means a line break, `\|` 
 | `about.diagnosticsTitle` | Diagnostics | 诊断信息 | machine | About: Copy Diagnostics row label. |
 | `button.copy` | Copy | 拷贝 | machine | Generic Copy button label. |
 | `tooltip.openSettings` | Settings | 设置 | machine | Tooltip for the settings toolbar button |
+| `tooltip.toggleCustomiseTile` | Toggle Customise Tile | 显示/隐藏“自定义磁贴” | machine | Tooltip and accessibility label of the toolbar button that opens or closes the Customise Tile inspector |
+| `tooltip.toggleCustomiser` | Toggle Customiser | 显示/隐藏自定义面板 | machine | Tooltip and accessibility label of the Tile Detail icon, which opens or closes the Customise Tile inspector when clicked |
 | `translation.helpImprove` | Help Improve… | 帮助改进… | machine | Button: opens the language's review sheet on GitHub |
 | `translation.invite.message` | This translation was made by a machine and has not yet been checked by a native speaker. If something reads wrong, you can fix it on GitHub — no coding needed. | 此翻译由机器生成，尚未经过母语人士校对。如果有读起来不对的地方，你可以在GitHub上修改——无需编程。 | machine | One-time alert message inviting translation review |
 | `translation.invite.title` | Dock Tile now speaks your language | Dock Tile现已支持你的语言 | machine | One-time alert title on first launch in a machine-translated language |

@@ -32,7 +32,6 @@ Keep `%@`-style placeholders exactly as they are. `\n` means a line break, `\|` 
 | `button.checkNow` | Check Now | 今すぐ確認 | machine | Settings → Software Update: button that triggers a manual Sparkle update check |
 | `button.confirm` | Confirm | 確認 | machine | Confirm button for alert dialogs |
 | `button.createNewTile` | Create New Tile | 新規タイルを作成 | machine | Smart Add sheet — neutral button that starts a blank tile instead of a suggestion |
-| `button.customise` | Customise | カスタマイズ | machine | Button to open customization view |
 | `button.delete` | Delete | 削除 | machine | Delete button |
 | `button.done` | Done | 完了 | machine | Done button |
 | `button.duplicate` | Duplicate | 複製 | machine | Duplicate button in context menu |
@@ -292,6 +291,8 @@ Keep `%@`-style placeholders exactly as they are. `\n` means a line break, `\|` 
 | `about.diagnosticsTitle` | Diagnostics | 診断情報 | machine | About: Copy Diagnostics row label. |
 | `button.copy` | Copy | コピー | machine | Generic Copy button label. |
 | `tooltip.openSettings` | Settings | 設定 | machine | Tooltip for the settings toolbar button |
+| `tooltip.toggleCustomiseTile` | Toggle Customise Tile | 「タイルをカスタマイズ」の表示/非表示を切り替え | machine | Tooltip and accessibility label of the toolbar button that opens or closes the Customise Tile inspector |
+| `tooltip.toggleCustomiser` | Toggle Customiser | カスタマイズパネルの表示/非表示を切り替え | machine | Tooltip and accessibility label of the Tile Detail icon, which opens or closes the Customise Tile inspector when clicked |
 | `translation.helpImprove` | Help Improve… | 改善に協力… | machine | Button: opens the language's review sheet on GitHub |
 | `translation.invite.message` | This translation was made by a machine and has not yet been checked by a native speaker. If something reads wrong, you can fix it on GitHub — no coding needed. | この翻訳は機械翻訳によるもので、ネイティブスピーカーによる確認はまだ行われていません。おかしな表現があれば、GitHubで修正できます。コーディングは不要です。 | machine | One-time alert message inviting translation review |
 | `translation.invite.title` | Dock Tile now speaks your language | Dock Tileが日本語に対応しました | machine | One-time alert title on first launch in a machine-translated language |
