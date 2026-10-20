@@ -444,6 +444,14 @@ private struct WindowAccessor: NSViewRepresentable {
             window.identifier = NSUserInterfaceItemIdentifier(AppDelegate.configurationWindowID)
         }
 
+        // The open minimum rests on `windowWillResize`: SwiftUI's root frame resets `contentMinSize`
+        // to the closed minimum. So every window gets the delegate here, on every creation path
+        // (launch, Dock reopen, deep link, ⌘,), not once at launch.
+        if let delegate = AppDelegate.instance, window.delegate !== delegate {
+            window.delegate = delegate
+            DiagnosticsLog.shared.log("window", "delegate set by WindowAccessor", verbose: true)
+        }
+
         window.titlebarAppearsTransparent = true
         window.titleVisibility = .hidden
         window.toolbarStyle = .unified

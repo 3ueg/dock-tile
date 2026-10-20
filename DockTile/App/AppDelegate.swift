@@ -25,6 +25,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     /// window when it has been fully closed while the app stayed resident (e.g. Dock Lock on).
     var openConfigurationWindow: (() -> Void)?
 
+    /// The main app's delegate, for `WindowAccessor` to install as every configuration window's
+    /// delegate (`windowWillResize` enforces the open minimum). `NSApp.delegate` is SwiftUI's adaptor
+    /// proxy, not this object. Set in `applicationDidFinishLaunching` on the main-app path only.
+    @MainActor static weak var instance: AppDelegate?
+
     // Window width range: horizontally resizable, height unbounded
     nonisolated static let minWindowWidth: CGFloat = 700
     nonisolated static let maxWindowWidth: CGFloat = 1200
@@ -98,6 +103,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         if isHelperApp {
             configureAsHelper()
         } else {
+            Self.instance = self
             configureAsMainApp()
         }
 
@@ -202,9 +208,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         guard let window = NSApp.windows.first(where: { $0.contentViewController != nil }) else {
             return
         }
-
-        // Set ourselves as delegate for resize control
-        window.delegate = self
 
         // Bound horizontal size to the allowed range, allow vertical resize
         let inspectorShown = UserDefaults.standard.bool(forKey: UserDefaultsKeys.inspectorShown)

@@ -103,13 +103,13 @@ struct MainWindowWidthTests {
 
     // MARK: - The split view fits inside the window minimums
 
-    /// What AppKit adds to the split view's minimum width beyond the three columns. Measured on
-    /// macOS 27 (2026-10-20) by logging each `NSSplitViewItem` view's `fittingSize`: closed, the
-    /// minimum is exactly sidebar + Tile Detail (502 = 228 + 274); open, it is sidebar + Tile Detail
-    /// + 2 × 260 (1022 = 228 + 274 + 520). The inspector is counted twice: the detail column's
-    /// minimum includes the inspector's 260 pt safe-area inset, and the outer split adds it again.
+    /// The split view's minimum width counts the inspector TWICE. Measured on macOS 27 (2026-10-20)
+    /// by logging each `NSSplitViewItem` view's `fittingSize`: closed, the minimum is exactly
+    /// sidebar + Tile Detail (502 = 228 + 274); open, it is sidebar + Tile Detail + 2 × 260
+    /// (1022 = 228 + 274 + 520). The SwiftUI hosting view's fitting size includes the inspector (its
+    /// safe-area inset), and the NSSplitView adds the inspector column again. So the open inequality
+    /// below bills `2 * inspectorWidth`, never a literal: the overhead IS the inspector width.
     /// The AX widths of the three columns still sum to the window width (no visible gap).
-    private let splitOverhead: CGFloat = 260
     /// Minimum room between the split view's own minimum and the window minimum.
     private let slack: CGFloat = 8
 
@@ -130,10 +130,10 @@ struct MainWindowWidthTests {
         #expect(sidebar + AppDelegate.detailColumnMinWidth + slack <= AppDelegate.minWindowWidth)
     }
 
-    @Test("Open: sidebar + detail minimum + inspector + overhead fits the 960 minimum", arguments: [AppDelegate.sidebarMinWidth, AppDelegate.sidebarMaxWidth])
+    @Test("Open: sidebar + detail minimum + the inspector counted twice fits the 960 minimum", arguments: [AppDelegate.sidebarMinWidth, AppDelegate.sidebarMaxWidth])
     func openFits(sidebar: CGFloat) {
         let openMinimum = AppDelegate.clampedWindowWidth(0, inspectorShown: true)
-        #expect(sidebar + AppDelegate.detailColumnMinWidth + AppDelegate.inspectorWidth + splitOverhead + slack <= openMinimum)
+        #expect(sidebar + AppDelegate.detailColumnMinWidth + 2 * AppDelegate.inspectorWidth + slack <= openMinimum)
     }
 
     /// The detail column's minimum is set below Tile Detail's content on purpose (see above); the

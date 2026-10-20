@@ -229,23 +229,32 @@ Popover, Dock Lock) · Dock Tile (About)** — the old accordion `@AppStorage` e
   `maxWindowWidth`; `DockTileApp`, `DockTileConfigurationView` and `WindowAccessor` read them). The pure
   `AppDelegate.clampedWindowWidth(_:inspectorShown:)` clamps `windowWillResize` and a restored saved
   frame; `windowFrame(forInspectorShown:from:visibleFrame:)` is the frame rule. Guarded by `MainWindowWidthTests`.
-  **The split view's own minimum must fit inside those (critical).** With the inspector open AppKit
-  counts it TWICE: the split view's minimum is sidebar + Tile Detail's minimum + 2 × 260 (measured
-  2026-10-20 from each `NSSplitViewItem` view's `fittingSize`: 1022 = 228 + 274 + 520; closed, 502 =
-  228 + 274). Tile Detail's own minimum (274, the hero row with its labels squeezed away) therefore
-  asked for 1022 pt, above the 988 open minimum of round 3: the inspector was clipped off the right
-  edge, and opening at 988–994 pt (or resizing an open window to 1010) threw in AppKit's
+  **The split view's own minimum must fit inside those (critical).** With the inspector open the split
+  view counts it TWICE: the SwiftUI hosting view's fitting size includes the inspector (its safe-area
+  inset), and the NSSplitView adds the inspector column again, so the minimum is sidebar + Tile
+  Detail's minimum + 2 × 260 (measured 2026-10-20 from each `NSSplitViewItem` view's `fittingSize`:
+  1022 = 228 + 274 + 520; closed, 502 = 228 + 274). Tile Detail's own minimum (274, the hero row with
+  its labels squeezed away) therefore asked for 1022 pt, above the earlier 988 pt open minimum
+  (2026-10-20): the inspector was clipped off the right edge, and opening at 988–994 pt (or resizing an open window to 1010) threw in AppKit's
   update-constraints pass. So Tile Detail reports `AppDelegate.detailColumnMinWidth` (150) through
   `.frame(minWidth:)` in `DockTileConfigurationView.tileDetail`, below its content's own minimum on
   purpose; the content's room comes from the window minimums (at least 420 pt: 700 − 280, or
   960 − 280 − 260, which holds the 406 pt hero row). `.navigationSplitViewColumnWidth(min:)` alone
   does NOT lower that minimum (measured: the item's `minimumThickness` changed, the floor did not).
   The sidebar range is `sidebarMinWidth` / `sidebarMaxWidth` (220 / 280); the inequalities with the
-  widest sidebar are pinned in `MainWindowWidthTests`.
+  widest sidebar are pinned in `MainWindowWidthTests`. Known limit, very rare: on a screen whose
+  visible frame is narrower than 960, `windowFrame` caps the open window to the screen, which can fall
+  below the split floor with a wide sidebar.
+  **The open floor rests on `windowWillResize`**: SwiftUI's root `.frame(minWidth:)` resets
+  `contentMinSize` to the closed minimum, so `WindowAccessor` sets `AppDelegate.instance` as the window
+  delegate on every window creation (launch, Dock reopen, deep link, ⌘,) — set once at launch, a window
+  created later had no delegate and could be dragged below the floor. Do not make the root frame's
+  `minWidth` follow the flag instead: it would grow a restored window before `WindowAccessor`'s frame
+  fix, which then no longer shifts a right-edge frame on screen.
   **One launch-frame writer**: `WindowAccessor` (on window creation) fixes a restored frame — with the
   flag stored on, through `windowFrame(forInspectorShown: true, …)`, so a frame saved near the right edge
   grows to 960 on screen; off, the plain clamp. `AppDelegate.configureMainWindowSizing` sets only the
-  delegate and size limits (its own frame fix ran after WindowAccessor's and never fired).
+  size limits (its own frame fix ran after WindowAccessor's and never fired).
 - **Customise Tile is a native trailing `.inspector`, not a screen (critical).** The old drill-down
   (a canvas, a floating Select Apps pill, a 700 pt window height) is gone.
   - **Placement**: `.inspector` is attached to the `NavigationSplitView` in `DockTileConfigurationView`,
