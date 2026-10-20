@@ -4274,49 +4274,49 @@
         "de": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Noch keine Apps – wähle welche mit „Apps wählen“."
+            "value": "Noch keine Apps – füge welche mit „Hinzufügen“ unter „In dieser Kachel“ hinzu."
           }
         },
         "en-GB": {
           "stringUnit": {
             "state": "translated",
-            "value": "No apps yet — choose some with Select Apps."
+            "value": "No apps yet — add some with Add in Tile Detail."
           }
         },
         "en-AU": {
           "stringUnit": {
             "state": "translated",
-            "value": "No apps yet — choose some with Select Apps."
+            "value": "No apps yet — add some with Add in Tile Detail."
           }
         },
         "en-US": {
           "stringUnit": {
             "state": "translated",
-            "value": "No apps yet — choose some with Select Apps."
+            "value": "No apps yet — add some with Add in Tile Detail."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Aucune app pour l’instant — choisissez-en avec « Choisir les apps »."
+            "value": "Aucune app pour l’instant — ajoutez-en avec « Ajouter » dans la section « Dans cette tuile »."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "まだアプリがありません。「アプリを選択」から選んでください。"
+            "value": "まだアプリがありません。「このタイルの内容」の「追加」から追加してください。"
           }
         },
         "ru": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Приложений пока нет — выберите их кнопкой «Выбрать приложения»."
+            "value": "Приложений пока нет — добавьте их кнопкой «Добавить» в разделе «В этой плитке»."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "还没有App——请通过“选择App”添加。"
+            "value": "还没有App——请在“此磁贴中的项目”中点按“添加”。"
           }
         }
       }
