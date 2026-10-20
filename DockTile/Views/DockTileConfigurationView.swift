@@ -51,9 +51,9 @@ struct InspectorMenuItem: View {
     @FocusedValue(\.inspectorCommand) private var command
 
     var body: some View {
-        let label = command?.isShown == true ? AppStrings.Menu.hideInspector : AppStrings.Menu.showInspector
-        Button(label) {
-            DiagnosticsLog.shared.ui("Menu → \(label) (⌥⌘I)")
+        let isShown = command?.isShown == true
+        Button(isShown ? AppStrings.Menu.hideInspector : AppStrings.Menu.showInspector) {
+            DiagnosticsLog.shared.ui(isShown ? "Menu → Hide Inspector (⌥⌘I)" : "Menu → Show Inspector (⌥⌘I)")
             command?.toggle()
         }
         .keyboardShortcut("i", modifiers: [.command, .option])
