@@ -198,7 +198,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
 
         // Bound horizontal size to the allowed range, allow vertical resize
         let inspectorShown = UserDefaults.standard.bool(forKey: UserDefaultsKeys.inspectorShown)
-        window.contentMinSize = NSSize(width: inspectorShown ? Self.minWindowWidth + Self.inspectorWidth : Self.minWindowWidth, height: minWindowHeight)
+        window.contentMinSize = NSSize(width: Self.clampedWindowWidth(0, inspectorShown: inspectorShown), height: minWindowHeight)
         window.contentMaxSize = NSSize(width: Self.maxWindowWidth, height: CGFloat.greatestFiniteMagnitude)
 
         // Ensure current frame has correct width
@@ -209,6 +209,19 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         }
 
         print("✓ Window sizing configured: \(Self.minWindowWidth)…\(Self.maxWindowWidth)x\(minWindowHeight)+")
+    }
+
+    /// The ONE place that moves the frame for an inspector change. Order matters: closing lowers the
+    /// minimum BEFORE the frame shrinks, opening grows the frame FIRST and raises the minimum after,
+    /// so the frame change is never below the current minimum.
+    func resizeConfigurationWindow(forInspectorShown shown: Bool) {
+        guard let window = NSApp.windows.first(where: { $0.identifier?.rawValue == Self.configurationWindowID }),
+              let screen = window.screen ?? NSScreen.main else { return }
+        let minimum = NSSize(width: Self.clampedWindowWidth(0, inspectorShown: shown), height: minWindowHeight)
+        let target = Self.windowFrame(forInspectorShown: shown, from: window.frame, visibleFrame: screen.visibleFrame)
+        if !shown { window.contentMinSize = minimum }
+        window.setFrame(target, display: true, animate: !NSWorkspace.shared.accessibilityDisplayShouldReduceMotion)
+        if shown { window.contentMinSize = minimum }
     }
 
     // MARK: - NSWindowDelegate

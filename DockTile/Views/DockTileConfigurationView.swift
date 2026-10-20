@@ -31,6 +31,7 @@ struct DockTileConfigurationView: View {
     @EnvironmentObject private var configManager: ConfigurationManager
     @EnvironmentObject private var smartAddEngine: SmartAddEngine
     @State private var isDrilledDown = false
+    @AppStorage(UserDefaultsKeys.inspectorShown) private var inspectorShown = false
 
     /// Smart Add sheet state. Driven by `.sheet(item:)` — NOT `isPresented` + a separate array.
     /// With a separate `Bool` + array, SwiftUI can evaluate the sheet content while the array is
@@ -82,7 +83,7 @@ struct DockTileConfigurationView: View {
             minHeight: minWindowHeight,
             maxHeight: .infinity
         )
-        .background(WindowAccessor(isCustomising: isDrilledDown))
+        .background(WindowAccessor(inspectorShown: inspectorShown))
         .onAppear {
             // Restore the persisted tile selection on first launch; with no tiles, land on the
             // empty-state placeholder so the user sees the empty state (not a Settings pane).
@@ -176,6 +177,12 @@ struct DockTileConfigurationView: View {
         case emptyState = "empty state"
     }
 
+    private func toggleInspector() {
+        inspectorShown.toggle()
+        DiagnosticsLog.shared.ui("Inspector → \(inspectorShown ? "shown" : "hidden")")
+        (NSApp.delegate as? AppDelegate)?.resizeConfigurationWindow(forInspectorShown: inspectorShown)
+    }
+
     private func handleAddTapped(source: AddSource) {
         // Smart Add OFF skips the dialog entirely: a sheet holding only the blank-tile row is a
         // pointless extra step, so the + creates the blank tile directly (review feedback
@@ -266,10 +273,9 @@ struct DockTileConfigurationView: View {
 /// NSViewRepresentable that configures the window at the AppKit level
 /// Configures the unified title bar and the width range (AppDelegate.minWindowWidth...maxWindowWidth)
 private struct WindowAccessor: NSViewRepresentable {
-    let isCustomising: Bool
+    let inspectorShown: Bool
 
-    private let defaultMinHeight: CGFloat = 500
-    private let customiseMinHeight: CGFloat = 700
+    private let minHeight: CGFloat = 500
 
     func makeNSView(context: Context) -> NSView {
         let view = NSView()
@@ -281,7 +287,7 @@ private struct WindowAccessor: NSViewRepresentable {
     }
 
     func updateNSView(_ nsView: NSView, context: Context) {
-        // Reconfigure on update in case window changed or isCustomising toggled
+        // Reconfigure on update in case window changed or the inspector toggled
         DispatchQueue.main.async {
             guard let window = nsView.window else { return }
             configureWindow(window, animated: true)
@@ -299,11 +305,8 @@ private struct WindowAccessor: NSViewRepresentable {
         window.titleVisibility = .hidden
         window.toolbarStyle = .unified
 
-        let minHeight = isCustomising ? customiseMinHeight : defaultMinHeight
-
         // Bound horizontal size to the allowed range, allow vertical resize
-        let inspectorShown = UserDefaults.standard.bool(forKey: UserDefaultsKeys.inspectorShown)
-        window.contentMinSize = NSSize(width: inspectorShown ? AppDelegate.minWindowWidth + AppDelegate.inspectorWidth : AppDelegate.minWindowWidth, height: minHeight)
+        window.contentMinSize = NSSize(width: AppDelegate.clampedWindowWidth(0, inspectorShown: inspectorShown), height: minHeight)
         window.contentMaxSize = NSSize(width: AppDelegate.maxWindowWidth, height: CGFloat.greatestFiniteMagnitude)
 
         // Set current size if needed
@@ -313,15 +316,6 @@ private struct WindowAccessor: NSViewRepresentable {
         // Clamp width into the allowed range
         if frame.width != AppDelegate.clampedWindowWidth(frame.width, inspectorShown: inspectorShown) {
             frame.size.width = AppDelegate.clampedWindowWidth(frame.width, inspectorShown: inspectorShown)
-            needsResize = true
-        }
-
-        // Grow window height if below minimum for current mode
-        if frame.height < minHeight {
-            let heightDelta = minHeight - frame.height
-            frame.size.height = minHeight
-            // Grow upward (keep bottom edge fixed)
-            frame.origin.y -= heightDelta
             needsResize = true
         }
 
