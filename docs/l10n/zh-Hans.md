@@ -85,7 +85,7 @@ Keep `%@`-style placeholders exactly as they are. `\n` means a line break, `\|` 
 | `label.apps.header` | Apps | App | machine | Customise Tile: group header above the Apps card |
 | `label.apps.note.all` | Shows all %lld apps, in tile order. | 按磁贴中的顺序显示全部 %lld 个App。 | machine | Customise Tile: Apps caption, 2–9 apps; %lld = app count |
 | `label.apps.note.firstNine` | Shows the first 9 of %lld apps, in tile order. | 按磁贴中的顺序显示 %lld 个App中的前 9 个。 | machine | Customise Tile: Apps caption, more than nine apps; %lld = app count |
-| `label.apps.note.none` | No apps yet — add some with Add in Tile Detail. | 还没有App——请在“此磁贴中的项目”中点按“添加”。 | machine | Customise Tile: Apps caption when the tile has no apps (builder copy, not in the handoff) |
+| `label.apps.note.none` | No apps yet — use Add under In This Tile. | 还没有App——请在“此磁贴中的项目”中点按“添加”。 | machine | Customise Tile: Apps caption when the tile has no apps (builder copy, not in the handoff) |
 | `label.apps.note.one` | Shows the only app in this tile. | 显示此磁贴中唯一的App。 | machine | Customise Tile: Apps caption, one app |
 | `label.apps.shown` | Shown | 显示 | machine | Customise Tile: Apps card row — how many apps the face shows |
 | `label.apps.shownValue` | %1$lld of %2$lld | %2$lld 个中的 %1$lld 个 | machine | Customise Tile: Apps card Shown value, e.g. 9 of 12; %1$lld = shown, %2$lld = total (positional so a language may reorder them) |

@@ -85,7 +85,7 @@ Keep `%@`-style placeholders exactly as they are. `\n` means a line break, `\|` 
 | `label.apps.header` | Apps | アプリ | machine | Customise Tile: group header above the Apps card |
 | `label.apps.note.all` | Shows all %lld apps, in tile order. | %lld 個のアプリをすべてタイル内の順序で表示します。 | machine | Customise Tile: Apps caption, 2–9 apps; %lld = app count |
 | `label.apps.note.firstNine` | Shows the first 9 of %lld apps, in tile order. | %lld 個のアプリのうち最初の 9 個をタイル内の順序で表示します。 | machine | Customise Tile: Apps caption, more than nine apps; %lld = app count |
-| `label.apps.note.none` | No apps yet — add some with Add in Tile Detail. | まだアプリがありません。「このタイルの内容」の「追加」から追加してください。 | machine | Customise Tile: Apps caption when the tile has no apps (builder copy, not in the handoff) |
+| `label.apps.note.none` | No apps yet — use Add under In This Tile. | まだアプリがありません。「このタイルの内容」の「追加」から追加してください。 | machine | Customise Tile: Apps caption when the tile has no apps (builder copy, not in the handoff) |
 | `label.apps.note.one` | Shows the only app in this tile. | このタイルにある唯一のアプリを表示します。 | machine | Customise Tile: Apps caption, one app |
 | `label.apps.shown` | Shown | 表示数 | machine | Customise Tile: Apps card row — how many apps the face shows |
 | `label.apps.shownValue` | %1$lld of %2$lld | %2$lld 個中 %1$lld 個 | machine | Customise Tile: Apps card Shown value, e.g. 9 of 12; %1$lld = shown, %2$lld = total (positional so a language may reorder them) |

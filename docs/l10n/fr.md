@@ -85,7 +85,7 @@ Keep `%@`-style placeholders exactly as they are. `\n` means a line break, `\|` 
 | `label.apps.header` | Apps | Apps | machine | Customise Tile: group header above the Apps card |
 | `label.apps.note.all` | Shows all %lld apps, in tile order. | Affiche les %lld apps, dans l’ordre de la tuile. | machine | Customise Tile: Apps caption, 2–9 apps; %lld = app count |
 | `label.apps.note.firstNine` | Shows the first 9 of %lld apps, in tile order. | Affiche les 9 premières apps sur %lld, dans l’ordre de la tuile. | machine | Customise Tile: Apps caption, more than nine apps; %lld = app count |
-| `label.apps.note.none` | No apps yet — add some with Add in Tile Detail. | Aucune app pour l’instant — ajoutez-en avec « Ajouter » dans la section « Dans cette tuile ». | machine | Customise Tile: Apps caption when the tile has no apps (builder copy, not in the handoff) |
+| `label.apps.note.none` | No apps yet — use Add under In This Tile. | Aucune app pour l’instant — ajoutez-en avec « Ajouter » dans la section « Dans cette tuile ». | machine | Customise Tile: Apps caption when the tile has no apps (builder copy, not in the handoff) |
 | `label.apps.note.one` | Shows the only app in this tile. | Affiche la seule app de cette tuile. | machine | Customise Tile: Apps caption, one app |
 | `label.apps.shown` | Shown | Affichées | machine | Customise Tile: Apps card row — how many apps the face shows |
 | `label.apps.shownValue` | %1$lld of %2$lld | %1$lld sur %2$lld | machine | Customise Tile: Apps card Shown value, e.g. 9 of 12; %1$lld = shown, %2$lld = total (positional so a language may reorder them) |

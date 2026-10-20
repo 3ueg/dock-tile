@@ -118,7 +118,7 @@ struct CustomiseStyleTests {
         #expect(CustomiseTileView.appsSummary(count: 4) == S(shown: "4 of 4", arrangement: "2 × 2", note: "Shows all 4 apps, in tile order."))
         #expect(CustomiseTileView.appsSummary(count: 9) == S(shown: "9 of 9", arrangement: "3 × 3", note: "Shows all 9 apps, in tile order."))
         #expect(CustomiseTileView.appsSummary(count: 12) == S(shown: "9 of 12", arrangement: "3 × 3", note: "Shows the first 9 of 12 apps, in tile order."))
-        #expect(CustomiseTileView.appsSummary(count: 0) == S(shown: "0 of 0", arrangement: "—", note: "No apps yet — add some with Add in Tile Detail."))
+        #expect(CustomiseTileView.appsSummary(count: 0) == S(shown: "0 of 0", arrangement: "—", note: "No apps yet — use Add under In This Tile."))
         #expect(AppStrings.Label.appsGlass == "A glass folder that follows Light and Dark Mode.")
     }
 
@@ -131,7 +131,7 @@ struct CustomiseStyleTests {
                 == S(shown: "2 of 2", arrangement: "2 × 2", note: "Shows all 2 apps, in tile order."))
         // Items exist but none is installed: the face draws the glyph, so the card reads as empty.
         #expect(CustomiseTileView.appsSummary(items: items, isInstalled: { _ in false })
-                == S(shown: "0 of 0", arrangement: "—", note: "No apps yet — add some with Add in Tile Detail."))
+                == S(shown: "0 of 0", arrangement: "—", note: "No apps yet — use Add under In This Tile."))
     }
 
     @Test("inspectorSections: App Preview has no knobs; Symbol/Emoji re-house today's controls")
