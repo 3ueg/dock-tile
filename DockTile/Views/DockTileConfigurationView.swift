@@ -440,17 +440,17 @@ private struct WindowAccessor: NSViewRepresentable {
         window.contentMinSize = NSSize(width: AppDelegate.clampedWindowWidth(0, inspectorShown: inspectorShown), height: minHeight)
         window.contentMaxSize = NSSize(width: AppDelegate.maxWindowWidth, height: CGFloat.greatestFiniteMagnitude)
 
-        // Set current size if needed
+        // The one launch-time frame fix. With the inspector stored open, the restored frame takes
+        // the same rule as opening it (`windowFrame`), so growing to 1028 never pushes a frame saved
+        // near the screen's right edge off it; closed, the plain clamp into the allowed range.
+        guard clampsFrame else { return }
         var frame = window.frame
-        var needsResize = false
-
-        // Clamp width into the allowed range
-        if frame.width != AppDelegate.clampedWindowWidth(frame.width, inspectorShown: inspectorShown) {
+        if inspectorShown, let screen = window.screen ?? NSScreen.main {
+            frame = AppDelegate.windowFrame(forInspectorShown: true, from: frame, visibleFrame: screen.visibleFrame)
+        } else {
             frame.size.width = AppDelegate.clampedWindowWidth(frame.width, inspectorShown: inspectorShown)
-            needsResize = true
         }
-
-        if clampsFrame && needsResize {
+        if frame != window.frame {
             window.setFrame(frame, display: true, animate: false)
         }
     }

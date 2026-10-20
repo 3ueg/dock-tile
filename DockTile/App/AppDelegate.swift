@@ -199,18 +199,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         let inspectorShown = UserDefaults.standard.bool(forKey: UserDefaultsKeys.inspectorShown)
         window.contentMinSize = NSSize(width: Self.clampedWindowWidth(0, inspectorShown: inspectorShown), height: Self.minWindowHeight)
         window.contentMaxSize = NSSize(width: Self.maxWindowWidth, height: CGFloat.greatestFiniteMagnitude)
-
-        // Ensure current frame has correct width. With the inspector stored open, the restored frame
-        // takes the same rule as opening it, so growing to 1028 never pushes it off the screen.
-        var frame = window.frame
-        if inspectorShown, let screen = window.screen ?? NSScreen.main {
-            frame = Self.windowFrame(forInspectorShown: true, from: frame, visibleFrame: screen.visibleFrame)
-        } else {
-            frame.size.width = Self.clampedWindowWidth(frame.width, inspectorShown: inspectorShown)
-        }
-        if frame != window.frame {
-            window.setFrame(frame, display: true, animate: false)
-        }
+        // The restored frame is fixed once, by WindowAccessor (it runs first, on every window creation).
 
         print("✓ Window sizing configured: \(Self.minWindowWidth)…\(Self.maxWindowWidth)x\(Self.minWindowHeight)+")
     }
