@@ -4,6 +4,7 @@ import Testing
 @testable import Dock_Tile
 
 /// Inspector entry points: the canonical hero while editing and the View menu item's enablement.
+@Suite("Inspector entry points")
 struct InspectorEntryPointTests {
     @Test func heroIsLiveWhileClosedInLight() {
         #expect(DockTileDetailView.heroForcedStyle(inspectorShown: false, colorScheme: .light) == nil)

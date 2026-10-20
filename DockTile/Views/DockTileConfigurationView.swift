@@ -115,8 +115,8 @@ struct DockTileConfigurationView: View {
         .inspector(isPresented: Binding(
             get: { Self.inspectorIsPresented(stored: inspectorShown, selection: selection) },
             set: { newValue in
-                if newValue != Self.inspectorIsPresented(stored: Self.storedInspectorShown, selection: selection) {
-                    setInspectorShown(newValue)
+                if let shown = Self.inspectorSetterWrites(newValue: newValue, stored: Self.storedInspectorShown, selection: selection) {
+                    setInspectorShown(shown)
                 }
             }
         )) {
@@ -243,6 +243,13 @@ struct DockTileConfigurationView: View {
     nonisolated static func inspectorIsPresented(stored: Bool, selection: SidebarSelection?) -> Bool {
         guard stored, case .tile = selection else { return false }
         return true
+    }
+
+    /// R9: what the `.inspector` binding's setter stores. `nil` = ignore (SwiftUI wrote back what is
+    /// already presented: our own echo, or `false` on a Settings pane where the stored flag must stay
+    /// `true`); otherwise exactly `newValue`, never a toggle.
+    nonisolated static func inspectorSetterWrites(newValue: Bool, stored: Bool, selection: SidebarSelection?) -> Bool? {
+        newValue == inspectorIsPresented(stored: stored, selection: selection) ? nil : newValue
     }
 
     /// The View menu item is live exactly when the inspector could be presented: a tile row is selected.
