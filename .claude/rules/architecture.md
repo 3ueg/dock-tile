@@ -225,13 +225,13 @@ Popover, Dock Lock) · Dock Tile (About)** — the old accordion `@AppStorage` e
   label typography too, so it would shrink those panes' title and description text. Verify a
   change by reading the AX frame (`size of every checkbox …`), not by eye.
 
-- **Window widths: 768 closed, 1028 open, 1200 max** (`AppDelegate.minWindowWidth` / `inspectorWidth` 260 /
+- **Window widths: 728 closed, 988 open, 1200 max** (`AppDelegate.minWindowWidth` / `inspectorWidth` 260 /
   `maxWindowWidth`; `DockTileApp`, `DockTileConfigurationView` and `WindowAccessor` read them). The pure
   `AppDelegate.clampedWindowWidth(_:inspectorShown:)` clamps `windowWillResize` and a restored saved
   frame; `windowFrame(forInspectorShown:from:visibleFrame:)` is the frame rule. Guarded by `MainWindowWidthTests`.
   **One launch-frame writer**: `WindowAccessor` (on window creation) fixes a restored frame — with the
   flag stored on, through `windowFrame(forInspectorShown: true, …)`, so a frame saved near the right edge
-  grows to 1028 on screen; off, the plain clamp. `AppDelegate.configureMainWindowSizing` sets only the
+  grows to 988 on screen; off, the plain clamp. `AppDelegate.configureMainWindowSizing` sets only the
   delegate and size limits (its own frame fix ran after WindowAccessor's and never fired).
 - **Customise Tile is a native trailing `.inspector`, not a screen (critical).** The old drill-down
   (a canvas, a floating Select Apps pill, a 700 pt window height) is gone.
@@ -249,7 +249,7 @@ Popover, Dock Lock) · Dock Tile (About)** — the old accordion `@AppStorage` e
     only when the value differs from what is presented, and reads the stored flag from `UserDefaults`:
     `@AppStorage` was measured stale inside the setter and toggled twice per press.
   - **The window KEEPS its width when the inspector toggles** (Xcode/Pages/Keynote). Opening grows it
-    only when narrower than 1028; closing never changes the frame. Shrinking in the same turn as the
+    only when narrower than 988; closing never changes the frame. Shrinking in the same turn as the
     inspector collapsed crashed AppKit's constraint pass. `AppDelegate.resizeConfigurationWindow` is
     `static` because `NSApp.delegate as? AppDelegate` is nil under SwiftUI's
     `NSApplicationDelegateAdaptor` proxy, so the instance call silently never ran.

@@ -26,7 +26,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     var openConfigurationWindow: (() -> Void)?
 
     // Window width range: horizontally resizable, height unbounded
-    nonisolated static let minWindowWidth: CGFloat = 768
+    nonisolated static let minWindowWidth: CGFloat = 728
     nonisolated static let maxWindowWidth: CGFloat = 1200
     /// Width of the trailing Customise inspector; the open minimum is this much wider.
     nonisolated static let inspectorWidth: CGFloat = 260
@@ -40,7 +40,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
 
     /// Frame after opening/closing the inspector (AppKit coordinates). Height and y never change.
     /// The window keeps its width, as Xcode does: the detail column absorbs the inspector. Opening
-    /// grows only a window narrower than the open minimum (1028), to exactly that, keeping the
+    /// grows only a window narrower than the open minimum (988), to exactly that, keeping the
     /// leading edge, capped to the screen, then shifted to stay inside `visibleFrame`. Closing never
     /// changes the frame.
     nonisolated static func windowFrame(forInspectorShown shown: Bool, from frame: CGRect, visibleFrame: CGRect) -> CGRect {
