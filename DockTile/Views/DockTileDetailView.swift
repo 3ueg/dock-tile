@@ -373,9 +373,13 @@ struct DockTileDetailView: View {
         return colorScheme == .dark && followsAppearance ? .dark : .defaultStyle
     }
 
+    /// `formRow`'s height and divider thickness; `heroIconSize` is derived from them.
+    nonisolated static let formRowHeight: CGFloat = 40
+    nonisolated static let formDividerHeight: CGFloat = 1
+
     /// The hero fills the hero row's height: the Tile Name card beside it is three `formRow`s
-    /// (40 pt each) and two 1 pt `formRow` dividers.
-    nonisolated static let heroIconSize: CGFloat = 3 * 40 + 2 * 1
+    /// and two `formRow` dividers.
+    nonisolated static let heroIconSize: CGFloat = 3 * formRowHeight + 2 * formDividerHeight
 
     @ViewBuilder private var heroFace: some View {
         if let forced = Self.heroForcedStyle(inspectorShown: inspectorShown, colorScheme: colorScheme,
@@ -469,19 +473,19 @@ struct DockTileDetailView: View {
 
     /// Renders a single row in a form group with optional bottom separator.
     /// - Parameter isLast: When `true`, omits the bottom separator (last row in group).
-    /// `heroIconSize` is three of these rows: keep its 40 and 1 in step with the ones here.
+    /// `heroIconSize` is derived from `formRowHeight` / `formDividerHeight`.
     @ViewBuilder
     private func formRow<Content: View>(isLast: Bool, @ViewBuilder content: () -> Content) -> some View {
         VStack(spacing: 0) {
             HStack(spacing: 16) {
                 content()
             }
-            .frame(height: 40)
+            .frame(height: Self.formRowHeight)
 
             if !isLast {
                 Rectangle()
                     .fill(Color(nsColor: .quinaryLabel))
-                    .frame(height: 1)
+                    .frame(height: Self.formDividerHeight)
             }
         }
     }

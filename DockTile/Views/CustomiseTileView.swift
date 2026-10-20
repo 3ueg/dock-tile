@@ -11,11 +11,11 @@
 import SwiftUI
 import AppKit
 
+/// Built only while the inspector is presented (`CustomiseInspectorColumn` gates it).
 struct CustomiseTileView: View {
     /// The shared `TileEditSession`'s config: the inspector keeps no copy and no save path of its own —
     /// Tile Detail's debounce + `preservingStoredVisibility` save persists these edits.
     @Binding private var editedConfig: DockTileConfiguration
-    /// Built only while the inspector is presented (`CustomiseInspectorColumn` gates it).
     let onToggleInspector: () -> Void
 
     @State private var customColor: Color = .blue

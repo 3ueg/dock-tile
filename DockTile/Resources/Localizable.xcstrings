@@ -7724,7 +7724,7 @@
       }
     },
     "menu.hideInspector": {
-      "comment": "View menu item, and tooltip and accessibility label of the inspector toggle, that closes the Customise Tile inspector",
+      "comment": "View menu item (Hide Inspector, ⌥⌘I) that closes the Customise Tile inspector",
       "extractionState": "manual",
       "localizations": {
         "de": {
@@ -8102,7 +8102,7 @@
       }
     },
     "menu.showInspector": {
-      "comment": "View menu item, and tooltip and accessibility label of the inspector toggle, that opens the Customise Tile inspector",
+      "comment": "View menu item (Show Inspector, ⌥⌘I) that opens the Customise Tile inspector",
       "extractionState": "manual",
       "localizations": {
         "de": {

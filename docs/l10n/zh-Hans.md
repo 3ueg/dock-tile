@@ -150,14 +150,14 @@ Keep `%@`-style placeholders exactly as they are. `\n` means a line break, `\|` 
 | `menu.configure` | Configure... | 配置… | machine | Menu item to configure tile (opens main app) |
 | `menu.configureTile` | Configure Tile | 配置磁贴 | machine | Tooltip for gear icon in popover |
 | `menu.copyDiagnostics` | Copy Diagnostics | 拷贝诊断信息 | machine | File menu item that copies recent diagnostic logs to the clipboard |
-| `menu.hideInspector` | Hide Inspector | 隐藏检查器 | machine | View menu item, and tooltip and accessibility label of the inspector toggle, that closes the Customise Tile inspector |
+| `menu.hideInspector` | Hide Inspector | 隐藏检查器 | machine | View menu item (Hide Inspector, ⌥⌘I) that closes the Customise Tile inspector |
 | `menu.newTile` | New Tile | 新建磁贴 | machine | Menu item to create a new tile |
 | `menu.noAppsConfigured` | No apps configured | 未配置App | machine | Dock menu: disabled row when the tile has no apps |
 | `menu.noConfiguration` | No configuration | 无配置 | machine | Dock menu: disabled row when the tile's config cannot be found |
 | `menu.openInFinder` | Open in Finder | 在访达中打开 | machine | Menu item to open in Finder |
 | `menu.options` | Options | 选项 | machine | Section divider in menu |
 | `menu.settings` | Settings… | 设置… | machine | App menu item that opens the inline Settings pane (⌘,) |
-| `menu.showInspector` | Show Inspector | 显示检查器 | machine | View menu item, and tooltip and accessibility label of the inspector toggle, that opens the Customise Tile inspector |
+| `menu.showInspector` | Show Inspector | 显示检查器 | machine | View menu item (Show Inspector, ⌥⌘I) that opens the Customise Tile inspector |
 | `popover.option.animation.default` | Default | 默认 | machine | Animation tier — default |
 | `popover.option.animation.fast` | Fast | 快速 | machine | Animation tier — fast |
 | `popover.option.animation.none` | None | 无 | machine | Animation tier — none |

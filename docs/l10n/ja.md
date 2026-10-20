@@ -150,14 +150,14 @@ Keep `%@`-style placeholders exactly as they are. `\n` means a line break, `\|` 
 | `menu.configure` | Configure... | タイルを設定… | machine | Menu item to configure tile (opens main app) |
 | `menu.configureTile` | Configure Tile | タイルを設定 | machine | Tooltip for gear icon in popover |
 | `menu.copyDiagnostics` | Copy Diagnostics | 診断情報をコピー | machine | File menu item that copies recent diagnostic logs to the clipboard |
-| `menu.hideInspector` | Hide Inspector | インスペクタを非表示 | machine | View menu item, and tooltip and accessibility label of the inspector toggle, that closes the Customise Tile inspector |
+| `menu.hideInspector` | Hide Inspector | インスペクタを非表示 | machine | View menu item (Hide Inspector, ⌥⌘I) that closes the Customise Tile inspector |
 | `menu.newTile` | New Tile | 新規タイル | machine | Menu item to create a new tile |
 | `menu.noAppsConfigured` | No apps configured | アプリが設定されていません | machine | Dock menu: disabled row when the tile has no apps |
 | `menu.noConfiguration` | No configuration | 設定が見つかりません | machine | Dock menu: disabled row when the tile's config cannot be found |
 | `menu.openInFinder` | Open in Finder | Finderで開く | machine | Menu item to open in Finder |
 | `menu.options` | Options | オプション | machine | Section divider in menu |
 | `menu.settings` | Settings… | 設定… | machine | App menu item that opens the inline Settings pane (⌘,) |
-| `menu.showInspector` | Show Inspector | インスペクタを表示 | machine | View menu item, and tooltip and accessibility label of the inspector toggle, that opens the Customise Tile inspector |
+| `menu.showInspector` | Show Inspector | インスペクタを表示 | machine | View menu item (Show Inspector, ⌥⌘I) that opens the Customise Tile inspector |
 | `popover.option.animation.default` | Default | デフォルト | machine | Animation tier — default |
 | `popover.option.animation.fast` | Fast | 高速 | machine | Animation tier — fast |
 | `popover.option.animation.none` | None | なし | machine | Animation tier — none |

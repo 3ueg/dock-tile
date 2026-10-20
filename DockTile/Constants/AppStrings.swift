@@ -1066,12 +1066,12 @@ enum AppStrings {
         static let showInspector = NSLocalizedString(
             "menu.showInspector",
             value: "Show Inspector",
-            comment: "View menu item, and tooltip and accessibility label of the inspector toggle, that opens the Customise Tile inspector"
+            comment: "View menu item (Show Inspector, ⌥⌘I) that opens the Customise Tile inspector"
         )
         static let hideInspector = NSLocalizedString(
             "menu.hideInspector",
             value: "Hide Inspector",
-            comment: "View menu item, and tooltip and accessibility label of the inspector toggle, that closes the Customise Tile inspector"
+            comment: "View menu item (Hide Inspector, ⌥⌘I) that closes the Customise Tile inspector"
         )
 
         static let settings = NSLocalizedString(
