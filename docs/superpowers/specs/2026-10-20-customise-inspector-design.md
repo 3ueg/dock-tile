@@ -70,8 +70,10 @@ hid the rest of the tile while editing. Apple's own pattern for "how this thing 
    tooltip Show Inspector / Hide Inspector; (b) the same toggle at the trailing edge of the
    inspector's own band, titled **Customise Tile**; (c) View menu **Show Inspector / Hide
    Inspector**, ⌥⌘I, enabled only while a tile is selected; (d) the **Customise** button and the
-   hero icon tap **open** the inspector and never close it.
-7. **Pane.** Title "Customise Tile" (new key; `button.customise` stays for the button). Width
+   hero icon tap **open** the inspector and never close it. *(Superseded by Decision 11: no
+   Customise button; the hero toggles; toolbar label "Toggle Customise Tile".)*
+7. **Pane.** Title "Customise Tile" (new key; `button.customise` stays for the button — removed
+   with the button by Decision 11). Width
    **fixed 260 pt**, not user-resizable. The spike may add a side inset; the plan names the number.
 8. **Spike pass criteria** (throwaway build on this Mac, macOS 27):
    1. The inspector band shows the title and the toggle, no Liquid Glass capsule around the title,
@@ -93,6 +95,20 @@ hid the rest of the tile while editing. Apple's own pattern for "how this thing 
     "Customise Tile" in the inspector band. Same `sidebar.trailing` icon, one button that changes
     section (the system toggle's behaviour). Supersedes the sketch's two toggles and entry point
     6(a)/(b) as drawn; spike criterion 2 is read as "Delete / Update trail the detail column".
+11. **Hands-on polish (Karthik, 2026-10-20, after the first build).** Supersedes 6(d) and 7's
+    title size:
+    - A 1 pt separator line runs the full window height between the detail column and the
+      inspector (as in the sketch).
+    - The **Customise** button under the hero is removed. The hero icon fills the hero row's height
+      (the Tile Name card beside it: 3 × 40 pt rows + 2 × 1 pt dividers = 122 pt) and **toggles** the
+      inspector both ways; tooltip and accessibility label **"Toggle Customiser"**.
+    - The toolbar toggle (both bands) is labelled **"Toggle Customise Tile"** (tooltip and
+      accessibility label). The View menu items stay Show / Hide Inspector.
+    - The inspector's labels and content follow Tile Detail's: group headers like "In This Tile"
+      (13 pt semibold, primary), captions like its hint (11 pt, tertiary), rows like its form rows
+      (40 pt, 13 pt labels, 1 pt `quinaryLabel` dividers, the same card surface and insets).
+    - The "Customise Tile" band title is one step smaller than the 16 pt page title: **14 pt
+      semibold** (Claude's call on "a size smaller"; not 13 pt, which is the row-label size).
 
 ## Builder's calls (Claude, 2026-10-20; override freely)
 
