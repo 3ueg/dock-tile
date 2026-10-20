@@ -46,9 +46,13 @@ hid the rest of the tile while editing. Apple's own pattern for "how this thing 
 1. **Native SwiftUI `.inspector(isPresented:)`**, not a hand-built column. Gated on the spike
    below: a failure of spike criteria 1 or 2 flips the plan to a hand-built trailing column inside
    Tile Detail's HStack; the rest of this document still applies.
-2. **Window width.** *(Amended by Karthik 2026-10-20, round 3: the closed minimum is now
-   **728 pt** and the open minimum **728 + 260 = 988 pt**; every 768 / 1028 below reads as
-   728 / 988. Max stays 1200.)* The closed minimum returns to **768 pt** (the pre-Customise value; 782 was
+2. **Window width.** *(Amended by Karthik 2026-10-20, round 4: the closed minimum is now
+   **700 pt** and the open minimum **700 + 260 = 960 pt**; every 768 / 1028 below reads as
+   700 / 960. Max stays 1200. Round 3's 728 / 988 broke: Tile Detail's content would not shrink
+   below ~520 pt, so at the open minimum the inspector was clipped off the window's right edge,
+   and below ~995 pt AppKit threw during SwiftUI's constraint update. Round 4 therefore also makes
+   the detail column's minimum explicit and small enough that sidebar min + detail min +
+   inspector fits inside both minimums, and makes Tile Detail's content honour it.)* The closed minimum returns to **768 pt** (the pre-Customise value; 782 was
    raised only for the two-column Customise screen). With the inspector open the minimum is
    **768 + 260 = 1028 pt**; max stays 1200. **Amended by Karthik 2026-10-20 (during
    implementation): the window keeps its width when the inspector opens or closes, as Xcode,
