@@ -386,6 +386,11 @@ struct DockTileDetailView: View {
         }
     }
 
+    private func toggleInspectorFromHero() {
+        DiagnosticsLog.shared.ui("Tile Detail → hero icon tapped (toggle Customise Tile) '\(editedConfig.name)'")
+        onToggleInspector()
+    }
+
     private var heroSection: some View {
         HStack(alignment: .center, spacing: 16) {
             // Left column: the icon preview, as tall as the form card beside it (`heroIconSize`,
@@ -400,13 +405,12 @@ struct DockTileDetailView: View {
                         NSCursor.pop()
                     }
                 }
-                .onTapGesture {
-                    DiagnosticsLog.shared.ui("Tile Detail → hero icon tapped (toggle Customise Tile) '\(editedConfig.name)'")
-                    onToggleInspector()
-                }
+                .onTapGesture(perform: toggleInspectorFromHero)
                 .help(AppStrings.Tooltip.toggleCustomiser)
                 .accessibilityLabel(AppStrings.Tooltip.toggleCustomiser)
                 .accessibilityAddTraits(.isButton)
+                // The button trait promises a press: VoiceOver / AXPress run the same toggle.
+                .accessibilityAction { toggleInspectorFromHero() }
 
             // Right column: Custom Form Group
             VStack(spacing: 0) {
