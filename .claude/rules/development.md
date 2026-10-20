@@ -36,6 +36,10 @@ Old configs must always load — never break backward compatibility.
 ## Native macOS Colors
 
 `Color(nsColor:)` doesn't reliably bridge dynamic AppKit colors. Use `NSViewRepresentable` wrappers from `NativeBackgroundViews.swift` (`.formGroup`, `.windowBackground`).
+Their backing `AppearanceColorView` re-resolves the colour in `updateLayer()` under its own
+`effectiveAppearance` on every appearance change. Never assign `someDynamicNSColor.cgColor` to a
+layer once: it freezes the colour for the appearance current at that moment — the Customise Tile
+inspector stayed dark after a switch to Light Mode (2026-10-21; `AppearanceColorViewTests`).
 
 ## Product Name Has a Space
 

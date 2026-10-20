@@ -24,15 +24,47 @@ struct NSColorBackgroundView: NSViewRepresentable {
         self.color = color
     }
 
-    func makeNSView(context: Context) -> NSView {
-        let view = NSView()
-        view.wantsLayer = true
-        view.layer?.backgroundColor = color().cgColor
-        return view
+    func makeNSView(context: Context) -> AppearanceColorView {
+        AppearanceColorView(color: color())
     }
 
-    func updateNSView(_ nsView: NSView, context: Context) {
-        nsView.layer?.backgroundColor = color().cgColor
+    func updateNSView(_ nsView: AppearanceColorView, context: Context) {
+        nsView.color = color()
+    }
+}
+
+/// A layer-backed view whose background is a DYNAMIC `NSColor`, re-resolved for the view's own
+/// effective appearance on every appearance change. `NSColor.cgColor` resolves a dynamic colour
+/// once, for whatever appearance is current at that moment; assigning it to `layer.backgroundColor`
+/// in `makeNSView` / `updateNSView` froze it — a view built in Dark Mode stayed dark after the
+/// system switched to Light, because SwiftUI does not call `updateNSView` for an appearance change
+/// (the Customise Tile inspector, 2026-10-21). Guarded by `AppearanceColorViewTests`.
+final class AppearanceColorView: NSView {
+    var color: NSColor {
+        didSet { needsDisplay = true }
+    }
+
+    init(color: NSColor) {
+        self.color = color
+        super.init(frame: .zero)
+        wantsLayer = true
+        layerContentsRedrawPolicy = .onSetNeedsDisplay
+    }
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder) { fatalError("init(coder:) is not supported") }
+
+    override var wantsUpdateLayer: Bool { true }
+
+    override func updateLayer() {
+        effectiveAppearance.performAsCurrentDrawingAppearance {
+            layer?.backgroundColor = color.cgColor
+        }
+    }
+
+    override func viewDidChangeEffectiveAppearance() {
+        super.viewDidChangeEffectiveAppearance()
+        needsDisplay = true
     }
 }
 
