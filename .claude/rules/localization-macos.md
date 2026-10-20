@@ -52,8 +52,8 @@ trip, but a noisy diff; prefer not to open it there.
 ## Usage
 
 ```swift
-Button(AppStrings.Button.customise) { ... }  // correct
-Button("Customise") { ... }                   // wrong — never hardcode
+Button(AppStrings.Button.update) { ... }  // correct
+Button("Update") { ... }                   // wrong — never hardcode
 ```
 
 Categories: `Button.*`, `Label.*`, `Menu.*`, `Navigation.*`, `Section.*`, `Empty.*`, `Error.*`,

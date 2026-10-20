@@ -71,7 +71,7 @@ it, and unit-test the seam so a broken rule fails loudly. Existing seams: `resol
 `AppDelegate.clampedWindowWidth(_:inspectorShown:)` / `.windowFrame(forInspectorShown:from:visibleFrame:)` (window 768 closed, 1028 open, 1200 max; the window keeps its width on a toggle, opening only grows it, closing never moves the frame; `MainWindowWidthTests`),
 `DockTileConfigurationView.inspectorIsPresented(stored:selection:)` (the inspector shows only for a tile row while the stored flag is on; `InspectorVisibilityTests`),
 `DockTileConfigurationView.inspectorSetterWrites(newValue:stored:selection:)` (the `.inspector` binding setter: nil = ignore a write-back of what is presented — our own echo, or `false` on a Settings pane, which must not clear the flag — else exactly `newValue`; `InspectorVisibilityTests`),
-`DockTileDetailView.heroForcedStyle` / `DockTileConfigurationView.inspectorCommandIsEnabled` (hero is canonical Default/Dark while the inspector is open; ⌥⌘I enabled only for a tile row; `InspectorEntryPointTests`),
+`DockTileDetailView.heroForcedStyle(inspectorShown:colorScheme:followsAppearance:)` / `DockTileConfigurationView.inspectorCommandIsEnabled` (hero is canonical Default/Dark while the inspector is open, Dark only when `followsAppearance` — `IconPipeline.isDeclarative`, so never on macOS 15; ⌥⌘I enabled only for a tile row; `InspectorEntryPointTests`),
 `IconFace` tolerant decode + the two defaults (missing key → glyph, new tile → apps; unknown value → glyph; `IconFaceTests`),
 `MacOSFloorGuardTests` (the deployment target ↔ appcast floor ↔ macOS 15 CI leg ↔ website requirement claims — read from the files, so the macOS 15 leg cannot be dropped while 15 is supported, and must be once it is not).
 

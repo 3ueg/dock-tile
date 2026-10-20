@@ -229,6 +229,10 @@ Popover, Dock Lock) · Dock Tile (About)** — the old accordion `@AppStorage` e
   `maxWindowWidth`; `DockTileApp`, `DockTileConfigurationView` and `WindowAccessor` read them). The pure
   `AppDelegate.clampedWindowWidth(_:inspectorShown:)` clamps `windowWillResize` and a restored saved
   frame; `windowFrame(forInspectorShown:from:visibleFrame:)` is the frame rule. Guarded by `MainWindowWidthTests`.
+  **One launch-frame writer**: `WindowAccessor` (on window creation) fixes a restored frame — with the
+  flag stored on, through `windowFrame(forInspectorShown: true, …)`, so a frame saved near the right edge
+  grows to 1028 on screen; off, the plain clamp. `AppDelegate.configureMainWindowSizing` sets only the
+  delegate and size limits (its own frame fix ran after WindowAccessor's and never fired).
 - **Customise Tile is a native trailing `.inspector`, not a screen (critical).** The old drill-down
   (a canvas, a floating Select Apps pill, a 700 pt window height) is gone.
   - **Placement**: `.inspector` is attached to the `NavigationSplitView` in `DockTileConfigurationView`,
@@ -251,16 +255,26 @@ Popover, Dock Lock) · Dock Tile (About)** — the old accordion `@AppStorage` e
     `NSApplicationDelegateAdaptor` proxy, so the instance call silently never ran.
     `WindowAccessor.updateNSView` never moves the frame.
   - **Content pinned to 260 pt** (`CustomiseInspectorColumn`): AppKit throws in a constraint loop when
-    the content's minimum width exceeds its column.
-  - **Inspector band**: `InspectorTitleBand` places its title `.automatic` (never `.navigation`) and its
-    whole toolbar is guarded on the presented flag. Unguarded, its items leaked into the main band
-    while the inspector was closed.
-  - **One moving toggle** (`sidebar.trailing`): Show Inspector trails Update in Tile Detail while
-    closed; Hide Inspector trails the inspector band while open. Customise button and hero tap
-    only OPEN. ⌥⌘I is in the View menu via a `FocusedValue` (`InspectorCommand`), enabled only for a
+    the content's minimum width exceeds its column. A 1 pt `separatorColor` line runs along its
+    leading edge, full window height including the 52 pt band (a `.leading` overlay with
+    `.ignoresSafeArea()`, so it never shifts the content and exists only with the inspector).
+  - **Inspector band**: `InspectorTitleBand` places its title `.automatic` (never `.navigation`), at
+    14 pt semibold, one step below the 16 pt page title (`PaneTitleLabel(fontSize:)`). Its toolbar
+    has no guard of its own: `CustomiseInspectorColumn`'s presented check is the content gate, so
+    the band's items exist only while open. Built while closed, they leaked into the main band.
+  - **Inspector content follows Tile Detail's form**: group headers like "In This Tile" (13 pt
+    semibold, primary), captions like its hint (11 pt, tertiary), 40 pt rows with 13 pt labels, cards
+    inset 10 pt with full-width 1 pt `quinaryLabel` dividers, 13 pt Style-card and Background-chip labels.
+  - **One moving toggle** (`sidebar.trailing`, tooltip and accessibility label "Toggle Customise Tile"):
+    it trails Update in Tile Detail while closed and the inspector band while open. There is no
+    Customise button; the hero icon toggles both ways ("Toggle Customiser"; a default
+    `accessibilityAction` makes its button trait answer AXPress / VoiceOver). ⌥⌘I is in the View
+    menu (Show / Hide Inspector) via a `FocusedValue` (`InspectorCommand`), enabled only for a
     tile row (`inspectorCommandIsEnabled`, `InspectorEntryPointTests`).
-  - **Hero**: canonical Default/Dark while the inspector is open, live `TileFace` while closed
-    (`DockTileDetailView.heroForcedStyle`, `InspectorEntryPointTests`).
+  - **Hero**: `heroIconSize` 122 pt, the Tile Name card's height (3 × 40 pt rows + 2 × 1 pt dividers),
+    so they align top and bottom. Canonical Default/Dark while the inspector is open, Dark only where
+    the Dock icon follows the appearance (macOS 26+; macOS 15 stays Default), live `TileFace` while
+    closed (`DockTileDetailView.heroForcedStyle`, `InspectorEntryPointTests`).
   - **Content only while presented (R15)**: SwiftUI instantiates inspector content while it is closed,
     so `CustomiseInspectorColumn` builds `CustomiseTileView` only while presented (an empty
     placeholder otherwise); built while closed, every Name keystroke re-rendered the whole hidden Customise view.

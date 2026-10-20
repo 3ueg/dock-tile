@@ -104,7 +104,8 @@ Every role (fill top/bottom, glyph) per background x style x icon type is derive
   such icon appearance).
 - **Previews are canonical**: the Customise chips and the Tile Detail hero (while the inspector is open) always render Default/Dark via
   `DockTileIconPreview.forcing(_:)` (`displayStyle(forced:raw:colorScheme:)`), whatever the system
-  icon style is.
+  icon style is. Dark only where the icon follows the appearance (macOS 26+): on macOS 15 the open
+  hero, like the Mono chip, stays Default in Dark Mode.
 - **Fills are P3 JSON fills** (`HelperBundleManager.declarativeFillsP3`), not pixels.
 - **Layer model (spike, 2026-10-14)**: a Mono symbol `.icon` keeps the SAME two glyph layers as a
   Colour one; the tinted appearance reuses the (coloured) light layer, and macOS 27 derives a legible
