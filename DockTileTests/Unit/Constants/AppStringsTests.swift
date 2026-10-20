@@ -238,6 +238,20 @@ struct AppStringsTests {
         #expect(!AppStrings.Error.failedToCodeSign.isEmpty)
     }
 
+    @Test("Inspector strings are non-empty")
+    func inspectorStringsNonEmpty() {
+        #expect(!AppStrings.Title.customiseTile.isEmpty)
+        #expect(!AppStrings.Menu.showInspector.isEmpty)
+        #expect(!AppStrings.Menu.hideInspector.isEmpty)
+    }
+
+    @Test("Inspector title spelling follows the English variant")
+    func inspectorTitleSpelling() {
+        #expect(localizedString(for: "title.customiseTile", locale: "en-GB") == "Customise Tile")
+        #expect(localizedString(for: "title.customiseTile", locale: "en-AU") == "Customise Tile")
+        #expect(localizedString(for: "title.customiseTile", locale: "en-US") == "Customize Tile")
+    }
+
     // MARK: - Locale-Specific Tests
 
     @Test("UK English spelling used for 'Customise' in en-GB locale")

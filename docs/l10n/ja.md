@@ -154,12 +154,14 @@ Keep `%@`-style placeholders exactly as they are. `\n` means a line break, `\|` 
 | `menu.configure` | Configure... | タイルを設定… | machine | Menu item to configure tile (opens main app) |
 | `menu.configureTile` | Configure Tile | タイルを設定 | machine | Tooltip for gear icon in popover |
 | `menu.copyDiagnostics` | Copy Diagnostics | 診断情報をコピー | machine | File menu item that copies recent diagnostic logs to the clipboard |
+| `menu.hideInspector` | Hide Inspector | インスペクタを非表示 | machine | View menu item, and tooltip and accessibility label of the inspector toggle, that closes the Customise Tile inspector |
 | `menu.newTile` | New Tile | 新規タイル | machine | Menu item to create a new tile |
 | `menu.noAppsConfigured` | No apps configured | アプリが設定されていません | machine | Dock menu: disabled row when the tile has no apps |
 | `menu.noConfiguration` | No configuration | 設定が見つかりません | machine | Dock menu: disabled row when the tile's config cannot be found |
 | `menu.openInFinder` | Open in Finder | Finderで開く | machine | Menu item to open in Finder |
 | `menu.options` | Options | オプション | machine | Section divider in menu |
 | `menu.settings` | Settings… | 設定… | machine | App menu item that opens the inline Settings pane (⌘,) |
+| `menu.showInspector` | Show Inspector | インスペクタを表示 | machine | View menu item, and tooltip and accessibility label of the inspector toggle, that opens the Customise Tile inspector |
 | `navigation.customiseTile` | Customise Tile | タイルをカスタマイズ | machine | Navigation title for customise tile view |
 | `popover.option.animation.default` | Default | デフォルト | machine | Animation tier — default |
 | `popover.option.animation.fast` | Fast | 高速 | machine | Animation tier — fast |
@@ -257,6 +259,7 @@ Keep `%@`-style placeholders exactly as they are. `\n` means a line break, `\|` 
 | `symbolCategory.whatsnew` | What's New | 新機能 | machine | Symbol picker: section header (SF Symbols category) |
 | `tab.emoji` | Emoji | 絵文字 | machine | Emoji tab label |
 | `tab.symbol` | Symbol | シンボル | machine | Symbol tab label |
+| `title.customiseTile` | Customise Tile | タイルをカスタマイズ | machine | Title of the Customise Tile inspector beside Tile Detail |
 | `title.deleteTile` | Delete Tile | タイルを削除 | machine | Alert title for delete confirmation |
 | `tooltip.createNewTile` | Create new tile | 新規タイルを作成 | machine | Tooltip when add button is enabled |
 | `tooltip.editFirst` | Edit current tile before creating another | 別のタイルを作成する前に、現在のタイルを編集してください | machine | Tooltip when add button is disabled |

@@ -154,12 +154,14 @@ Keep `%@`-style placeholders exactly as they are. `\n` means a line break, `\|` 
 | `menu.configure` | Configure... | Configurer… | machine | Menu item to configure tile (opens main app) |
 | `menu.configureTile` | Configure Tile | Configurer la tuile | machine | Tooltip for gear icon in popover |
 | `menu.copyDiagnostics` | Copy Diagnostics | Copier les diagnostics | machine | File menu item that copies recent diagnostic logs to the clipboard |
+| `menu.hideInspector` | Hide Inspector | Masquer l’inspecteur | machine | View menu item, and tooltip and accessibility label of the inspector toggle, that closes the Customise Tile inspector |
 | `menu.newTile` | New Tile | Nouvelle tuile | machine | Menu item to create a new tile |
 | `menu.noAppsConfigured` | No apps configured | Aucune app configurée | machine | Dock menu: disabled row when the tile has no apps |
 | `menu.noConfiguration` | No configuration | Aucune configuration | machine | Dock menu: disabled row when the tile's config cannot be found |
 | `menu.openInFinder` | Open in Finder | Ouvrir dans le Finder | machine | Menu item to open in Finder |
 | `menu.options` | Options | Options | machine | Section divider in menu |
 | `menu.settings` | Settings… | Réglages… | machine | App menu item that opens the inline Settings pane (⌘,) |
+| `menu.showInspector` | Show Inspector | Afficher l’inspecteur | machine | View menu item, and tooltip and accessibility label of the inspector toggle, that opens the Customise Tile inspector |
 | `navigation.customiseTile` | Customise Tile | Personnaliser la tuile | machine | Navigation title for customise tile view |
 | `popover.option.animation.default` | Default | Par défaut | machine | Animation tier — default |
 | `popover.option.animation.fast` | Fast | Rapide | machine | Animation tier — fast |
@@ -257,6 +259,7 @@ Keep `%@`-style placeholders exactly as they are. `\n` means a line break, `\|` 
 | `symbolCategory.whatsnew` | What's New | Nouveautés | machine | Symbol picker: section header (SF Symbols category) |
 | `tab.emoji` | Emoji | Emoji | machine | Emoji tab label |
 | `tab.symbol` | Symbol | Symbole | machine | Symbol tab label |
+| `title.customiseTile` | Customise Tile | Personnaliser la tuile | machine | Title of the Customise Tile inspector beside Tile Detail |
 | `title.deleteTile` | Delete Tile | Supprimer la tuile | machine | Alert title for delete confirmation |
 | `tooltip.createNewTile` | Create new tile | Créer une tuile | machine | Tooltip when add button is enabled |
 | `tooltip.editFirst` | Edit current tile before creating another | Modifiez la tuile actuelle avant d’en créer une autre | machine | Tooltip when add button is disabled |

@@ -1085,6 +1085,16 @@ enum AppStrings {
             value: "Configure...",
             comment: "Menu item to configure tile (opens main app)"
         )
+        static let showInspector = NSLocalizedString(
+            "menu.showInspector",
+            value: "Show Inspector",
+            comment: "View menu item, and tooltip and accessibility label of the inspector toggle, that opens the Customise Tile inspector"
+        )
+        static let hideInspector = NSLocalizedString(
+            "menu.hideInspector",
+            value: "Hide Inspector",
+            comment: "View menu item, and tooltip and accessibility label of the inspector toggle, that closes the Customise Tile inspector"
+        )
 
         static let settings = NSLocalizedString(
             "menu.settings",
@@ -1354,6 +1364,11 @@ enum AppStrings {
             "title.deleteTile",
             value: "Delete Tile",
             comment: "Alert title for delete confirmation"
+        )
+        static let customiseTile = NSLocalizedString(
+            "title.customiseTile",
+            value: "Customise Tile",
+            comment: "Title of the Customise Tile inspector beside Tile Detail"
         )
     }
 

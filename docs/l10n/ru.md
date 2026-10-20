@@ -154,12 +154,14 @@ Keep `%@`-style placeholders exactly as they are. `\n` means a line break, `\|` 
 | `menu.configure` | Configure... | Настроить… | machine | Menu item to configure tile (opens main app) |
 | `menu.configureTile` | Configure Tile | Настроить плитку | machine | Tooltip for gear icon in popover |
 | `menu.copyDiagnostics` | Copy Diagnostics | Скопировать диагностику | machine | File menu item that copies recent diagnostic logs to the clipboard |
+| `menu.hideInspector` | Hide Inspector | Скрыть инспектор | machine | View menu item, and tooltip and accessibility label of the inspector toggle, that closes the Customise Tile inspector |
 | `menu.newTile` | New Tile | Новая плитка | machine | Menu item to create a new tile |
 | `menu.noAppsConfigured` | No apps configured | Приложения не добавлены | machine | Dock menu: disabled row when the tile has no apps |
 | `menu.noConfiguration` | No configuration | Нет конфигурации | machine | Dock menu: disabled row when the tile's config cannot be found |
 | `menu.openInFinder` | Open in Finder | Открыть в Finder | machine | Menu item to open in Finder |
 | `menu.options` | Options | Параметры | machine | Section divider in menu |
 | `menu.settings` | Settings… | Настройки… | machine | App menu item that opens the inline Settings pane (⌘,) |
+| `menu.showInspector` | Show Inspector | Показать инспектор | machine | View menu item, and tooltip and accessibility label of the inspector toggle, that opens the Customise Tile inspector |
 | `navigation.customiseTile` | Customise Tile | Настройка плитки | machine | Navigation title for customise tile view |
 | `popover.option.animation.default` | Default | По умолчанию | machine | Animation tier — default |
 | `popover.option.animation.fast` | Fast | Быстро | machine | Animation tier — fast |
@@ -257,6 +259,7 @@ Keep `%@`-style placeholders exactly as they are. `\n` means a line break, `\|` 
 | `symbolCategory.whatsnew` | What's New | Что нового | machine | Symbol picker: section header (SF Symbols category) |
 | `tab.emoji` | Emoji | Эмодзи | machine | Emoji tab label |
 | `tab.symbol` | Symbol | Символ | machine | Symbol tab label |
+| `title.customiseTile` | Customise Tile | Настройка плитки | machine | Title of the Customise Tile inspector beside Tile Detail |
 | `title.deleteTile` | Delete Tile | Удалить плитку | machine | Alert title for delete confirmation |
 | `tooltip.createNewTile` | Create new tile | Создать плитку | machine | Tooltip when add button is enabled |
 | `tooltip.editFirst` | Edit current tile before creating another | Измените текущую плитку, прежде чем создавать новую | machine | Tooltip when add button is disabled |

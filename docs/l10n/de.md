@@ -154,12 +154,14 @@ Keep `%@`-style placeholders exactly as they are. `\n` means a line break, `\|` 
 | `menu.configure` | Configure... | Konfigurieren … | machine | Menu item to configure tile (opens main app) |
 | `menu.configureTile` | Configure Tile | Kachel konfigurieren | machine | Tooltip for gear icon in popover |
 | `menu.copyDiagnostics` | Copy Diagnostics | Diagnose kopieren | machine | File menu item that copies recent diagnostic logs to the clipboard |
+| `menu.hideInspector` | Hide Inspector | Inspektor ausblenden | machine | View menu item, and tooltip and accessibility label of the inspector toggle, that closes the Customise Tile inspector |
 | `menu.newTile` | New Tile | Neue Kachel | machine | Menu item to create a new tile |
 | `menu.noAppsConfigured` | No apps configured | Keine Apps konfiguriert | machine | Dock menu: disabled row when the tile has no apps |
 | `menu.noConfiguration` | No configuration | Keine Konfiguration | machine | Dock menu: disabled row when the tile's config cannot be found |
 | `menu.openInFinder` | Open in Finder | Im Finder öffnen | machine | Menu item to open in Finder |
 | `menu.options` | Options | Optionen | machine | Section divider in menu |
 | `menu.settings` | Settings… | Einstellungen … | machine | App menu item that opens the inline Settings pane (⌘,) |
+| `menu.showInspector` | Show Inspector | Inspektor einblenden | machine | View menu item, and tooltip and accessibility label of the inspector toggle, that opens the Customise Tile inspector |
 | `navigation.customiseTile` | Customise Tile | Kachel anpassen | machine | Navigation title for customise tile view |
 | `popover.option.animation.default` | Default | Standard | machine | Animation tier — default |
 | `popover.option.animation.fast` | Fast | Schnell | machine | Animation tier — fast |
@@ -257,6 +259,7 @@ Keep `%@`-style placeholders exactly as they are. `\n` means a line break, `\|` 
 | `symbolCategory.whatsnew` | What's New | Neue Funktionen | machine | Symbol picker: section header (SF Symbols category) |
 | `tab.emoji` | Emoji | Emoji | machine | Emoji tab label |
 | `tab.symbol` | Symbol | Symbol | machine | Symbol tab label |
+| `title.customiseTile` | Customise Tile | Kachel anpassen | machine | Title of the Customise Tile inspector beside Tile Detail |
 | `title.deleteTile` | Delete Tile | Kachel löschen | machine | Alert title for delete confirmation |
 | `tooltip.createNewTile` | Create new tile | Neue Kachel erstellen | machine | Tooltip when add button is enabled |
 | `tooltip.editFirst` | Edit current tile before creating another | Bearbeite die aktuelle Kachel, bevor du eine weitere erstellst | machine | Tooltip when add button is disabled |
