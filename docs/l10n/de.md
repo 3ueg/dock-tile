@@ -108,8 +108,6 @@ Keep `%@`-style placeholders exactly as they are. `\n` means a line break, `\|` 
 | `label.colour.hint.toned.static` | Toned to stay clear on white | Abgestimmt für gute Erkennbarkeit auf Weiß | machine | Customise Tile: colour hint, Mono tile on macOS 15 |
 | `label.iconSize` | Icon Size | Symbolgröße | machine | Compact label for the icon size stepper (side-by-side with icon weight) |
 | `label.iconWeight` | Icon Weight | Strichstärke | machine | Label for the SF Symbol weight picker |
-| `label.iconWeightInfo` | Weight applies to symbols only. Emoji aren’t affected. | Die Strichstärke gilt nur für Symbole. Emoji sind nicht betroffen. | machine | Popover/help note explaining that the icon weight setting affects symbols but not emoji |
-| `label.iconWeightInfo.accessibility` | About Icon Weight | Info zur Strichstärke | machine | VoiceOver label for the icon weight info button |
 | `label.missingAppsScan` | Missing Apps | Fehlende Apps | machine | Settings row title for the missing-app scan |
 | `label.missingAppsScanDescription` | Check your tiles for apps that have been moved or uninstalled. | Prüfe deine Kacheln auf Apps, die verschoben oder deinstalliert wurden. | machine | Settings row description for the missing-app scan |
 | `label.notInstalled` | Not installed | Nicht installiert | machine | Badge/kind text shown for an app whose bundle is no longer on disk |

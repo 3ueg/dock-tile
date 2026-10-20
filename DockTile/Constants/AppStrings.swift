@@ -589,18 +589,6 @@ enum AppStrings {
             comment: "Label for the SF Symbol weight picker"
         )
 
-        static let iconWeightInfo = NSLocalizedString(
-            "label.iconWeightInfo",
-            value: "Weight applies to symbols only. Emoji aren’t affected.",
-            comment: "Popover/help note explaining that the icon weight setting affects symbols but not emoji"
-        )
-
-        static let iconWeightInfoAccessibility = NSLocalizedString(
-            "label.iconWeightInfo.accessibility",
-            value: "About Icon Weight",
-            comment: "VoiceOver label for the icon weight info button"
-        )
-
         static let tileName = NSLocalizedString(
             "label.tileName",
             value: "Tile Name",

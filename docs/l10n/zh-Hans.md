@@ -108,8 +108,6 @@ Keep `%@`-style placeholders exactly as they are. `\n` means a line break, `\|` 
 | `label.colour.hint.toned.static` | Toned to stay clear on white | 已调整色调，在白色上保持清晰 | machine | Customise Tile: colour hint, Mono tile on macOS 15 |
 | `label.iconSize` | Icon Size | 图标大小 | machine | Compact label for the icon size stepper (side-by-side with icon weight) |
 | `label.iconWeight` | Icon Weight | 图标粗细 | machine | Label for the SF Symbol weight picker |
-| `label.iconWeightInfo` | Weight applies to symbols only. Emoji aren’t affected. | 粗细仅适用于符号，不影响表情符号。 | machine | Popover/help note explaining that the icon weight setting affects symbols but not emoji |
-| `label.iconWeightInfo.accessibility` | About Icon Weight | 关于图标粗细 | machine | VoiceOver label for the icon weight info button |
 | `label.missingAppsScan` | Missing Apps | 缺失的App | machine | Settings row title for the missing-app scan |
 | `label.missingAppsScanDescription` | Check your tiles for apps that have been moved or uninstalled. | 检查你的磁贴中是否有已被移动或卸载的App。 | machine | Settings row description for the missing-app scan |
 | `label.notInstalled` | Not installed | 未安装 | machine | Badge/kind text shown for an app whose bundle is no longer on disk |

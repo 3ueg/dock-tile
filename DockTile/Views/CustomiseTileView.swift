@@ -20,7 +20,6 @@ struct CustomiseTileView: View {
 
     @State private var customColor: Color = .blue
     @State private var searchText: String = ""
-    @State private var showWeightInfo: Bool = false
 
     init(config: Binding<DockTileConfiguration>, onToggleInspector: @escaping () -> Void) {
         self._editedConfig = config
@@ -502,42 +501,13 @@ struct CustomiseTileView: View {
             if showsWeight {
                 cardHairline
                 inspectorRow(AppStrings.Label.iconWeight) {
-                    // Its own tight stack: with the row's 8 pt gaps around the info button and a
-                    // spacer, the label truncated to "Icon We…" in the 260 pt inspector.
-                    HStack(spacing: 4) {
-                        iconWeightInfoButton
-                        Spacer(minLength: 0)
-                        iconWeightPicker
-                    }
+                    Spacer(minLength: 8)
+                    iconWeightPicker
                 }
             }
         }
         .padding(.horizontal, Self.cardPadding)
         .modifier(InspectorCard())
-    }
-
-    /// Small info affordance next to the Icon Weight label. Click reveals a popover
-    /// explaining the setting's scope (Apple's pattern for a note too minor for a
-    /// persistent subtitle); hover shows the same text as a help tag for accessibility.
-    private var iconWeightInfoButton: some View {
-        Button {
-            showWeightInfo.toggle()
-        } label: {
-            Image(systemName: "info.circle")
-                .font(.system(size: 12))
-                .foregroundStyle(.secondary)
-        }
-        .buttonStyle(.plain)
-        .help(AppStrings.Label.iconWeightInfo)
-        .accessibilityLabel(AppStrings.Label.iconWeightInfoAccessibility)
-        .popover(isPresented: $showWeightInfo, arrowEdge: .bottom) {
-            Text(AppStrings.Label.iconWeightInfo)
-                .font(.callout)
-                .foregroundStyle(.primary)
-                .fixedSize(horizontal: false, vertical: true)
-                .frame(width: 220, alignment: .leading)
-                .padding(12)
-        }
     }
 
     /// Native macOS pull-down (pop-up button) for choosing the SF Symbol weight.
@@ -808,14 +778,17 @@ private struct BackgroundChip: View {
     let followsAppearance: Bool
     let action: () -> Void
 
+    /// The thumbnail's slot, which sets the chip's height (unchanged).
     private let side: CGFloat = 32
+    /// The tile drawn inside that slot: 80% of it (owner, 2026-10-21), centred.
+    private let iconSide: CGFloat = 32 * 0.8
 
     var body: some View {
         Button(action: action) {
             HStack(spacing: 8) {
                 thumbnail
+                    .iconLift(size: iconSide)
                     .frame(width: side, height: side)
-                    .iconLift(size: side)
                 Text(option == .colour ? AppStrings.Label.backgroundColour : AppStrings.Label.backgroundMono)
                     .font(.system(size: 13, weight: isSelected ? .semibold : .regular))
                     .foregroundStyle(.primary)
@@ -843,7 +816,7 @@ private struct BackgroundChip: View {
     private func preview(_ style: IconStyle) -> some View {
         DockTileIconPreview(
             tintColor: config.tintColor, iconType: config.iconType, iconValue: config.iconValue,
-            iconScale: config.iconScale, iconWeight: config.iconWeight, background: option, size: side
+            iconScale: config.iconScale, iconWeight: config.iconWeight, background: option, size: iconSide
         )
         .forcing(style)
     }
