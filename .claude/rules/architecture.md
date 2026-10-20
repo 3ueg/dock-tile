@@ -225,13 +225,26 @@ Popover, Dock Lock) · Dock Tile (About)** — the old accordion `@AppStorage` e
   label typography too, so it would shrink those panes' title and description text. Verify a
   change by reading the AX frame (`size of every checkbox …`), not by eye.
 
-- **Window widths: 728 closed, 988 open, 1200 max** (`AppDelegate.minWindowWidth` / `inspectorWidth` 260 /
+- **Window widths: 700 closed, 960 open, 1200 max** (`AppDelegate.minWindowWidth` / `inspectorWidth` 260 /
   `maxWindowWidth`; `DockTileApp`, `DockTileConfigurationView` and `WindowAccessor` read them). The pure
   `AppDelegate.clampedWindowWidth(_:inspectorShown:)` clamps `windowWillResize` and a restored saved
   frame; `windowFrame(forInspectorShown:from:visibleFrame:)` is the frame rule. Guarded by `MainWindowWidthTests`.
+  **The split view's own minimum must fit inside those (critical).** With the inspector open AppKit
+  counts it TWICE: the split view's minimum is sidebar + Tile Detail's minimum + 2 × 260 (measured
+  2026-10-20 from each `NSSplitViewItem` view's `fittingSize`: 1022 = 228 + 274 + 520; closed, 502 =
+  228 + 274). Tile Detail's own minimum (274, the hero row with its labels squeezed away) therefore
+  asked for 1022 pt, above the 988 open minimum of round 3: the inspector was clipped off the right
+  edge, and opening at 988–994 pt (or resizing an open window to 1010) threw in AppKit's
+  update-constraints pass. So Tile Detail reports `AppDelegate.detailColumnMinWidth` (150) through
+  `.frame(minWidth:)` in `DockTileConfigurationView.tileDetail`, below its content's own minimum on
+  purpose; the content's room comes from the window minimums (at least 420 pt: 700 − 280, or
+  960 − 280 − 260, which holds the 406 pt hero row). `.navigationSplitViewColumnWidth(min:)` alone
+  does NOT lower that minimum (measured: the item's `minimumThickness` changed, the floor did not).
+  The sidebar range is `sidebarMinWidth` / `sidebarMaxWidth` (220 / 280); the inequalities with the
+  widest sidebar are pinned in `MainWindowWidthTests`.
   **One launch-frame writer**: `WindowAccessor` (on window creation) fixes a restored frame — with the
   flag stored on, through `windowFrame(forInspectorShown: true, …)`, so a frame saved near the right edge
-  grows to 988 on screen; off, the plain clamp. `AppDelegate.configureMainWindowSizing` sets only the
+  grows to 960 on screen; off, the plain clamp. `AppDelegate.configureMainWindowSizing` sets only the
   delegate and size limits (its own frame fix ran after WindowAccessor's and never fired).
 - **Customise Tile is a native trailing `.inspector`, not a screen (critical).** The old drill-down
   (a canvas, a floating Select Apps pill, a 700 pt window height) is gone.
@@ -249,7 +262,7 @@ Popover, Dock Lock) · Dock Tile (About)** — the old accordion `@AppStorage` e
     only when the value differs from what is presented, and reads the stored flag from `UserDefaults`:
     `@AppStorage` was measured stale inside the setter and toggled twice per press.
   - **The window KEEPS its width when the inspector toggles** (Xcode/Pages/Keynote). Opening grows it
-    only when narrower than 988; closing never changes the frame. Shrinking in the same turn as the
+    only when narrower than 960; closing never changes the frame. Shrinking in the same turn as the
     inspector collapsed crashed AppKit's constraint pass. `AppDelegate.resizeConfigurationWindow` is
     `static` because `NSApp.delegate as? AppDelegate` is nil under SwiftUI's
     `NSApplicationDelegateAdaptor` proxy, so the instance call silently never ran.
