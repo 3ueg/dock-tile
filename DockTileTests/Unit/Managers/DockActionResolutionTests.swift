@@ -179,6 +179,21 @@ struct DockActionResolutionTests {
         #expect(DockTileDetailView.contentSignature(of: colour) != DockTileDetailView.contentSignature(of: mono))
     }
 
+    /// The Customise inspector edits Tile Detail's own `editedConfig`, so its colour and face
+    /// edits reach the dirty check directly: a hidden, unpinned tile's Done lights up after them.
+    @Test("Inspector edits (colour, face) dirty the tile (contentSignature)")
+    func inspectorEditsChangeSignature() {
+        let base = DockTileConfiguration(name: "Media", tintColor: .preset(.blue), iconFace: .apps)
+
+        var recoloured = base
+        recoloured.tintColor = .preset(.orange)
+        #expect(DockTileDetailView.contentSignature(of: recoloured) != DockTileDetailView.contentSignature(of: base))
+
+        var refaced = base
+        refaced.iconFace = .glyph
+        #expect(DockTileDetailView.contentSignature(of: refaced) != DockTileDetailView.contentSignature(of: base))
+    }
+
     // MARK: - dockActionParameters
 
     @Test("Dock action analytics carry layout, app_count, show_in_app_switcher, background and face")

@@ -13,22 +13,21 @@ import AppKit
 
 struct CustomiseTileView: View {
     @EnvironmentObject private var configManager: ConfigurationManager
-    let config: DockTileConfiguration
-    let onBack: () -> Void
+    /// Tile Detail's own `editedConfig`: the inspector keeps no copy and no save path of its own —
+    /// Tile Detail's debounce + `preservingStoredVisibility` save persists these edits.
+    @Binding private var editedConfig: DockTileConfiguration
+    /// Whether the inspector is open; guards the inspector's toolbar content (Task 5).
+    let isPresented: Bool
+    let onToggleInspector: () -> Void
 
-    @State private var editedConfig: DockTileConfiguration
     @State private var customColor: Color = .blue
     @State private var searchText: String = ""
     @State private var showWeightInfo: Bool = false
-    /// Monotonic edit counter — the `.task(id:)` identity for the debounced save (same pattern as
-    /// DockTileDetailView), so each edit CANCELS the previous pending save.
-    @State private var saveGeneration: Int = 0
-    @State private var hasPendingSave = false
 
-    init(config: DockTileConfiguration, onBack: @escaping () -> Void) {
-        self.config = config
-        self.onBack = onBack
-        self._editedConfig = State(initialValue: config)
+    init(config: Binding<DockTileConfiguration>, isPresented: Bool, onToggleInspector: @escaping () -> Void) {
+        self._editedConfig = config
+        self.isPresented = isPresented
+        self.onToggleInspector = onToggleInspector
     }
 
     var body: some View {
@@ -41,30 +40,6 @@ struct CustomiseTileView: View {
         .padding(.bottom, 10)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(NSColorBackgroundView.windowBackground)
-        .onChange(of: editedConfig) { oldValue, newValue in
-            // Mark as edited immediately (enables + button)
-            // Defer to avoid "Publishing changes from within view updates" warning
-            DispatchQueue.main.async {
-                configManager.markSelectedConfigAsEdited()
-            }
-
-            // Only save if the config actually changed (prevent infinite loop)
-            if oldValue.id == newValue.id {
-                hasPendingSave = true
-                saveGeneration += 1
-            }
-        }
-        .task(id: saveGeneration) {
-            guard saveGeneration > 0 else { return }
-            guard await SaveDebounce.waitedFullInterval(nanoseconds: 300_000_000) else { return }
-            persistEdits()
-        }
-        .onDisappear {
-            // Back within the debounce window cancels the task above; flush so the edit survives.
-            if hasPendingSave {
-                persistEdits()
-            }
-        }
         // Per-control diagnostics. Colour and size change continuously (colour-panel drag /
         // stepper repeat) so they're verbose; icon selection is a discrete click.
         .onChange(of: editedConfig.tintColor) { _, newValue in
@@ -248,18 +223,6 @@ struct CustomiseTileView: View {
 
     // MARK: - Actions
 
-    /// Persist the customiser's content edits (tint, icon, scale, weight). Visibility is owned
-    /// EXCLUSIVELY by `DockTileDetailView.performDockAction()`, so this saves through
-    /// `preservingStoredVisibility` — the same seam Tile Detail uses. Writing the raw snapshot
-    /// re-asserted whatever `isVisibleInDock` / `lastDockIndex` were when Customise opened, which
-    /// silently reverts a `syncDockVisibility()` that landed meanwhile (the user dragging the tile
-    /// out of the Dock mid-session) and leaves the config claiming visible with nothing pinned.
-    private func persistEdits() {
-        configManager.updateConfiguration(ConfigurationManager.preservingStoredVisibility(
-            editedConfig, stored: configManager.configuration(for: editedConfig.id)))
-        hasPendingSave = false
-    }
-
     private func selectIcon(_ value: String, type: IconType) {
         editedConfig.iconType = type
         editedConfig.iconValue = value
@@ -281,29 +244,10 @@ struct CustomiseTileView: View {
         let styles = Self.heroStyles(background: editedConfig.background, followsAppearance: monoFollowsAppearance,
                                      iconFace: editedConfig.iconFace)
         return canvasSurface(styles)
-            .overlay(alignment: .topLeading) {
-                selectAppsPill
-                    .padding(Self.pillInset)
-            }
             .padding(.top, Self.paneTopInset)
             .ignoresSafeArea(edges: .top)
             // 200, not the handoff's 250: a 280 pt sidebar in a 782 pt window leaves ~502 pt for the pane.
             .frame(minWidth: 200, maxWidth: .infinity, maxHeight: .infinity)
-    }
-
-    private var selectAppsPill: some View {
-        Button {
-            DiagnosticsLog.shared.ui("Customise → Select Apps (back to Tile Detail)")
-            onBack()
-        } label: {
-            Label(AppStrings.Button.selectApps, systemImage: "chevron.left")
-                .font(.system(size: 13, weight: .medium))
-                .padding(.horizontal, 12)
-                .frame(height: 28)
-                .contentShape(Capsule())
-        }
-        .buttonStyle(.plain)
-        .modifier(GlassCapsule())
     }
 
     private func canvasSurface(_ styles: [IconStyle?]) -> some View {
@@ -968,13 +912,14 @@ extension Color {
 
 #Preview {
     CustomiseTileView(
-        config: DockTileConfiguration(
+        config: .constant(DockTileConfiguration(
             name: "AI Tile",
             tintColor: .blue,
             iconType: .sfSymbol,
             iconValue: "sparkles"
-        ),
-        onBack: {}
+        )),
+        isPresented: true,
+        onToggleInspector: {}
     )
     .environmentObject(ConfigurationManager())
     .frame(width: 620, height: 700)

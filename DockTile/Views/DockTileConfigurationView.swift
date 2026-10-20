@@ -30,7 +30,6 @@ enum SidebarSelection: Hashable {
 struct DockTileConfigurationView: View {
     @EnvironmentObject private var configManager: ConfigurationManager
     @EnvironmentObject private var smartAddEngine: SmartAddEngine
-    @State private var isDrilledDown = false
     @AppStorage(UserDefaultsKeys.inspectorShown) private var inspectorShown = false
 
     /// Smart Add sheet state. Driven by `.sheet(item:)` — NOT `isPresented` + a separate array.
@@ -230,37 +229,16 @@ struct DockTileConfigurationView: View {
     @ViewBuilder
     private var tileDetail: some View {
         if let selectedConfig = configManager.selectedConfiguration {
-            ZStack {
-                if !isDrilledDown {
-                    // Detail view (Screen 3)
-                    // IMPORTANT: Use .id() to force view recreation when config changes
-                    // Without this, SwiftUI may reuse the view and editedConfig gets stale
-                    DockTileDetailView(
-                        config: selectedConfig,
-                        onCustomise: {
-                            isDrilledDown = true
-                        }
-                    )
-                    .id(selectedConfig.id)
-                    .transition(.move(edge: .leading))
-                }
-
-                if isDrilledDown {
-                    // Drill-down view (Screen 4)
-                    // IMPORTANT: Use .id() to force view recreation when config changes
-                    CustomiseTileView(
-                        config: selectedConfig,
-                        onBack: {
-                            isDrilledDown = false
-                        }
-                    )
-                    .id(selectedConfig.id)
-                    .transition(.move(edge: .trailing))
-                }
-            }
+            // IMPORTANT: Use .id() to force view recreation when config changes
+            // Without this, SwiftUI may reuse the view and editedConfig gets stale
+            DockTileDetailView(
+                config: selectedConfig,
+                inspectorShown: $inspectorShown,
+                onToggleInspector: toggleInspector
+            )
+            .id(selectedConfig.id)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             .background(Color(nsColor: .windowBackgroundColor))
-            .animation(.easeInOut(duration: 0.3), value: isDrilledDown)
         } else {
             // Empty state — routes through the same Smart Add flow as the sidebar +.
             EmptyConfigurationView(onAdd: { handleAddTapped(source: .emptyState) })

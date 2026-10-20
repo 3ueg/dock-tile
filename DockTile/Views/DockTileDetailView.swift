@@ -13,7 +13,9 @@ import AppKit
 struct DockTileDetailView: View {
     @EnvironmentObject private var configManager: ConfigurationManager
     let config: DockTileConfiguration
-    let onCustomise: () -> Void
+    /// The Customise inspector's open flag (owned by DockTileConfigurationView, persisted).
+    let inspectorShown: Binding<Bool>
+    let onToggleInspector: () -> Void
 
     @State private var editedConfig: DockTileConfiguration
     @State private var tileName: String  // Separate state for TextField to avoid struct churn
@@ -130,9 +132,10 @@ struct DockTileDetailView: View {
         }
     }
 
-    init(config: DockTileConfiguration, onCustomise: @escaping () -> Void) {
+    init(config: DockTileConfiguration, inspectorShown: Binding<Bool>, onToggleInspector: @escaping () -> Void) {
         self.config = config
-        self.onCustomise = onCustomise
+        self.inspectorShown = inspectorShown
+        self.onToggleInspector = onToggleInspector
         self._editedConfig = State(initialValue: config)
         self._tileName = State(initialValue: config.name)
         self._appliedContentSignature = State(initialValue: Self.contentSignature(of: config))
@@ -179,6 +182,13 @@ struct DockTileDetailView: View {
                 actionButton
             }
         }
+        // Customise Tile edits THIS view's editedConfig through a binding, so its edits ride the
+        // debounced save below — one copy, one save path.
+        .inspector(isPresented: inspectorShown) {
+            CustomiseTileView(config: $editedConfig, isPresented: inspectorShown.wrappedValue,
+                              onToggleInspector: onToggleInspector)
+                .inspectorColumnWidth(AppDelegate.inspectorWidth)
+        }
         .alert(AppStrings.Title.deleteTile, isPresented: $showDeleteConfirmation) {
             Button(AppStrings.Button.cancel, role: .cancel) {
                 DiagnosticsLog.shared.ui("Delete confirmation → Cancel '\(editedConfig.name)'")
@@ -219,7 +229,7 @@ struct DockTileDetailView: View {
             persistEdits()
         }
         .onDisappear {
-            // Leaving within the debounce window (tile switch, Customise, a Settings pane) cancels
+            // Leaving within the debounce window (tile switch, a Settings pane) cancels
             // the task above; without this flush the last edit would be lost.
             if hasPendingSave { persistEdits() }
         }
@@ -250,7 +260,7 @@ struct DockTileDetailView: View {
             DiagnosticsLog.shared.log("tile", "Mode changed to \(newValue ? "App" : "Ghost") for \(editedConfig.diagnosticName)")
         }
         .onChange(of: configManager.configurations) { _, newConfigs in
-            // Sync editedConfig when underlying configuration changes (e.g., from CustomiseTileView)
+            // Sync editedConfig when the underlying configuration changes externally
             // NOTE: We intentionally do NOT sync isVisibleInDock here because:
             // 1. User might be in the middle of editing and toggled "Show Tile" ON
             // 2. Dock watcher might fire and think the tile should be OFF
@@ -260,25 +270,6 @@ struct DockTileDetailView: View {
                 // Defer state updates to avoid "Publishing changes from within view updates" warning
                 // This is necessary because .onChange fires during the view update cycle
                 DispatchQueue.main.async {
-                    // Sync icon-related properties (may be changed in CustomiseTileView)
-                    if editedConfig.iconType != updatedConfig.iconType {
-                        editedConfig.iconType = updatedConfig.iconType
-                    }
-                    if editedConfig.iconFace != updatedConfig.iconFace {
-                        editedConfig.iconFace = updatedConfig.iconFace
-                    }
-                    if editedConfig.iconValue != updatedConfig.iconValue {
-                        editedConfig.iconValue = updatedConfig.iconValue
-                    }
-                    if editedConfig.iconScale != updatedConfig.iconScale {
-                        editedConfig.iconScale = updatedConfig.iconScale
-                    }
-                    if editedConfig.tintColor != updatedConfig.tintColor {
-                        editedConfig.tintColor = updatedConfig.tintColor
-                    }
-                    if editedConfig.symbolEmoji != updatedConfig.symbolEmoji {
-                        editedConfig.symbolEmoji = updatedConfig.symbolEmoji
-                    }
                     // Sync showInAppSwitcher if it was changed externally
                     if editedConfig.showInAppSwitcher != updatedConfig.showInAppSwitcher {
                         editedConfig.showInAppSwitcher = updatedConfig.showInAppSwitcher
@@ -374,13 +365,22 @@ struct DockTileDetailView: View {
                     }
                 }
                 .onTapGesture {
-                    DiagnosticsLog.shared.ui("Tile Detail → Customise (icon tapped) '\(editedConfig.name)'")
-                    onCustomise()
+                    // Opens only, never closes (the inspector's own toggle closes it).
+                    if inspectorShown.wrappedValue {
+                        DiagnosticsLog.shared.ui("Tile Detail → Customise (icon tapped) '\(editedConfig.name)' — already open")
+                    } else {
+                        DiagnosticsLog.shared.ui("Tile Detail → Customise (icon tapped) '\(editedConfig.name)'")
+                        onToggleInspector()
+                    }
                 }
 
                 SubtleButton(title: AppStrings.Button.customise, width: 90, action: {
-                    DiagnosticsLog.shared.ui("Tile Detail → Customise button '\(editedConfig.name)'")
-                    onCustomise()
+                    if inspectorShown.wrappedValue {
+                        DiagnosticsLog.shared.ui("Tile Detail → Customise button '\(editedConfig.name)' — already open")
+                    } else {
+                        DiagnosticsLog.shared.ui("Tile Detail → Customise button '\(editedConfig.name)'")
+                        onToggleInspector()
+                    }
                 })
             }
 
@@ -873,7 +873,8 @@ private struct SubtleButton: View {
                 AppItem(bundleIdentifier: "com.anthropic.claude", name: "Claude AI")
             ]
         ),
-        onCustomise: {}
+        inspectorShown: .constant(false),
+        onToggleInspector: {}
     )
     .environmentObject(ConfigurationManager())
     .frame(width: 600, height: 700)
