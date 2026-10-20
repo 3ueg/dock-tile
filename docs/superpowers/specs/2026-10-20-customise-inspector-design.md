@@ -46,7 +46,9 @@ hid the rest of the tile while editing. Apple's own pattern for "how this thing 
 1. **Native SwiftUI `.inspector(isPresented:)`**, not a hand-built column. Gated on the spike
    below: a failure of spike criteria 1 or 2 flips the plan to a hand-built trailing column inside
    Tile Detail's HStack; the rest of this document still applies.
-2. **Window width.** The closed minimum returns to **768 pt** (the pre-Customise value; 782 was
+2. **Window width.** *(Amended by Karthik 2026-10-20, round 3: the closed minimum is now
+   **728 pt** and the open minimum **728 + 260 = 988 pt**; every 768 / 1028 below reads as
+   728 / 988. Max stays 1200.)* The closed minimum returns to **768 pt** (the pre-Customise value; 782 was
    raised only for the two-column Customise screen). With the inspector open the minimum is
    **768 + 260 = 1028 pt**; max stays 1200. **Amended by Karthik 2026-10-20 (during
    implementation): the window keeps its width when the inspector opens or closes, as Xcode,
@@ -59,7 +61,7 @@ hid the rest of the tile while editing. Apple's own pattern for "how this thing 
 3. **Height.** The inspector **scrolls as a whole**; the symbol / emoji picker card has a **fixed
    grid height of 320 pt**. The window minimum height stays 500 pt; the 700 pt Customise special
    case in `WindowAccessor` is deleted. Iterate later if the picker feels short.
-4. **Previews.** The Tile Detail hero (`TileFace`, 90 pt, live system style) is the only live
+4. **Previews.** The Tile Detail hero (`TileFace`, 90 pt — 122 pt since Decision 11, live system style) is the only live
    preview. Mono's Light/Dark explanation is the Background chips' diagonal split plus the existing
    caption. The canvas hero, the Light/Dark pair, the icon-grid overlay and the ‹ Select Apps pill
    are removed.
