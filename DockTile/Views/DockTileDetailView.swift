@@ -365,13 +365,17 @@ struct DockTileDetailView: View {
 
     /// While the inspector is open the hero is the canonical Default/Dark look the inspector edits
     /// (never the system's Tinted/Clear render); closed, today's appearance-aware `TileFace`.
-    nonisolated static func heroForcedStyle(inspectorShown: Bool, colorScheme: ColorScheme) -> IconStyle? {
+    /// Dark only where the Dock icon follows the appearance (`IconPipeline.isDeclarative`): on
+    /// macOS 15 the Dock always shows the light render, so a black hero would promise a tile that
+    /// never appears there.
+    nonisolated static func heroForcedStyle(inspectorShown: Bool, colorScheme: ColorScheme, followsAppearance: Bool) -> IconStyle? {
         guard inspectorShown else { return nil }
-        return colorScheme == .dark ? .dark : .defaultStyle
+        return colorScheme == .dark && followsAppearance ? .dark : .defaultStyle
     }
 
     @ViewBuilder private var heroFace: some View {
-        if let forced = Self.heroForcedStyle(inspectorShown: inspectorShown, colorScheme: colorScheme) {
+        if let forced = Self.heroForcedStyle(inspectorShown: inspectorShown, colorScheme: colorScheme,
+                                             followsAppearance: IconPipeline.isDeclarative) {
             DockTileIconPreview.fromConfig(editedConfig, size: 90).forcing(forced)
         } else {
             TileFace(config: editedConfig, size: 90)

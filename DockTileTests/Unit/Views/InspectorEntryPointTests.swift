@@ -7,19 +7,28 @@ import Testing
 @Suite("Inspector entry points")
 struct InspectorEntryPointTests {
     @Test func heroIsLiveWhileClosedInLight() {
-        #expect(DockTileDetailView.heroForcedStyle(inspectorShown: false, colorScheme: .light) == nil)
+        #expect(DockTileDetailView.heroForcedStyle(inspectorShown: false, colorScheme: .light, followsAppearance: true) == nil)
     }
 
     @Test func heroIsLiveWhileClosedInDark() {
-        #expect(DockTileDetailView.heroForcedStyle(inspectorShown: false, colorScheme: .dark) == nil)
+        #expect(DockTileDetailView.heroForcedStyle(inspectorShown: false, colorScheme: .dark, followsAppearance: true) == nil)
     }
 
     @Test func heroIsDefaultWhenOpenInLight() {
-        #expect(DockTileDetailView.heroForcedStyle(inspectorShown: true, colorScheme: .light) == .defaultStyle)
+        #expect(DockTileDetailView.heroForcedStyle(inspectorShown: true, colorScheme: .light, followsAppearance: true) == .defaultStyle)
     }
 
     @Test func heroIsDarkWhenOpenInDark() {
-        #expect(DockTileDetailView.heroForcedStyle(inspectorShown: true, colorScheme: .dark) == .dark)
+        #expect(DockTileDetailView.heroForcedStyle(inspectorShown: true, colorScheme: .dark, followsAppearance: true) == .dark)
+    }
+
+    /// macOS 15: the Dock always shows the light render, so the open hero never promises a black tile.
+    @Test func heroIsDefaultWhenOpenInDarkWithoutAppearance() {
+        #expect(DockTileDetailView.heroForcedStyle(inspectorShown: true, colorScheme: .dark, followsAppearance: false) == .defaultStyle)
+    }
+
+    @Test func heroIsLiveWhileClosedInDarkWithoutAppearance() {
+        #expect(DockTileDetailView.heroForcedStyle(inspectorShown: false, colorScheme: .dark, followsAppearance: false) == nil)
     }
 
     @Test func commandEnabledForTile() {
