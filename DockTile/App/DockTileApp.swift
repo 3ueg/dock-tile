@@ -106,6 +106,9 @@ struct DockTileApp: App {
                 .keyboardShortcut("n", modifiers: .command)
                 .disabled(!configManager.selectedConfigHasBeenEdited)
             }
+            CommandGroup(after: .sidebar) {
+                InspectorMenuItem()
+            }
             CommandGroup(after: .newItem) {
                 Button(AppStrings.Menu.copyDiagnostics) {
                     DiagnosticsLog.shared.ui("Menu → Copy Diagnostics")

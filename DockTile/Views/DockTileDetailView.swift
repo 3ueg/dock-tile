@@ -196,6 +196,16 @@ struct DockTileDetailView: View {
                 .accessibilityLabel(AppStrings.Title.deleteTile)
 
                 actionButton
+
+                // The one inspector toggle: here while closed, in the inspector's band while open.
+                if !inspectorShown {
+                    Button(action: onToggleInspector) {
+                        Image(systemName: "sidebar.trailing")
+                    }
+                    .buttonStyle(.bordered)
+                    .help(AppStrings.Menu.showInspector)
+                    .accessibilityLabel(AppStrings.Menu.showInspector)
+                }
             }
         }
         .alert(AppStrings.Title.deleteTile, isPresented: $showDeleteConfirmation) {
@@ -353,6 +363,21 @@ struct DockTileDetailView: View {
 
     // MARK: - Hero Section (Figma Spec)
 
+    /// While the inspector is open the hero is the canonical Default/Dark look the inspector edits
+    /// (never the system's Tinted/Clear render); closed, today's appearance-aware `TileFace`.
+    nonisolated static func heroForcedStyle(inspectorShown: Bool, colorScheme: ColorScheme) -> IconStyle? {
+        guard inspectorShown else { return nil }
+        return colorScheme == .dark ? .dark : .defaultStyle
+    }
+
+    @ViewBuilder private var heroFace: some View {
+        if let forced = Self.heroForcedStyle(inspectorShown: inspectorShown, colorScheme: colorScheme) {
+            DockTileIconPreview.fromConfig(editedConfig, size: 90).forcing(forced)
+        } else {
+            TileFace(config: editedConfig, size: 90)
+        }
+    }
+
     private var heroSection: some View {
         HStack(alignment: .center, spacing: 16) {
             // Left column: Icon preview with Customise button.
@@ -364,7 +389,7 @@ struct DockTileDetailView: View {
             VStack(alignment: .center, spacing: 6) {
                 // Appearance-aware tile face (the system's own render under Tinted — TileFace)
                 // Tappable to open customise view
-                TileFace(config: editedConfig, size: 90)
+                heroFace
                 .contentShape(RoundedRectangle(cornerRadius: 90 * 0.225, style: .continuous))
                 .onHover { hovering in
                     if hovering {

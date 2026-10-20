@@ -27,6 +27,40 @@ enum SidebarSelection: Hashable {
     case tilesPlaceholder
 }
 
+/// What the View menu's inspector item reads from the focused main window.
+struct InspectorCommand {
+    let isEnabled: Bool
+    /// The PRESENTED state, so the title reads "Hide" only while the inspector is actually visible.
+    let isShown: Bool
+    let toggle: () -> Void
+}
+
+private struct InspectorCommandKey: FocusedValueKey {
+    typealias Value = InspectorCommand
+}
+
+extension FocusedValues {
+    var inspectorCommand: InspectorCommand? {
+        get { self[InspectorCommandKey.self] }
+        set { self[InspectorCommandKey.self] = newValue }
+    }
+}
+
+/// View ▸ Show/Hide Inspector (⌥⌘I). Disabled when no window is focused or no tile row is selected.
+struct InspectorMenuItem: View {
+    @FocusedValue(\.inspectorCommand) private var command
+
+    var body: some View {
+        let label = command?.isShown == true ? AppStrings.Menu.hideInspector : AppStrings.Menu.showInspector
+        Button(label) {
+            DiagnosticsLog.shared.ui("Menu → \(label) (⌥⌘I)")
+            command?.toggle()
+        }
+        .keyboardShortcut("i", modifiers: [.command, .option])
+        .disabled(command?.isEnabled != true)
+    }
+}
+
 struct DockTileConfigurationView: View {
     @EnvironmentObject private var configManager: ConfigurationManager
     @EnvironmentObject private var smartAddEngine: SmartAddEngine
@@ -104,6 +138,11 @@ struct DockTileConfigurationView: View {
             maxHeight: .infinity
         )
         .background(WindowAccessor(inspectorShown: inspectorShown))
+        .focusedSceneValue(\.inspectorCommand, InspectorCommand(
+            isEnabled: Self.inspectorCommandIsEnabled(selection: selection),
+            isShown: Self.inspectorIsPresented(stored: inspectorShown, selection: selection),
+            toggle: toggleInspector
+        ))
         .onAppear {
             // Restore the persisted tile selection on first launch; with no tiles, land on the
             // empty-state placeholder so the user sees the empty state (not a Settings pane).
@@ -204,6 +243,11 @@ struct DockTileConfigurationView: View {
     nonisolated static func inspectorIsPresented(stored: Bool, selection: SidebarSelection?) -> Bool {
         guard stored, case .tile = selection else { return false }
         return true
+    }
+
+    /// The View menu item is live exactly when the inspector could be presented: a tile row is selected.
+    nonisolated static func inspectorCommandIsEnabled(selection: SidebarSelection?) -> Bool {
+        inspectorIsPresented(stored: true, selection: selection)
     }
 
     /// The button / menu entry point. Negates the STORED flag — the one source the R9 setter
