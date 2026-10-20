@@ -4,7 +4,8 @@
 //
 //  The main window is horizontally resizable: 768 closed, 768 + 260 = 1028 with the Customise
 //  inspector open, 1200 at most. Pins the shared clamp used by every width fix-up site and
-//  `windowWillResize`, and the frame arithmetic for opening/closing the inspector.
+//  `windowWillResize`, and the frame arithmetic for opening/closing the inspector: the window keeps
+//  its width, except that opening grows a narrower window to 1028; closing never moves the frame.
 //
 
 import Testing
@@ -48,25 +49,25 @@ struct MainWindowWidthTests {
         AppDelegate.windowFrame(forInspectorShown: true, from: frame, visibleFrame: visible)
     }
 
-    @Test("Opening grows by 260 keeping the leading edge")
-    func openGrows() {
+    @Test("Opening grows a narrower window to exactly 1028, keeping the leading edge")
+    func openGrowsToOpenMinimum() {
         let result = open(CGRect(x: 100, y: 200, width: 800, height: 600), on: screen)
-        #expect(result == CGRect(x: 100, y: 200, width: 1060, height: 600))
+        #expect(result == CGRect(x: 100, y: 200, width: 1028, height: 600))
     }
 
-    @Test("Opening clamps to the 1200 maximum")
-    func openClampsToMax() {
-        let result = open(CGRect(x: 100, y: 200, width: 1100, height: 600), on: screen)
-        #expect(result == CGRect(x: 100, y: 200, width: 1200, height: 600))
+    @Test("Opening keeps a window already at least 1028 wide", arguments: [CGFloat(1060), CGFloat(1100)])
+    func openKeepsWidth(width: CGFloat) {
+        let frame = CGRect(x: 100, y: 200, width: width, height: 600)
+        #expect(open(frame, on: screen) == frame)
     }
 
     @Test("Opening near the right edge shifts left to fit")
     func openShiftsLeft() {
         let result = open(CGRect(x: 1500, y: 200, width: 800, height: 600), on: screen)
-        #expect(result == CGRect(x: 940, y: 200, width: 1060, height: 600))
+        #expect(result == CGRect(x: 972, y: 200, width: 1028, height: 600))
     }
 
-    @Test("Opening on a screen narrower than the window fits the screen")
+    @Test("Opening on a screen narrower than 1028 fits the screen")
     func openOnNarrowScreen() {
         let narrow = CGRect(x: 0, y: 0, width: 900, height: 1200)
         let result = open(CGRect(x: 50, y: 200, width: 800, height: 600), on: narrow)
@@ -77,29 +78,19 @@ struct MainWindowWidthTests {
     func openOnSecondDisplay() {
         let second = CGRect(x: 2000, y: 0, width: 1600, height: 1000)
         let result = open(CGRect(x: 2100, y: 100, width: 800, height: 600), on: second)
-        #expect(result == CGRect(x: 2100, y: 100, width: 1060, height: 600))
+        #expect(result == CGRect(x: 2100, y: 100, width: 1028, height: 600))
     }
 
     @Test("Second display: shifts against its own right edge, not the width")
     func openShiftsOnSecondDisplay() {
         let second = CGRect(x: 2000, y: 0, width: 1600, height: 1000)
         let result = open(CGRect(x: 3000, y: 100, width: 800, height: 600), on: second)
-        #expect(result == CGRect(x: 2540, y: 100, width: 1060, height: 600))
+        #expect(result == CGRect(x: 2572, y: 100, width: 1028, height: 600))
     }
 
-    @Test("Closing shrinks by 260, x unchanged")
-    func closeShrinks() {
-        let result = AppDelegate.windowFrame(forInspectorShown: false,
-                                             from: CGRect(x: 100, y: 200, width: 1060, height: 600),
-                                             visibleFrame: screen)
-        #expect(result == CGRect(x: 100, y: 200, width: 800, height: 600))
-    }
-
-    @Test("Closing never goes below the closed minimum", arguments: [CGFloat(1028), CGFloat(900)])
-    func closeFloor(width: CGFloat) {
-        let result = AppDelegate.windowFrame(forInspectorShown: false,
-                                             from: CGRect(x: 100, y: 200, width: width, height: 600),
-                                             visibleFrame: screen)
-        #expect(result == CGRect(x: 100, y: 200, width: 768, height: 600))
+    @Test("Closing never changes the frame", arguments: [CGFloat(1060), CGFloat(1028)])
+    func closeKeepsFrame(width: CGFloat) {
+        let frame = CGRect(x: 100, y: 200, width: width, height: 600)
+        #expect(AppDelegate.windowFrame(forInspectorShown: false, from: frame, visibleFrame: screen) == frame)
     }
 }

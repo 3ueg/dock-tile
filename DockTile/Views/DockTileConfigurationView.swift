@@ -207,24 +207,8 @@ struct DockTileConfigurationView: View {
     private func toggleInspector() {
         inspectorShown.toggle()
         DiagnosticsLog.shared.ui("Inspector → \(inspectorShown ? "shown" : "hidden")")
-        guard !inspectorShown else {
-            AppDelegate.resizeConfigurationWindow(forInspectorShown: true)
-            return
-        }
-        // Shrink only once the inspector column has collapsed. Shrinking in the same turn (or the
-        // next run-loop turn, or before hiding) sent AppKit into an Update Constraints loop through
-        // SwiftUI's toolbar bridge and crashed the app ~20 s later, every time; 0.3 s and 0.5 s
-        // later never did (2026-10-20, macOS 27, survival checked 33 s after closing).
-        DispatchQueue.main.asyncAfter(deadline: .now() + Self.inspectorCollapseDelay) {
-            // A reopen inside the delay keeps the window as it is. Read the stored flag:
-            // `@AppStorage` read inside an escaping closure returned the old value.
-            guard !UserDefaults.standard.bool(forKey: UserDefaultsKeys.inspectorShown) else { return }
-            AppDelegate.resizeConfigurationWindow(forInspectorShown: false)
-        }
+        AppDelegate.resizeConfigurationWindow(forInspectorShown: inspectorShown)
     }
-
-    /// How long the window waits for the inspector column to collapse before it shrinks.
-    private static let inspectorCollapseDelay: TimeInterval = 0.5
 
     private func handleAddTapped(source: AddSource) {
         // Smart Add OFF skips the dialog entirely: a sheet holding only the blank-tile row is a

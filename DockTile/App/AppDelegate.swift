@@ -28,7 +28,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     // Window width range: horizontally resizable, height unbounded
     nonisolated static let minWindowWidth: CGFloat = 768
     nonisolated static let maxWindowWidth: CGFloat = 1200
-    /// Width of the trailing Customise inspector; the window grows by this much while it is open.
+    /// Width of the trailing Customise inspector; the open minimum is this much wider.
     nonisolated static let inspectorWidth: CGFloat = 260
 
     /// Pure clamp into the allowed window width range (shared by every width fix-up site).
@@ -39,19 +39,18 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     }
 
     /// Frame after opening/closing the inspector (AppKit coordinates). Height and y never change.
-    /// Opening grows by `inspectorWidth` keeping the leading edge, clamps to the open range and to
-    /// the screen, then shifts left so the window stays inside `visibleFrame`. Closing shrinks by
-    /// `inspectorWidth`, never below `minWindowWidth`.
+    /// The window keeps its width, as Xcode does: the detail column absorbs the inspector. Opening
+    /// grows only a window narrower than the open minimum (1028), to exactly that, keeping the
+    /// leading edge, capped to the screen, then shifted to stay inside `visibleFrame`. Closing never
+    /// changes the frame.
     nonisolated static func windowFrame(forInspectorShown shown: Bool, from frame: CGRect, visibleFrame: CGRect) -> CGRect {
+        guard shown else { return frame }
         var result = frame
-        if shown {
-            let width = min(clampedWindowWidth(frame.width + inspectorWidth, inspectorShown: true), visibleFrame.width)
-            result.size.width = width
-            if result.maxX > visibleFrame.maxX { result.origin.x = visibleFrame.maxX - width }
-            if result.minX < visibleFrame.minX { result.origin.x = visibleFrame.minX }
-        } else {
-            result.size.width = max(frame.width - inspectorWidth, minWindowWidth)
-        }
+        let width = min(clampedWindowWidth(frame.width, inspectorShown: true), visibleFrame.width)
+        guard width != frame.width else { return frame }
+        result.size.width = width
+        if result.maxX > visibleFrame.maxX { result.origin.x = visibleFrame.maxX - width }
+        if result.minX < visibleFrame.minX { result.origin.x = visibleFrame.minX }
         return result
     }
 
@@ -211,9 +210,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         print("✓ Window sizing configured: \(Self.minWindowWidth)…\(Self.maxWindowWidth)x\(Self.minWindowHeight)+")
     }
 
-    /// The ONE place that moves the frame for an inspector change. Order matters: closing lowers the
-    /// minimum BEFORE the frame shrinks, opening grows the frame FIRST and raises the minimum after,
-    /// so the frame change is never below the current minimum.
+    /// The ONE place that moves the frame for an inspector change. Closing only lowers the minimum
+    /// (the frame never changes — shrinking while the inspector collapsed also crashed AppKit's
+    /// constraint pass). Opening grows a too-narrow window FIRST and raises the minimum after, so the
+    /// frame change is never below the current minimum.
     /// `static`: SwiftUI's `NSApplicationDelegateAdaptor` installs its own proxy as `NSApp.delegate`,
     /// so `NSApp.delegate as? AppDelegate` is nil and an instance call never ran.
     static func resizeConfigurationWindow(forInspectorShown shown: Bool) {
@@ -221,9 +221,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
               let screen = window.screen ?? NSScreen.main else { return }
         let minimum = NSSize(width: Self.clampedWindowWidth(0, inspectorShown: shown), height: Self.minWindowHeight)
         let target = Self.windowFrame(forInspectorShown: shown, from: window.frame, visibleFrame: screen.visibleFrame)
-        if !shown { window.contentMinSize = minimum }
-        window.setFrame(target, display: true, animate: !NSWorkspace.shared.accessibilityDisplayShouldReduceMotion)
-        if shown { window.contentMinSize = minimum }
+        if target != window.frame {
+            window.setFrame(target, display: true, animate: !NSWorkspace.shared.accessibilityDisplayShouldReduceMotion)
+        }
+        window.contentMinSize = minimum
     }
 
     // MARK: - NSWindowDelegate
