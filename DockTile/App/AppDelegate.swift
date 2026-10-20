@@ -26,10 +26,21 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     var openConfigurationWindow: (() -> Void)?
 
     // Window width range: horizontally resizable, height unbounded
-    nonisolated static let minWindowWidth: CGFloat = 728
+    nonisolated static let minWindowWidth: CGFloat = 700
     nonisolated static let maxWindowWidth: CGFloat = 1200
     /// Width of the trailing Customise inspector; the open minimum is this much wider.
     nonisolated static let inspectorWidth: CGFloat = 260
+    /// The sidebar column's range (`DockTileConfigurationView`).
+    nonisolated static let sidebarMinWidth: CGFloat = 220
+    nonisolated static let sidebarMaxWidth: CGFloat = 280
+    /// The minimum Tile Detail reports to the split view, deliberately below its content's own
+    /// (274 pt: the hero row with its labels squeezed to nothing). With the inspector open AppKit
+    /// counts the inspector twice in the split view's minimum (sidebar + detail + 2 × 260, measured
+    /// 2026-10-20), so the content's own minimum asked for 1022 pt, more than the 988 open minimum:
+    /// the inspector was clipped off the right edge and AppKit's update-constraints pass threw.
+    /// The content's real room comes from the window minimums instead: at least 420 pt wide
+    /// (700 − 280, or 960 − 280 − 260), which holds the 406 pt hero row. `MainWindowWidthTests`.
+    nonisolated static let detailColumnMinWidth: CGFloat = 150
 
     /// Pure clamp into the allowed window width range (shared by every width fix-up site).
     /// With the inspector open the minimum is `minWindowWidth + inspectorWidth`.
@@ -40,7 +51,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
 
     /// Frame after opening/closing the inspector (AppKit coordinates). Height and y never change.
     /// The window keeps its width, as Xcode does: the detail column absorbs the inspector. Opening
-    /// grows only a window narrower than the open minimum (988), to exactly that, keeping the
+    /// grows only a window narrower than the open minimum (960), to exactly that, keeping the
     /// leading edge, capped to the screen, then shifted to stay inside `visibleFrame`. Closing never
     /// changes the frame.
     nonisolated static func windowFrame(forInspectorShown shown: Bool, from frame: CGRect, visibleFrame: CGRect) -> CGRect {

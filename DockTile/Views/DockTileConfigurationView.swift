@@ -99,7 +99,7 @@ struct DockTileConfigurationView: View {
             // Sidebar: static Tiles / Settings / Dock Tile sections
             DockTileSidebarView(selection: $selection,
                                 onAdd: { handleAddTapped(source: .toolbarPlus) })
-                .navigationSplitViewColumnWidth(min: 220, ideal: 240, max: 280)
+                .navigationSplitViewColumnWidth(min: AppDelegate.sidebarMinWidth, ideal: 240, max: AppDelegate.sidebarMaxWidth)
         } detail: {
             detailColumn
         }
@@ -332,7 +332,9 @@ struct DockTileConfigurationView: View {
                 onToggleInspector: toggleInspector
             )
             .id(selectedConfig.id)
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+            // `minWidth` caps the minimum Tile Detail reports below its content's, so the split
+            // view's minimum fits the window's with the inspector open (see detailColumnMinWidth).
+            .frame(minWidth: AppDelegate.detailColumnMinWidth, maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             .background(Color(nsColor: .windowBackgroundColor))
         } else {
             // Empty state — routes through the same Smart Add flow as the sidebar +.
@@ -451,7 +453,7 @@ private struct WindowAccessor: NSViewRepresentable {
         window.contentMaxSize = NSSize(width: AppDelegate.maxWindowWidth, height: CGFloat.greatestFiniteMagnitude)
 
         // The one launch-time frame fix. With the inspector stored open, the restored frame takes
-        // the same rule as opening it (`windowFrame`), so growing to 988 never pushes a frame saved
+        // the same rule as opening it (`windowFrame`), so growing to 960 never pushes a frame saved
         // near the screen's right edge off it; closed, the plain clamp into the allowed range.
         guard clampsFrame else { return }
         var frame = window.frame
