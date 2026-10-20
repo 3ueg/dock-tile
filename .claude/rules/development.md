@@ -56,6 +56,9 @@ The app product name is **"Dock Tile"** (with space), not "DockTile". File syste
   for the visible dimming (`.disabled` barely dims a mini switch), and attaching `.help` to the
   still-enabled row. Shipped wrong once (Show in App Switcher, 2026-09-02) — the tooltip only
   appeared after this restructure.
+- **Don't rely on a SwiftUI layer filter for what a test or a bake checks.** `.saturation(0)` on
+  the App Grid minis was skipped by the CI runner's renderer and by `cacheDisplay` (2026-10-20), so
+  the preview looked right on one Mac only. Transform the bitmap itself (`IconGenerator.desaturated`).
 - **Never block a thread waiting for work queued on `DispatchQueue.global` (critical).** Draining a
   `Process`'s pipes in global-queue blocks while the caller `DispatchGroup.wait()`s deadlocked when
   every pool thread was itself blocked in that wait: CI's 3-core runner hung six hours with three

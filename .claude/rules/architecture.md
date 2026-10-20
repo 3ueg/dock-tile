@@ -70,6 +70,15 @@ magnification collapses; only its tail tracks, which nothing public can replicat
   compensates). The clicked icon is under the cursor, so it IS at full largesize. Without this
   the popover pinned on top of the magnified icon. `largesize ≤ tilesize` → no lift; clearance
   capped at 40% of the screen axis (defends against `defaults write largesize 512`).
+- **The Dock's hover label stays up beside the popover; accepted, no fix (2026-10-20)**: the
+  Dock draws the label inside its one full-screen window (layer 20; it has no window of its own)
+  and keeps it through and after the click (captured at 0–1500 ms). It does the same for any
+  app's Dock tile. No public API hides it or reports its frame. A synthetic mouse move needs
+  Accessibility for every helper. Covering the label by anchoring lower was rejected after a
+  hands-on check: the label rises with the magnified icon, so a popover low enough to cover it
+  looks worse at high magnification than the overlap does. Measured at largesize 68: magnified
+  icon top ≈ `largesize + 6`, label band ≈ 80–114 pt above the screen edge. **Recheck every
+  macOS release / WWDC** for an API that hides a Dock tile's label or exposes its geometry.
 - **Autohide**: measured gap < 20pt ⇒ fall back to `tilesize + 25` (the click proves the Dock
   is revealed right now). Resting clearance otherwise uses the *measured* gap, which
   self-corrects when a crowded Dock auto-shrinks below the `tilesize` pref.

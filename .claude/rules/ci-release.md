@@ -32,6 +32,17 @@ months while the binary and appcast said 15.0 — macOS 15 users ran a build the
 a path nothing tested, and the 2.0.2 oversized-tile report came from there. Raising the floor is
 therefore a single edit to `Base.xcconfig` plus whatever the guard then lists.
 
+**Run a feature branch through CI BEFORE merging it (2026-10-20).** The App Grid work sat as 25
+local commits and first met CI on release day, where it surfaced two release blockers (a compile
+deadlock, a renderer-dependent preview test). `gh workflow run ci.yml --ref <branch>` runs any branch.
+
+**Reading a failed run.** The macos-26 test step times out at 30 min; if xcodebuild is still running at
+15 min it `sample`s the test host and keeps `diagnostics.log` (`hang/`). On failure it uploads
+`build-logs` with `test.log` and `TestResults.xcresult`: `gh run download <run> -n build-logs`, then
+`xcrun xcresulttool get test-results tests --path TestResults.xcresult | grep "Expectation failed"`.
+Swift Testing's issue text is ONLY in the xcresult (xcpretty and the raw log carry just "failed on"),
+and its per-test durations there are suite wall time, not the test's own.
+
 **Dock render check (on demand):** `gh workflow run ci.yml --ref <branch> -f dock_check=true`
 adds `dock-check-macos-15`, which bakes legacy tiles with the real generator on the macOS 15
 runner (`LegacyIcnsDockFixtureTests`, enabled only by `TEST_RUNNER_DOCKTILE_ICNS_FIXTURE_DIR`),
