@@ -53,4 +53,18 @@ struct AppearanceColorViewTests {
         view.displayIfNeeded()
         #expect(view.layer?.backgroundColor == (try resolved(.quaternarySystemFill, in: .darkAqua)))
     }
+
+    /// The inspector card sits on the sidebar glass and must be a step LIGHTER than it in both
+    /// appearances: translucent white, 50% Light / 8% Dark. Fails if it reverts to
+    /// `quaternarySystemFill` (black-based in Light, so the card read darker than the glass).
+    @Test("The inspector card is translucent white: 50% Light, 8% Dark")
+    func inspectorCardIsTranslucentWhite() throws {
+        let color = NSColorBackgroundView.inspectorCardColor
+        for (name, alpha) in [(NSAppearance.Name.aqua, 0.5), (.darkAqua, 0.08)] {
+            let cg = try resolved(color, in: name)
+            let rgb = try #require(NSColor(cgColor: cg)?.usingColorSpace(.sRGB))
+            #expect(rgb.redComponent == 1 && rgb.greenComponent == 1 && rgb.blueComponent == 1)
+            #expect(abs(rgb.alphaComponent - alpha) < 0.001)
+        }
+    }
 }

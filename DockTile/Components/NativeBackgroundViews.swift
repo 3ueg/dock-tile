@@ -80,6 +80,21 @@ extension NSColorBackgroundView {
     static var windowBackground: NSColorBackgroundView {
         NSColorBackgroundView(NSColor.windowBackgroundColor)
     }
+
+    /// A card ON the sidebar glass (the Customise Tile inspector): translucent white, 50% in Light
+    /// and 8% in Dark, so the card sits a step LIGHTER than the glass in both appearances and the
+    /// glass's desktop tint still shows through. `formGroup` (quaternarySystemFill) is for cards on
+    /// an opaque page: on the glass it read darker than the surface in Light and lighter in Dark
+    /// (compared on the real inspector glass, macOS 27, 2026-10-21).
+    static var inspectorCard: NSColorBackgroundView {
+        NSColorBackgroundView(inspectorCardColor)
+    }
+
+    static let inspectorCardColor = NSColor(name: "inspectorCard") { appearance in
+        appearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
+            ? NSColor.white.withAlphaComponent(0.08)
+            : NSColor.white.withAlphaComponent(0.5)
+    }
 }
 
 // MARK: - Studio Canvas Background

@@ -425,14 +425,9 @@ private struct CustomiseInspectorColumn: View {
         }
         // Pinned: AppKit throws (update-constraints loop) when the content's minimum width exceeds its column.
         .frame(width: AppDelegate.inspectorWidth)
-        // The 1 pt line between Tile Detail and the inspector, full window height including the
-        // 52 pt band. An overlay, so it never shifts the 260 pt content.
-        .overlay(alignment: .leading) {
-            Rectangle()
-                .fill(Color(nsColor: .separatorColor))
-                .frame(width: 1)
-                .ignoresSafeArea()
-        }
+        // No drawn line along the leading edge: the inspector's glass against Tile Detail's page is
+        // the separation, as in Xcode (owner's call, 2026-10-21; the 1 pt line dated from the
+        // opaque inspector).
     }
 }
 

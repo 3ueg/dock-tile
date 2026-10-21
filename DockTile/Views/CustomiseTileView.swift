@@ -32,10 +32,9 @@ struct CustomiseTileView: View {
                 .padding(12)
         }
         .paneScrollEdgeEffect()
-        // Under the band too: the inspector column's own background otherwise shows there as a
-        // grey surface, and the band must have none at rest (re-checked with the inspector on the
-        // NavigationSplitView: still grey without this).
-        .background { NSColorBackgroundView.windowBackground.ignoresSafeArea() }
+        // No background of our own: the inspector column is the SAME Liquid Glass surface as the
+        // sidebar (AppKit backs both split items with `NSGlassEffectView`, macOS 26+), as in Xcode.
+        // A window-background fill here used to hide it (owner's call, 2026-10-21).
         // Per-control diagnostics. Colour and size change continuously (colour-panel drag /
         // stepper repeat) so they're verbose; icon selection is a discrete click.
         .onChange(of: editedConfig.tintColor) { _, newValue in
@@ -562,47 +561,64 @@ struct CustomiseTileView: View {
         }
     }
 
+    /// The system search field, so it draws whatever the OS draws: the macOS 27 capsule with its
+    /// magnifier and clear button, the rounded field on macOS 15 (owner's call, 2026-10-21).
     private var iconSearchField: some View {
-        HStack(spacing: 6) {
-            Image(systemName: "magnifyingglass")
-                .font(.system(size: 12))
-                .foregroundColor(.secondary)
+        NativeSearchField(
+            text: $searchText,
+            placeholder: editedConfig.iconType == .emoji ? AppStrings.Search.emojis : AppStrings.Search.symbols
+        )
+    }
+}
 
-            TextField(
-                editedConfig.iconType == .emoji ? AppStrings.Search.emojis : AppStrings.Search.symbols,
-                text: $searchText
-            )
-            .textFieldStyle(.plain)
-            .font(.system(size: 13))
+// MARK: - Native search field
 
-            if !searchText.isEmpty {
-                Button(action: { searchText = "" }) {
-                    Image(systemName: "xmark.circle.fill")
-                        .font(.system(size: 12))
-                        .foregroundColor(.secondary)
-                }
-                .buttonStyle(.plain)
-            }
+/// `NSSearchField` for the symbol / emoji picker. SwiftUI's `.searchable` belongs to a toolbar, and
+/// a `TextField` styled by hand only imitates the system shape. Every edit, including the clear
+/// button, reaches `text` through the field's action (`sendsSearchStringImmediately`).
+private struct NativeSearchField: NSViewRepresentable {
+    @Binding var text: String
+    let placeholder: String
+
+    func makeCoordinator() -> Coordinator { Coordinator(text: $text) }
+
+    func makeNSView(context: Context) -> NSSearchField {
+        let field = NSSearchField()
+        field.sendsSearchStringImmediately = true
+        field.target = context.coordinator
+        field.action = #selector(Coordinator.changed(_:))
+        return field
+    }
+
+    func updateNSView(_ field: NSSearchField, context: Context) {
+        context.coordinator.text = $text
+        if field.stringValue != text { field.stringValue = text }
+        if field.placeholderString != placeholder { field.placeholderString = placeholder }
+    }
+
+    @MainActor
+    final class Coordinator: NSObject {
+        var text: Binding<String>
+        init(text: Binding<String>) { self.text = text }
+
+        @objc func changed(_ sender: NSSearchField) {
+            text.wrappedValue = sender.stringValue
         }
-        .padding(.horizontal, 8)
-        .padding(.vertical, 6)
-        .background(Color(nsColor: .quaternarySystemFill))
-        .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
     }
 }
 
 // MARK: - Inspector card surface
 
-/// The inspector's card: the form-group surface with 12 pt continuous corners and no outline
-/// (Icon Composer's inspector cards are fill-only) — or a 2 pt accent ring when the card is the
-/// selected choice.
+/// The inspector's card: the translucent `inspectorCard` surface (a step lighter than the glass)
+/// with 12 pt continuous corners and no outline (Icon Composer's inspector cards are fill-only) —
+/// or a 2 pt accent ring when the card is the selected choice.
 private struct InspectorCard: ViewModifier {
     var isSelected = false
 
     func body(content: Content) -> some View {
         let shape = RoundedRectangle(cornerRadius: 12, style: .continuous)
         content
-            .background(NSColorBackgroundView.formGroup)
+            .background(NSColorBackgroundView.inspectorCard)
             .clipShape(shape)
             .overlay { if isSelected { shape.strokeBorder(Color.accentColor, lineWidth: 2) } }
     }

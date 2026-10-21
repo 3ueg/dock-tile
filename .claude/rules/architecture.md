@@ -288,9 +288,9 @@ Popover, Dock Lock) · Dock Tile (About)** — the old accordion `@AppStorage` e
     `NSApplicationDelegateAdaptor` proxy, so the instance call silently never ran.
     `WindowAccessor.updateNSView` never moves the frame.
   - **Content pinned to 260 pt** (`CustomiseInspectorColumn`): AppKit throws in a constraint loop when
-    the content's minimum width exceeds its column. A 1 pt `separatorColor` line runs along its
-    leading edge, full window height including the 52 pt band (a `.leading` overlay with
-    `.ignoresSafeArea()`, so it never shifts the content and exists only with the inspector).
+    the content's minimum width exceeds its column. No drawn separator: the glass against Tile
+    Detail's page separates them, as in Xcode (a 1 pt line from the opaque-inspector days was
+    removed 2026-10-21).
   - **Inspector band**: `InspectorTitleBand` places its title `.automatic` (never `.navigation`), at
     14 pt semibold, one step below the 16 pt page title (`PaneTitleLabel(fontSize:)`). Its toolbar
     has no guard of its own: `CustomiseInspectorColumn`'s presented check is the content gate, so
@@ -300,6 +300,15 @@ Popover, Dock Lock) · Dock Tile (About)** — the old accordion `@AppStorage` e
   - **Inspector content follows Tile Detail's form**: group headers like "In This Tile" (13 pt
     semibold, primary), captions like its hint (11 pt, tertiary), 40 pt rows with 13 pt labels, cards
     inset 10 pt with full-width 1 pt `quinaryLabel` dividers, 13 pt Style-card and Background-chip labels.
+  - **The inspector is the sidebar's material, like Xcode (2026-10-21)**: AppKit backs both split
+    items with the same Liquid Glass view (`NSGlassEffectView`, measured on macOS 27), so the
+    inspector paints NO background of its own — a window-background fill used to hide the glass.
+    Its cards (`InspectorCard`) are `NSColorBackgroundView.inspectorCard`, translucent white 50% Light /
+    8% Dark, one step lighter than the glass in both appearances; Tile Detail's `formGroup`
+    (quaternarySystemFill) is for an opaque page and read darker than the glass in Light. The picker's
+    search is the system `NSSearchField` (`NativeSearchField`), so it is the macOS 27 capsule there
+    and the OS's own field on macOS 15 — never a hand-drawn imitation. macOS 15 shows whatever SwiftUI gives an inspector
+    there — not checked on that OS.
   - **One moving toggle** (`sidebar.trailing`, tooltip and accessibility label "Toggle Customise Tile"):
     it trails Update in Tile Detail while closed and the inspector band while open. There is no
     Customise button; the hero icon toggles both ways ("Toggle Customiser"; a default
