@@ -304,6 +304,18 @@ Popover, Dock Lock) · Dock Tile (About)** — the old accordion `@AppStorage` e
     so `CustomiseInspectorColumn` builds `CustomiseTileView` only while presented (an empty
     placeholder otherwise); built while closed, every Name keystroke re-rendered the whole hidden Customise view.
     Still no `onAppear` work in the inspector.
+  - **A selection change never animates the inspector (critical)**: `.transaction(value: selection)`
+    on the `NavigationSplitView` sets `disablesAnimations` and `animation = nil`, so the collapse on
+    the way to a Settings pane and the expand back to a tile are instant; only the user's own toggle
+    animates. The animated collapse was the single largest cost of the open inspector — the 12-switch
+    Settings sequence went from 39 main-thread hangs (4.05 s frozen) to 12 (2.95 s) on an optimised
+    build (2026-10-21) — and it is where both AppKit constraint-loop crashes came from.
+  - **Built in the SAME frame as Tile Detail, on purpose.** A tile switch costs the same with the
+    inspector open or closed (674 vs 671 ms main-thread busy, Debug): the inspector's content is
+    cheap, and the whole per-switch cost is the detail column remade by `.id(selectedConfig.id)`
+    (SwiftUI graph rebuild, `NSHostingView` layout, the toolbar re-tiled, the preview's LazyVGrid).
+    A skeleton-then-content deferral (32 ms settle) and stable `ToolbarItem(id:)`s were both built,
+    measured and removed — see performance-measurement.md "Main-window navigation".
   Design handoff (superseded where it describes a screen): `docs/design_handoff_customise_tile/README.md`.
 - **Two defaults for the tile face (critical)**: a NEW tile starts on App Grid
   (`ConfigurationDefaults.iconFace = .apps`), while a stored config missing the `iconFace` key loads as

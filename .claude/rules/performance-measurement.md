@@ -57,3 +57,42 @@ The report groups rows by tile and process ID, and helpers get low IDs at login,
 reboots a reused ID can merge two processes into one row: an `uptime` that drops mid-row is the
 tell. The open count parses the helpers' "✔ Show popover" log line, so renaming it reads as zero
 opens, not as an error.
+
+## Main-window navigation (Customise inspector round, October 2026)
+
+How the sidebar-switch cost was measured, and what the numbers mean. Harness: an optimised build
+(`SWIFT_OPTIMIZATION_LEVEL=-O SWIFT_COMPILATION_MODE=wholemodule ENABLE_TESTABILITY=NO
+ENABLE_DEBUG_DYLIB=NO`, into a scratch DerivedData so the Debug product stays signed), launched with
+`open -g … --args -ApplePersistenceIgnoreState YES`, 12 sidebar rows selected through AX at 1 s
+intervals, under `xcrun xctrace record --template 'Animation Hitches' --attach <pid>`; the verdict is
+the `potential-hangs` table (`xctrace export --xpath …table[@schema="potential-hangs"]`), summed.
+Attribution comes from `sample` on the DEBUG build (the optimised one has no app symbols), each
+leaf's samples billed to the most specific frame on its path.
+
+- **Noise band first.** Three baseline runs of the same sequence gave 13, 15 and 16 hangs
+  (3.42–3.57 s). A difference under ±2 hangs or ±150 ms is nothing. One run had a single 1.9 s hang
+  and an otherwise normal shape: the machine, not the code — repeat it.
+- **The `hitches` table depends on the window being ON SCREEN.** `open -g` leaves the dev window
+  behind the owner's, where CA renders nothing, so every clean run reports "hitches: none"; two runs
+  reported 13 and 62 hitches with identical hang totals because the window happened to be visible
+  (trains of 8 ms hitches at 120 Hz). Judge by hangs; read hitches only against a run from the same
+  minutes.
+- **A per-switch cost is the DETAIL column's unless open-vs-closed says otherwise.** Tile switch,
+  inspector open vs closed: 674 vs 671 ms busy (Debug). The inspector's own content is not in the
+  profile at all; the ~300 ms (optimised) per switch is the detail remade by `.id(selectedConfig.id)`:
+  SwiftUI graph update ~190, `NSHostingView` layout ~95, the toolbar torn down and re-tiled 50–130,
+  the preview LazyVGrid ~60 (Debug ms). Dropping that `.id` (with an explicit state reset) is the
+  only lever left and is a change to Tile Detail, not the inspector — a follow-up, not done.
+- **Kept: one change.** `.transaction(value: selection)` disabling animations on the split view:
+  Settings sequence, inspector open, 39 hangs / 4.05 s → 12 / 2.95 s; closed 13 / 1.86 s → 15 / 1.75 s
+  (noise); tiles unchanged. Plus `LoginItemManager.readStatus()` off the main thread (login XPC
+  7–14 → 1 ms per switch).
+- **Built, measured, removed (do not rebuild them without a new number):**
+  - a skeleton placeholder with a 32 ms settle before the inspector content — tiles 13–15 → 19–20
+    hangs; the deferral had nothing to hide and only added a layout pass;
+  - stable `ToolbarItem(id:)` on every item — toolbar cost unchanged, because the detail's whole
+    `.toolbar {}` is destroyed with the view, ids or not;
+  - a 1 s `AppInstallChecker` probe cache for the editor/preview — install probe 15 ms/switch
+    without it, 27–30 with it (the per-switch cost is the first probe per item, which a short TTL
+    never spans).
+- **Memory**: 200 switches with the inspector open, 125 → 127 MB, settled 118 MB. Flat.

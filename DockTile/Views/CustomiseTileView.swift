@@ -16,14 +16,13 @@ struct CustomiseTileView: View {
     /// The shared `TileEditSession`'s config: the inspector keeps no copy and no save path of its own —
     /// Tile Detail's debounce + `preservingStoredVisibility` save persists these edits.
     @Binding private var editedConfig: DockTileConfiguration
-    let onToggleInspector: () -> Void
 
     @State private var customColor: Color = .blue
     @State private var searchText: String = ""
 
-    init(config: Binding<DockTileConfiguration>, onToggleInspector: @escaping () -> Void) {
+    /// The band (title + toggle) is the column's (`CustomiseInspectorColumn`), not this view's.
+    init(config: Binding<DockTileConfiguration>) {
         self._editedConfig = config
-        self.onToggleInspector = onToggleInspector
     }
 
     var body: some View {
@@ -37,7 +36,6 @@ struct CustomiseTileView: View {
         // grey surface, and the band must have none at rest (re-checked with the inspector on the
         // NavigationSplitView: still grey without this).
         .background { NSColorBackgroundView.windowBackground.ignoresSafeArea() }
-        .inspectorTitleBand(AppStrings.Title.customiseTile, onToggle: onToggleInspector)
         // Per-control diagnostics. Colour and size change continuously (colour-panel drag /
         // stepper repeat) so they're verbose; icon selection is a discrete click.
         .onChange(of: editedConfig.tintColor) { _, newValue in
@@ -761,8 +759,7 @@ extension Color {
             tintColor: .blue,
             iconType: .sfSymbol,
             iconValue: "sparkles"
-        )),
-        onToggleInspector: {}
+        ))
     )
     .frame(width: 260, height: 700)
 }

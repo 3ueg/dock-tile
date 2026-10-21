@@ -222,3 +222,25 @@ Consequences carried into the plan:
   column needs a side inset).
 - Whether `heroStyles` keeps a caller.
 - The order of the plan's tasks and the per-task tests, within the rules in testing.md.
+
+## Performance round (Claude, 2026-10-21; Karthik asked for a first-principles pass and a lazy load)
+
+Measured on an optimised build, 12 sidebar switches at 1 s, Animation Hitches `potential-hangs`
+(baseline noise ±2 hangs). Settings sequence with the inspector open: **39 hangs / 4.05 s → 12 /
+2.95 s**; closed: 13 / 1.86 s → 15 / 1.75 s (noise); tile-to-tile with the inspector open: 13–16 →
+14–15 (unchanged). Memory flat over 200 switches (125 → 127 MB).
+
+- **Kept**: a selection change never animates the inspector collapse/expand
+  (`.transaction(value: selection)` on the split view) — the whole gain above; the General pane's
+  `SMAppService.status` read moved off the main thread.
+- **Asked for, built, measured, removed — the lazy load**: a skeleton placeholder (HIG "Loading":
+  shaped like the content, no text or spinner) with a 32 ms settle before the inspector content.
+  A tile switch costs the same with the inspector open or closed (674 vs 671 ms busy, Debug), so the
+  placeholder had nothing to defer; it made tile switches worse (19–20 hangs against 13–15). The
+  patch is kept in the session scratchpad; restoring it is a decision for Karthik, not a default.
+- Also removed after measuring: stable toolbar item ids (no change — the detail's toolbar is torn
+  down with the view) and a 1 s install-probe cache (slower than no cache).
+- **What remains is Tile Detail's, not the inspector's**: ~300 ms per switch (optimised) from the
+  detail column remade by `.id(selectedConfig.id)` — SwiftUI graph rebuild, hosting layout, toolbar
+  re-tile, preview grid. Dropping that `.id` with an explicit state reset is the only lever left and
+  is a separate change to Tile Detail (follow-up).

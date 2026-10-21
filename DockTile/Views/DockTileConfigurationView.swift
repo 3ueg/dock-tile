@@ -123,6 +123,18 @@ struct DockTileConfigurationView: View {
             inspectorColumn
                 .inspectorColumnWidth(AppDelegate.inspectorWidth)
         }
+        // A SELECTION change shows or hides the inspector instantly; only the user's own toggle
+        // animates (AppKit's own split: plain `isCollapsed` vs `animator()`). The animated collapse
+        // on the way to a Settings pane was the single largest cost of the open inspector: on an
+        // optimised build the 12-switch Settings sequence went from 39 main-thread hangs
+        // (4.05 s frozen) to 12 (2.95 s) with this alone (2026-10-21, Animation Hitches
+        // instrument; baseline noise ±2 hangs), and the collapse animation is where both AppKit
+        // constraint-loop crashes came from. `.transaction(value:)` applies only to transactions that changed `selection`, so
+        // the toggle's transaction is untouched.
+        .transaction(value: selection) { transaction in
+            transaction.disablesAnimations = true
+            transaction.animation = nil
+        }
         // v2 chrome: the 52pt title band IS the page header. No window title, no sidebar toggle,
         // no toolbar surface — each pane hosts its title + actions as toolbar items (PaneTitleBand).
         // The toggle is removed once, on the sidebar's own `List` (DockTileSidebarView) — that is the
@@ -389,6 +401,11 @@ final class TileEditSessionStore: ObservableObject {
 /// while presented; otherwise every Name keystroke re-rendered the whole hidden Customise view.
 /// This `isPresented` check is the content's one gate: it also keeps the inspector band's toolbar
 /// items out of the main band while closed.
+///
+/// Built in the SAME frame as Tile Detail, deliberately. A skeleton-then-content deferral was tried
+/// (2026-10-21, 32 ms settle): a tile switch costs the same with the inspector open or closed
+/// (674 vs 671 ms main-thread busy, Debug), so the placeholder had nothing to hide and only added a
+/// second layout pass — 20 hangs over 12 switches against 13–15 without it (optimised build).
 private struct CustomiseInspectorColumn: View {
     @ObservedObject var session: TileEditSession
     let isPresented: Bool
@@ -397,11 +414,12 @@ private struct CustomiseInspectorColumn: View {
     var body: some View {
         Group {
             if isPresented {
-                CustomiseTileView(config: $session.config, onToggleInspector: onToggleInspector)
+                CustomiseTileView(config: $session.config)
             } else {
                 Color.clear
             }
         }
+        .inspectorTitleBand(AppStrings.Title.customiseTile, onToggle: onToggleInspector)
         // Pinned: AppKit throws (update-constraints loop) when the content's minimum width exceeds its column.
         .frame(width: AppDelegate.inspectorWidth)
         // The 1 pt line between Tile Detail and the inspector, full window height including the

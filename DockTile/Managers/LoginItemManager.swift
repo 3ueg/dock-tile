@@ -38,6 +38,16 @@ final class LoginItemManager {
 
     var status: SMAppService.Status { service.status }
 
+    /// `status` read OFF the main thread. `SMAppService.status` is a synchronous XPC round trip to
+    /// the service-management daemon (~20 ms per read on an M3 Max, 2026-10-21), and the General
+    /// pane used to read it three times inside its `onAppear`, freezing every switch to General.
+    nonisolated static func readStatus() async -> SMAppService.Status {
+        let plistName = "\(AppEnvironment.mainAppBundleId).tilelauncher.plist"
+        return await Task.detached(priority: .userInitiated) {
+            SMAppService.agent(plistName: plistName).status
+        }.value
+    }
+
     /// The system error from the most recent registration attempt (launch reconcile or toggle),
     /// or `nil` when the last attempt succeeded. The General pane shows this under the toggle so
     /// a refused registration is visible instead of the switch silently snapping back — the

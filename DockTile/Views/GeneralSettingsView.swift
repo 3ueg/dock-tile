@@ -19,6 +19,8 @@ struct GeneralSettingsView: View {
     /// System Settings → Login Items.
     @State private var startAtLoginOn = false
     @State private var loginRequiresApproval = false
+    /// Bumped per `refreshLoginState`; a reply from an older refresh is dropped.
+    @State private var loginRefreshGeneration = 0
     @State private var loginRegistrationError: String?
 
     /// Drives the manual "Scan…" results dialog. `scanFoundMissing` picks the found vs all-clear
@@ -196,15 +198,23 @@ struct GeneralSettingsView: View {
         configManager.selectedConfigId = first.config.id
     }
 
-    /// Read the current SMAppService status into the toggle (system is source of truth).
+    /// Read the current SMAppService status into the toggle (system is source of truth). The read
+    /// is an XPC round trip, so it runs off the main thread; a newer refresh supersedes an older
+    /// one still in flight (the generation guard), so a slow reply can never overwrite a fresh one.
     private func refreshLoginState() {
-        let manager = LoginItemManager.shared
-        // Show the toggle ON whenever the user wants it on — including when macOS is holding
-        // the agent for approval (common right after a Sparkle update). Rendering it OFF there
-        // would look like the setting silently reset itself.
-        startAtLoginOn = manager.isEnabled || manager.requiresApproval
-        loginRequiresApproval = manager.requiresApproval
-        loginRegistrationError = manager.lastRegistrationError
+        loginRefreshGeneration += 1
+        let generation = loginRefreshGeneration
+        Task {
+            let status = await LoginItemManager.readStatus()
+            guard generation == loginRefreshGeneration else { return }
+            // Show the toggle ON whenever the user wants it on — including when macOS is holding
+            // the agent for approval (common right after a Sparkle update). Rendering it OFF there
+            // would look like the setting silently reset itself.
+            let requiresApproval = status == .requiresApproval
+            startAtLoginOn = status == .enabled || requiresApproval
+            loginRequiresApproval = requiresApproval
+            loginRegistrationError = LoginItemManager.shared.lastRegistrationError
+        }
     }
 
     /// Register/unregister the launcher agent to match the toggle. On failure, revert the

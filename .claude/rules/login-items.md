@@ -39,4 +39,7 @@ after a **Sparkle update** — replacing the app bundle demotes the SMAppService
 
 `GeneralSettingsView` toggle reflects `isEnabled || requiresApproval` (so a held-for-approval item
 still reads ON, with an "Open Login Items" approval button). An `onChange` guard ignores
-programmatic syncs so refreshing state never re-registers in a loop.
+programmatic syncs so refreshing state never re-registers in a loop. The pane reads the status
+through `LoginItemManager.readStatus()` — `SMAppService.status` is a synchronous XPC round trip
+(~20 ms), and three reads inside `onAppear` used to sit on the main thread of every switch to General
+(2026-10-21); a generation counter drops a stale reply.
