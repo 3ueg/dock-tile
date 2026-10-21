@@ -197,31 +197,18 @@ struct DockTileDetailView: View {
         // spacer (single `.toolbar {}` call — see PaneTitleBand in DockTileConfigurationView.swift).
         // The band shows the COMMITTED name — typing re-titles the preview below, not the chrome.
         .paneTitleBand(configManager.displayName(for: editedConfig.id)) {
-            ToolbarItemGroup(placement: .primaryAction) {
-                Button {
-                    DiagnosticsLog.shared.ui("Tile Detail → Delete tile pressed '\(editedConfig.name)' (shows delete confirmation)")
-                    showDeleteConfirmation = true
-                } label: {
-                    Image(systemName: "trash")
-                }
-                // `.bordered`, not `.borderless`: the destructive action needs the same rounded
-                // surface as the action button beside it, or it reads as a bare glyph floating in
-                // the band.
-                .buttonStyle(.bordered)
-                .help(AppStrings.Tooltip.deleteTile)
-                .accessibilityLabel(AppStrings.Title.deleteTile)
-
-                actionButton
-
-                // The one inspector toggle: here while closed, in the inspector's band while open.
-                if !inspectorShown {
-                    Button(action: onToggleInspector) {
-                        Image(systemName: "sidebar.trailing")
-                    }
-                    .buttonStyle(.bordered)
-                    .help(AppStrings.Tooltip.toggleCustomiseTile)
-                    .accessibilityLabel(AppStrings.Tooltip.toggleCustomiseTile)
-                }
+            // Three separate items, each its own glass button. In ONE group the macOS 26+ toolbar
+            // merges neighbouring bordered buttons into a single capsule; only a prominent button
+            // broke the run, so a quiet Update merged while a blue one didn't (owner report,
+            // 2026-10-21; reproduced in a spike). A fixed spacer between items keeps them apart in
+            // every state.
+            ToolbarItem(placement: .primaryAction) { deleteButton }
+            if #available(macOS 26.0, *) { ToolbarSpacer(.fixed, placement: .primaryAction) }
+            ToolbarItem(placement: .primaryAction) { actionButton }
+            // The one inspector toggle: here while closed, in the inspector's band while open.
+            if !inspectorShown {
+                if #available(macOS 26.0, *) { ToolbarSpacer(.fixed, placement: .primaryAction) }
+                ToolbarItem(placement: .primaryAction) { inspectorToggleButton }
             }
         }
         .alert(AppStrings.Title.deleteTile, isPresented: $showDeleteConfirmation) {
@@ -312,6 +299,32 @@ struct DockTileDetailView: View {
                 }
             }
         }
+    }
+
+    // MARK: - Band Buttons
+
+    private var deleteButton: some View {
+        Button {
+            DiagnosticsLog.shared.ui("Tile Detail → Delete tile pressed '\(editedConfig.name)' (shows delete confirmation)")
+            showDeleteConfirmation = true
+        } label: {
+            Image(systemName: "trash")
+        }
+        // `.bordered`, not `.borderless`: the destructive action needs the same rounded
+        // surface as the action button beside it, or it reads as a bare glyph floating in
+        // the band.
+        .buttonStyle(.bordered)
+        .help(AppStrings.Tooltip.deleteTile)
+        .accessibilityLabel(AppStrings.Title.deleteTile)
+    }
+
+    private var inspectorToggleButton: some View {
+        Button(action: onToggleInspector) {
+            Image(systemName: "sidebar.trailing")
+        }
+        .buttonStyle(.bordered)
+        .help(AppStrings.Tooltip.toggleCustomiseTile)
+        .accessibilityLabel(AppStrings.Tooltip.toggleCustomiseTile)
     }
 
     // MARK: - Band Action Button

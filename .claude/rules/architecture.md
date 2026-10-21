@@ -145,7 +145,10 @@ until new edits (`contentSignature` dirty tracking, which ignores `lastDockIndex
 `helperAppVersion` / `isVisibleInDock` bookkeeping). While processing, the button shows the spinner
 **inside** itself (same pattern as the Popover Appearance Save button), not a separate toolbar
 spinner. Guarded by `DockActionResolutionTests`. The button lives in the title band
-(`ToolbarItemGroup(.primaryAction)`, trailing the trash/Delete Tile icon). **A bright Update means the
+(three separate `.primaryAction` `ToolbarItem`s — Delete, the action, the inspector toggle — with a
+`ToolbarSpacer(.fixed)` between them on macOS 26+: in one `ToolbarItemGroup` the toolbar merged the
+bordered buttons into a single glass capsule whenever none was prominent, so a quiet Update looked
+grouped beside a separate Done; spike-verified 2026-10-21). **A bright Update means the
 Dock is behind (2026-10-21)**: Add to Dock is always `.borderedProminent`; Update is prominent only while
 the tile differs from what its helper was built from, else `.bordered` (still enabled — it is also the
 manual rebuild that refreshes an App Grid face after an app's icon or install state changed);
