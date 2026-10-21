@@ -77,12 +77,15 @@ leaf's samples billed to the most specific frame on its path.
   reported 13 and 62 hitches with identical hang totals because the window happened to be visible
   (trains of 8 ms hitches at 120 Hz). Judge by hangs; read hitches only against a run from the same
   minutes.
-- **A per-switch cost is the DETAIL column's unless open-vs-closed says otherwise.** Tile switch,
-  inspector open vs closed: 674 vs 671 ms busy (Debug). The inspector's own content is not in the
-  profile at all; the ~300 ms (optimised) per switch is the detail remade by `.id(selectedConfig.id)`:
-  SwiftUI graph update ~190, `NSHostingView` layout ~95, the toolbar torn down and re-tiled 50–130,
-  the preview LazyVGrid ~60 (Debug ms). Dropping that `.id` (with an explicit state reset) is the
-  only lever left and is a change to Tile Detail, not the inspector — a follow-up, not done.
+- **Total busy time and hang time can disagree — read both.** Tile switch, inspector open vs
+  closed, measured 674 vs 671 ms main-thread BUSY per switch (Debug `sample`), which read as "the
+  inspector costs nothing". The optimised hang trace on 2026-10-22 disagrees: 3.29 s vs 1.89 s
+  frozen over 12 tile switches (worst single hang ~350 vs ~190 ms), so with the inspector open each
+  tile switch freezes ~115 ms longer. Busy time in Debug is dominated by SwiftUI graph work common to
+  both; the hang trace measures what the user feels. The detail remade by `.id(selectedConfig.id)`
+  is still the largest single cost (SwiftUI graph update ~190, `NSHostingView` layout ~95, toolbar
+  re-tile 50–130, preview LazyVGrid ~60, Debug ms); dropping that `.id` with an explicit state reset
+  is a follow-up, not done.
 - **Kept: one change.** `.transaction(value: selection)` disabling animations on the split view:
   Settings sequence, inspector open, 39 hangs / 4.05 s → 12 / 2.95 s; closed 13 / 1.86 s → 15 / 1.75 s
   (noise); tiles unchanged. Plus `LoginItemManager.readStatus()` off the main thread (login XPC
@@ -96,3 +99,28 @@ leaf's samples billed to the most specific frame on its path.
     without it, 27–30 with it (the per-switch cost is the first probe per item, which a short TTL
     never spans).
 - **Memory**: 200 switches with the inspector open, 125 → 127 MB, settled 118 MB. Flat.
+
+### Against the release (v2.4.0), 2026-10-22
+
+Same Mac (M3 Max, macOS 27), same session, same dev data; v2.4.0 (= main's app code) and the branch
+both built optimised the same way; two runs each, 12 switches per run, Animation Hitches hangs:
+
+| | v2.4.0 | branch, inspector closed | branch, inspector open |
+|---|---|---|---|
+| Settings sequence, frozen | 1.63 / 1.66 s | 1.72 / 1.57 s | 2.47 / 2.43 s |
+| Tile sequence, frozen | 1.93 / 1.94 s | 1.92 / 1.85 s | 3.44 / 3.14 s |
+| Memory after 200 switches | 105 MB | 99 MB | 141–144 MB (peak ~340 MB for <10 s) |
+| Idle CPU | 0.0% | 0.0% | 0.1% |
+| App executable | 13.40 MB | 12.82 MB | (same) |
+
+Closed = the release, within noise. Open costs ~70 ms per Settings switch, ~115 ms per tile switch,
+~40 MB steady, and a short ~200 MB peak right after a burst of switches (released within 10 s, not
+a leak — sampled at +2/+10/+30/+60 s). The production app (Release build, its own two-tile data) is
+a reference only: 1.17 s Settings, 1.49–1.56 s tiles, 88 MB — different build type AND data.
+
+Harness traps found that day: `open -g` on a quit app sometimes restores NO window, and a script
+that finds no sidebar must fail, never record an empty trace as "no hangs" (four traces did); the
+production app needs `tell application id … to reopen` to create one. `top -l N -pid` hung a run
+for hours — read CPU time from `ps -o time=` twice instead. Match the main app with
+`pgrep -f "^…/MacOS/Dock Tile( |$)"`: launch arguments follow the executable path.
+

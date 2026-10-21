@@ -332,12 +332,11 @@ Popover, Dock Lock) · Dock Tile (About)** — the old accordion `@AppStorage` e
     animates. The animated collapse was the single largest cost of the open inspector — the 12-switch
     Settings sequence went from 39 main-thread hangs (4.05 s frozen) to 12 (2.95 s) on an optimised
     build (2026-10-21) — and it is where both AppKit constraint-loop crashes came from.
-  - **Built in the SAME frame as Tile Detail, on purpose.** A tile switch costs the same with the
-    inspector open or closed (674 vs 671 ms main-thread busy, Debug): the inspector's content is
-    cheap, and the whole per-switch cost is the detail column remade by `.id(selectedConfig.id)`
-    (SwiftUI graph rebuild, `NSHostingView` layout, the toolbar re-tiled, the preview's LazyVGrid).
-    A skeleton-then-content deferral (32 ms settle) and stable `ToolbarItem(id:)`s were both built,
-    measured and removed — see performance-measurement.md "Main-window navigation".
+  - **Built in the SAME frame as Tile Detail.** With the inspector open a tile switch freezes
+    ~115 ms longer and a Settings switch ~70 ms longer than v2.4.0 (optimised hang traces,
+    2026-10-22); closed, it matches the release. A skeleton-then-content deferral (32 ms settle) was
+    built and measured WORSE (more hangs), and stable `ToolbarItem(id:)`s changed nothing, so both
+    were removed — see performance-measurement.md "Main-window navigation" and "Against the release".
   Design handoff (superseded where it describes a screen): `docs/design_handoff_customise_tile/README.md`.
 - **Two defaults for the tile face (critical)**: a NEW tile starts on App Grid
   (`ConfigurationDefaults.iconFace = .apps`), while a stored config missing the `iconFace` key loads as
