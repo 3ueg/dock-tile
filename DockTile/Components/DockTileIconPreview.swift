@@ -482,35 +482,47 @@ struct TileFace: View {
 /// The App Store's icon treatment (macOS 27, compared by eye 2026-10-20 on its product page and its
 /// search results): a thin rim that catches light along the top edge and fades down the sides, plus
 /// a soft lift shadow, so a tile's outline reads even when its face is close to the background (a
-/// white Mono tile in Light Mode, a near-black one in Dark Mode). Light Mode swaps the bright rim for
-/// a faint dark hairline — a white rim on a white page is invisible. Small icons keep the same two
-/// layers, scaled: a hairline rim and a smaller, fainter shadow. Applied to every tile icon the app
+/// white Mono tile in Light Mode, a near-black one in Dark Mode). In Light Mode the hero has no rim:
+/// like the App Store's, its edge is a tight contact shadow (a white rim on a white page is invisible,
+/// and a dark hairline read as an outline). Small icons keep a faint dark hairline and a smaller,
+/// fainter shadow. Applied to every tile icon the app
 /// draws (Tile Detail hero, sidebar rows, the inspector's Style cards and Background chips, Smart Add)
 /// — never to the popover preview, which must match the shipped popover. The rim is drawn inside the
 /// squircle (`strokeBorder`), so the icon's footprint never changes.
 struct IconLift: ViewModifier {
-    /// Light Mode's dark hairline, the same at every size.
-    nonisolated static let lightHairline: CGFloat = 0.5
-
     struct Metrics: Equatable {
-        /// The Dark Mode light-catching rim (Light Mode uses `lightHairline`).
+        /// The Dark Mode light-catching rim.
         let rimWidth: CGFloat
+        /// Dark Mode's shadow.
         let shadowRadius: CGFloat
         let shadowY: CGFloat
         let darkOpacity: Double
+        /// Light Mode's shadow and its dark hairline (0 = none).
+        let lightRadius: CGFloat
+        let lightY: CGFloat
         let lightOpacity: Double
+        let lightHairline: CGFloat
     }
 
     /// Pure seam (`IconLiftTests`): 64 pt and up draw like the hero; below, a hairline rim and a
-    /// fainter shadow. Radius ≈ 6.5% and offset ≈ 3.3% of the size, rounded to half points.
+    /// fainter shadow. Dark radius ≈ 6.5% and offset ≈ 3.3% of the size, rounded to half points.
+    /// Light Mode at hero size follows the App Store's measured edge (2026-10-21, Word's product
+    /// page at 93 pt, scaled): a TIGHT shadow — radius ≈ 2.6%, offset ≈ 1.3% — and no hairline. The
+    /// earlier 8 / 4 shadow plus a 0.5 hairline drew a dark outline and a halo twice the App Store's
+    /// reach, visible above the icon too. Small icons keep their shipped Light values.
     nonisolated static func metrics(size: CGFloat) -> Metrics {
         let large = size >= 64
+        let radius = max(1.5, (size * 0.065 * 2).rounded() / 2)
+        let y = max(1, (size * 0.033 * 2).rounded() / 2)
         return Metrics(
             rimWidth: large ? 1 : 0.5,
-            shadowRadius: max(1.5, (size * 0.065 * 2).rounded() / 2),
-            shadowY: max(1, (size * 0.033 * 2).rounded() / 2),
+            shadowRadius: radius,
+            shadowY: y,
             darkOpacity: large ? 0.45 : 0.32,
-            lightOpacity: large ? 0.16 : 0.14)
+            lightRadius: large ? (size * 0.026 * 2).rounded() / 2 : radius,
+            lightY: large ? (size * 0.013 * 2).rounded() / 2 : y,
+            lightOpacity: large ? 0.22 : 0.14,
+            lightHairline: large ? 0 : 0.5)
     }
 
     let size: CGFloat
@@ -527,14 +539,14 @@ struct IconLift: ViewModifier {
                         LinearGradient(colors: [.white.opacity(0.34), .white.opacity(0.06)],
                                        startPoint: .top, endPoint: .bottom),
                         lineWidth: m.rimWidth)
-                } else {
-                    // Light Mode's dark hairline stays 0.5 at every size (the shipped hero's value).
-                    shape.strokeBorder(Color.black.opacity(0.10), lineWidth: Self.lightHairline)
+                } else if m.lightHairline > 0 {
+                    shape.strokeBorder(Color.black.opacity(0.10), lineWidth: m.lightHairline)
                 }
             }
             .compositingGroup()
             .shadow(color: .black.opacity(isDark ? m.darkOpacity : m.lightOpacity),
-                    radius: m.shadowRadius, x: 0, y: m.shadowY)
+                    radius: isDark ? m.shadowRadius : m.lightRadius, x: 0,
+                    y: isDark ? m.shadowY : m.lightY)
     }
 }
 
