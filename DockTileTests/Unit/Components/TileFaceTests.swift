@@ -84,7 +84,7 @@ struct TileFaceTests {
     func plistRecordsLook() {
         let out = HelperBundleManager.helperInfoPlist(
             from: ["CFBundleIdentifier": "com.docktile.app"], bundleId: "com.docktile.helper.x",
-            appName: "Dev", showInAppSwitcher: false, declarative: true, iconSignature: "sig-1")
+            appName: "Dev", showInAppSwitcher: false, declarative: true, iconSignature: "sig-1", dockSignature: "dock")
         #expect(out[HelperBundleManager.iconSignatureKey] as? String == "sig-1")
         #expect(HelperBundleManager.iconSignatureKey == "DTIconSignature")
     }

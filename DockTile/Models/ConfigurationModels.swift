@@ -60,6 +60,18 @@ struct DockTileConfiguration: Identifiable, Codable, Hashable {
         return iconFace == .glyph ? base : base + "|apps|" + appsFaceIdentities.joined(separator: ",")
     }
 
+    /// Fingerprint of everything the tile's helper shows — its icon, name, popover layout, app list
+    /// and Ghost/App mode — stamped into the helper's Info.plist when it is built
+    /// (`HelperBundleManager.dockSignatureKey`). A helper reads its config once at launch, so until
+    /// Update rebuilds and relaunches it, the Dock shows the tile as of this stamp; Tile Detail
+    /// compares the two to decide whether Update has anything to apply. A plain string, like
+    /// `iconSignature`, because it is compared across launches.
+    var dockSignature: String {
+        [iconSignature, name, layoutMode.rawValue, String(showInAppSwitcher),
+         appItems.map(\.id.uuidString).joined(separator: ",")]
+            .joined(separator: "\u{1F}")
+    }
+
     /// Identities of the first `AppsFaceGrid.maxItems` items as the Apps face would draw them.
     var appsFaceIdentities: [String] {
         appItems.prefix(AppsFaceGrid.maxItems).map { $0.isFolder ? ($0.folderPath ?? $0.name) : $0.bundleIdentifier }

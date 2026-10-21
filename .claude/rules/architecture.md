@@ -145,8 +145,16 @@ until new edits (`contentSignature` dirty tracking, which ignores `lastDockIndex
 `helperAppVersion` / `isVisibleInDock` bookkeeping). While processing, the button shows the spinner
 **inside** itself (same pattern as the Popover Appearance Save button), not a separate toolbar
 spinner. Guarded by `DockActionResolutionTests`. The button lives in the title band
-(`ToolbarItemGroup(.primaryAction)`, trailing the trash/Delete Tile icon); install actions render
-`.borderedProminent`, remove/saveOnly render `.bordered`.
+(`ToolbarItemGroup(.primaryAction)`, trailing the trash/Delete Tile icon). **A bright Update means the
+Dock is behind (2026-10-21)**: Add to Dock is always `.borderedProminent`; Update is prominent only while
+the tile differs from what its helper was built from, else `.bordered` (still enabled — it is also the
+manual rebuild that refreshes an App Grid face after an app's icon or install state changed);
+remove/saveOnly are always `.bordered`. A helper reads its config once at launch, so the Dock shows the
+tile as of its last build: every build stamps `DockTileConfiguration.dockSignature` (icon signature,
+name, layout, Ghost/App mode, app list) into the helper's Info.plist as `DTDockSignature`, and Tile
+Detail compares it on appear and after an action (`builtDockSignature`). A helper built before the stamp
+reads as pending until its next Update or migration. Pure seam `DockTileDetailView.actionIsProminent`,
+guarded by `DockSignatureTests`.
 
 ## Dock Position Preservation
 

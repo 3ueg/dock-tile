@@ -180,7 +180,8 @@ final class HelperBundleManager {
             bundleId: config.bundleIdentifier,
             helperPath: helperPath,
             showInAppSwitcher: config.showInAppSwitcher,
-            iconSignature: config.iconSignature
+            iconSignature: config.iconSignature,
+            dockSignature: config.dockSignature
         )
 
         // 2. Write the tile icon into the bundle (declarative Assets.car on macOS 26+, the
@@ -353,6 +354,18 @@ final class HelperBundleManager {
         guard let path = findExistingHelper(bundleId: config.bundleIdentifier) else { return nil }
         let plist = NSDictionary(contentsOf: path.appendingPathComponent("Contents/Info.plist"))
         return (path, plist?[Self.iconSignatureKey] as? String)
+    }
+
+    /// Info.plist key holding `DockTileConfiguration.dockSignature` of the tile a helper was built from.
+    nonisolated static let dockSignatureKey = "DTDockSignature"
+
+    /// `DockTileConfiguration.dockSignature` of the tile the helper on disk was built from; `nil` when
+    /// no helper exists or it was built before the stamp. Scans the helper folder (one plist read per
+    /// helper), so Tile Detail reads it on appear and after an action only.
+    func builtDockSignature(for config: DockTileConfiguration) -> String? {
+        guard let path = findExistingHelper(bundleId: config.bundleIdentifier) else { return nil }
+        let plist = NSDictionary(contentsOf: path.appendingPathComponent("Contents/Info.plist"))
+        return plist?[Self.dockSignatureKey] as? String
     }
 
     /// Check if a helper bundle exists for the given configuration (by bundle ID)
@@ -765,7 +778,8 @@ final class HelperBundleManager {
         bundleId: String,
         helperPath: URL,
         showInAppSwitcher: Bool,
-        iconSignature: String
+        iconSignature: String,
+        dockSignature: String
     ) throws {
         let mainAppPath = Bundle.main.bundlePath
 
@@ -791,7 +805,8 @@ final class HelperBundleManager {
             bundleId: bundleId,
             appName: appName,
             showInAppSwitcher: showInAppSwitcher,
-            iconSignature: iconSignature
+            iconSignature: iconSignature,
+            dockSignature: dockSignature
         )
         print("   ✓ Updated Info.plist")
 
@@ -1130,7 +1145,7 @@ final class HelperBundleManager {
     }
 
     private func updateInfoPlist(at helperPath: URL, bundleId: String, appName: String, showInAppSwitcher: Bool,
-                                 iconSignature: String) throws {
+                                 iconSignature: String, dockSignature: String) throws {
         let infoPlistPath = helperPath.appendingPathComponent("Contents/Info.plist")
 
         guard let base = NSDictionary(contentsOf: infoPlistPath) as? [String: Any] else {
@@ -1143,7 +1158,8 @@ final class HelperBundleManager {
             appName: appName,
             showInAppSwitcher: showInAppSwitcher,
             declarative: IconPipeline.isDeclarative,
-            iconSignature: iconSignature
+            iconSignature: iconSignature,
+            dockSignature: dockSignature
         )
 
         // Write back
@@ -1165,17 +1181,20 @@ final class HelperBundleManager {
     ///   • Ghost vs App mode via `LSUIElement` (set when hidden from Cmd+Tab, removed otherwise).
     ///   • Strip Sparkle keys — helpers must never self-update; only the main app does.
     ///   • Strip `CFBundleURLTypes` — only the main app handles `docktile://` deep links.
-    ///   • Record the look the icon is built from (`iconSignatureKey`) — see `builtIconSignature`.
+    ///   • Record the look the icon is built from (`iconSignatureKey`) — see `builtIconSignature` —
+    ///     and everything the helper shows (`dockSignatureKey`) — see `builtDockSignature`.
     nonisolated static func helperInfoPlist(
         from base: [String: Any],
         bundleId: String,
         appName: String,
         showInAppSwitcher: Bool,
         declarative: Bool,
-        iconSignature: String
+        iconSignature: String,
+        dockSignature: String
     ) -> [String: Any] {
         var plist = base
         plist[iconSignatureKey] = iconSignature
+        plist[dockSignatureKey] = dockSignature
 
         // Bundle metadata
         plist["CFBundleIdentifier"] = bundleId
@@ -1960,7 +1979,8 @@ final class HelperBundleManager {
             bundleId: config.bundleIdentifier,
             helperPath: helperPath,
             showInAppSwitcher: config.showInAppSwitcher,
-            iconSignature: config.iconSignature
+            iconSignature: config.iconSignature,
+            dockSignature: config.dockSignature
         )
 
         // 2. Write the tile icon into the bundle (same branch as install)

@@ -41,7 +41,7 @@ it, and unit-test the seam so a broken rule fails loudly. Existing seams: `resol
 `AppInstallChecker.classifyInstallStatus`, `PopoverMetrics` / `PopoverSettings.resolve`,
 `SmartAddEngine.rankGroups` (app + identity de-dup — no two cards share a name/icon) / `.score` / `.coLaunchClusters` / `.dominantCategory` (nil without signal, never a silent `.productivity`) / `SmartAddCategory.identity` + `Identity.coLaunch` backstop,
 `AnalyticsService.resolveConsent` / `.shouldCollect`,
-`DockTileDetailView.resolveDockAction` / `.dockActionIsEnabled` / `.contentSignature`,
+`DockTileDetailView.resolveDockAction` / `.dockActionIsEnabled` / `.contentSignature` / `.actionIsProminent` + `DockTileConfiguration.dockSignature` (Update is accent only while the helper's `DTDockSignature` differs from the tile; bookkeeping never moves it; `DockSignatureTests`),
 `HelperBundleManager.shouldPerformDockRemoval` / `.helperFolderName` (same-name tiles disambiguate to distinct folders) / `.dockFileLabel` (Dock tooltip = display name, never the folder stem) / `.helperIconsComplete` (bundle icon-integrity probe), `HelperMigrationManager.classifyHelperHealth` (self-heal targets pinned-and-broken bundles only — drafts safe), `DiagnosticsLog.shouldRecord` (verbose dev/prod gate),
 `ConfigurationManager.canCreateNewTile` (sidebar + gate — never deadlock at zero tiles),
 `IconDepthMetrics` (glyph size-ratio cap + glass stroke + Liquid-Glass surface/glyph sheen + shadow + shading, per style, size-gated — shared by the baked `.icns` renderer and the live preview; `glyphSheen` covers symbols 0.55 and emoji 0.18),

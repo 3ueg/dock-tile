@@ -42,6 +42,9 @@ struct DockTileDetailView: View {
     @State private var showDockRestartConsent = false  // Show consent dialog for Dock restart
     @State private var hasAppearedOnce = false  // Track if view has fully loaded
     @State private var isCurrentlyInDock = false  // Track actual Dock state
+    /// `dockSignature` stamped into the tile's helper — what the Dock shows now (nil: no helper, or
+    /// built before the stamp). Read with the Dock state, never per render.
+    @State private var builtDockSignature: String?
     @FocusState private var isNameFieldFocused: Bool  // Track focus for commit-on-blur
     /// The embedded popover panel renders per icon style — observe so it re-renders on a switch.
     @ObservedObject private var iconStyleManager = IconStyleManager.shared
@@ -86,6 +89,19 @@ struct DockTileDetailView: View {
         case .install, .remove: return true
         case .saveOnly: return isDirty
         }
+    }
+
+    /// The install action is PROMINENT (accent) only when it would change what the Dock shows: Add
+    /// to Dock always; Update only while the tile differs from what its helper was built from (or the
+    /// helper predates the stamp, `nil`). An Update with nothing pending stays enabled — it is also
+    /// the manual rebuild that refreshes an App Grid face after an app's icon or install state
+    /// changed — but reads as a plain button, so a bright Update always means "the Dock is behind".
+    /// Remove and Done are never prominent.
+    nonisolated static func actionIsProminent(action: DockAction, isCurrentlyInDock: Bool,
+                                              builtDockSignature: String?, dockSignature: String) -> Bool {
+        guard action == .install else { return false }
+        guard isCurrentlyInDock else { return true }
+        return builtDockSignature != dockSignature
     }
 
     /// Parameters for `tile_added_to_dock` / `tile_updated`. Pure so the event's shape is guarded
@@ -300,7 +316,7 @@ struct DockTileDetailView: View {
 
     // MARK: - Band Action Button
 
-    /// Prominent for Dock-adding actions, plain otherwise; spinner INSIDE while processing (same
+    /// Prominent only when it would change the Dock (`actionIsProminent`), plain otherwise; spinner INSIDE while processing (same
     /// pattern as the Popover Appearance Save button) so the band stays stable — no external
     /// spinner popping in and shoving the button around.
     @ViewBuilder private var actionButton: some View {
@@ -314,7 +330,8 @@ struct DockTileDetailView: View {
             }
         }
         .disabled(!Self.dockActionIsEnabled(action: currentDockAction, isDirty: isDirty, isProcessing: isProcessing))
-        if currentDockAction == .install {
+        if Self.actionIsProminent(action: currentDockAction, isCurrentlyInDock: isCurrentlyInDock,
+                                  builtDockSignature: builtDockSignature, dockSignature: editedConfig.dockSignature) {
             button.buttonStyle(.borderedProminent).foregroundStyle(.white)
         } else {
             button.buttonStyle(.bordered)
@@ -561,6 +578,7 @@ struct DockTileDetailView: View {
     /// Check if tile is currently in Dock and update state
     private func updateDockState() {
         isCurrentlyInDock = HelperBundleManager.shared.findInDock(bundleId: editedConfig.bundleIdentifier) != nil
+        builtDockSignature = HelperBundleManager.shared.builtDockSignature(for: editedConfig)
     }
 
     /// Persist the editor's content edits (name, layout, icon, app list…). Visibility is owned
