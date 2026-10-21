@@ -244,3 +244,5 @@ Measured on an optimised build, 12 sidebar switches at 1 s, Animation Hitches `p
   detail column remade by `.id(selectedConfig.id)` — SwiftUI graph rebuild, hosting layout, toolbar
   re-tile, preview grid. Dropping that `.id` with an explicit state reset is the only lever left and
   is a separate change to Tile Detail (follow-up).
+
+**Correction (2026-10-22), against v2.4.0 in the same session:** the open inspector is NOT free per switch. Optimised hang traces: closed matches the release; open freezes ~115 ms longer per tile switch and ~70 ms per Settings switch, holds ~40 MB more, and peaks ~200 MB higher for under 10 s after a burst of switches. The "costs the same open or closed" line above came from Debug busy time. Numbers: `.claude/rules/performance-measurement.md` "Against the release".
