@@ -286,7 +286,9 @@ Popover, Dock Lock) · Dock Tile (About)** — the old accordion `@AppStorage` e
   - **Inspector band**: `InspectorTitleBand` places its title `.automatic` (never `.navigation`), at
     14 pt semibold, one step below the 16 pt page title (`PaneTitleLabel(fontSize:)`). Its toolbar
     has no guard of its own: `CustomiseInspectorColumn`'s presented check is the content gate, so
-    the band's items exist only while open. Built while closed, they leaked into the main band.
+    the band's items exist only while open. Built while closed, they leaked into the main band —
+    so the modifier goes on the presented `CustomiseTileView`, never on the column (which is built
+    while closed; hoisting it there leaked the title and a second toggle again, 2026-10-21).
   - **Inspector content follows Tile Detail's form**: group headers like "In This Tile" (13 pt
     semibold, primary), captions like its hint (11 pt, tertiary), 40 pt rows with 13 pt labels, cards
     inset 10 pt with full-width 1 pt `quinaryLabel` dividers, 13 pt Style-card and Background-chip labels.

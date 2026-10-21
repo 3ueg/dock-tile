@@ -414,12 +414,15 @@ private struct CustomiseInspectorColumn: View {
     var body: some View {
         Group {
             if isPresented {
+                // The band rides on the presented content, never on the column: the column is built
+                // while closed too, and its band then leaked "Customise Tile" + a second toggle into
+                // the main band (owner report 2026-10-21, after d514d27 hoisted it here).
                 CustomiseTileView(config: $session.config)
+                    .inspectorTitleBand(AppStrings.Title.customiseTile, onToggle: onToggleInspector)
             } else {
                 Color.clear
             }
         }
-        .inspectorTitleBand(AppStrings.Title.customiseTile, onToggle: onToggleInspector)
         // Pinned: AppKit throws (update-constraints loop) when the content's minimum width exceeds its column.
         .frame(width: AppDelegate.inspectorWidth)
         // The 1 pt line between Tile Detail and the inspector, full window height including the

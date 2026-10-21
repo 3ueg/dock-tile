@@ -20,7 +20,7 @@ struct CustomiseTileView: View {
     @State private var customColor: Color = .blue
     @State private var searchText: String = ""
 
-    /// The band (title + toggle) is the column's (`CustomiseInspectorColumn`), not this view's.
+    /// The band (title + toggle) is applied by `CustomiseInspectorColumn`, on this view only while presented.
     init(config: Binding<DockTileConfiguration>) {
         self._editedConfig = config
     }
