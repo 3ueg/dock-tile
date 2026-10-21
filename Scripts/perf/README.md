@@ -39,6 +39,18 @@ see `make_test_config.py` for why. To measure on release-sized data, with the de
     cp -p /tmp/dev-config.swap-backup.json ~/Library/Preferences/com.docktile.dev.configs.json
     md5 -q ~/Library/Preferences/com.docktile.dev.configs.json      # must match the noted value
 
+## Sidebar navigation (hangs, memory) — `nav-bench.sh` + `nav-hangsum.sh`
+Dev app only. One run = 12 sidebar switches at 1 s under the Animation Hitches template:
+    Scripts/perf/nav-bench.sh "<app>" <label> <inspectorShown true|false> tiles|symbols|settings
+    Scripts/perf/nav-hangsum.sh <label>          # refuses a run that did not drive 12/12 switches
+    Scripts/perf/nav-bench.sh "<app>" <label> true mem   # 200 switches, footprint at +10 s and +30 s
+Output goes to `$NAV_BENCH_OUT` (default `$TMPDIR/nav-bench`). Protocol for an A/B: build each side
+optimised as above into its own scratch DerivedData (an old tag from a `git worktree`, copying
+`Vendor/actool/target/release/docktile-actool` into it first), run the builds interleaved, three
+runs each, decide on the mean; rerun a run with a lone >1 s hang. Rows are by index (2, 3, 4 =
+the first three tiles): check the `rows:` line each run prints — test runs add and remove dev tiles.
+Delete the scratch worktrees and DerivedData afterwards.
+
 ## Production safety
 `prod_fingerprint.sh` prints the production config's checksum, each production helper bundle's
 mtime and signature state, the production tiles' Dock entries, and the running production helper

@@ -1,6 +1,7 @@
 # Stable inspector identity — design
 
-**Date:** 2026-10-22 · **Branch:** `feature/customise-inspector` · **Status:** draft, revised after
+**Date:** 2026-10-22 · **Branch:** `feature/customise-inspector` · **Status:** STOPPED at Task 1 (2026-10-22): the best-case spike missed the bar — see
+`performance-measurement.md` "Best case for a stable inspector identity". Revised after
 three plan gates (Needs answers ×3 → Karthik's five answers below; the third gate's two technical items resolved by the author, not re-gated)
 
 ## Intent

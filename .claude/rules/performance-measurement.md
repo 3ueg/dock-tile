@@ -124,3 +124,24 @@ production app needs `tell application id … to reopen` to create one. `top -l 
 for hours — read CPU time from `ps -o time=` twice instead. Match the main app with
 `pgrep -f "^…/MacOS/Dock Tile( |$)"`: launch arguments follow the executable path.
 
+### Best case for a stable inspector identity (2026-10-22, plan stopped here)
+
+`Scripts/perf/nav-bench.sh` protocol: v2.4.0 (tag) vs HEAD vs a spike = HEAD with ONLY the
+inspector's `.id(selectedConfig.id)` removed; optimised builds, interleaved, three runs, means.
+
+| | v2.4.0 | HEAD | spike | bar |
+|---|---|---|---|---|
+| Tiles, inspector open | 1.99 s / 15.3 hangs | 3.38 s / 16.3 | 2.82 s / 13.7 | ≤ 2.14 s |
+| Symbol↔Symbol, open | 2.26 s | 4.07 s (one 1.4 s outlier dropped) | 2.89 s | — |
+| Tiles, inspector closed | — | 2.00 s | 2.06 s | no worse |
+| Settings, open | — | 2.68 s | 2.63 s | no worse |
+| Memory +30 s after 200 switches | 99 MB | 142 MB | 135 MB | ≤ 109 MB |
+
+The rebuild is ~40% of the open inspector's tile-switch cost (~65% symbol↔symbol) and ~7 MB of its
+memory; the rest is the inspector existing and updating for each tile. The best case misses the
+v2.4.0 bar, so the stable-identity plan was stopped before any refactor (Karthik's rule).
+**Correction:** the ~300 MB peak right after a burst of switches is NOT the inspector's — v2.4.0
+peaks at 292–298 MB too; all builds settle within 10 s.
+Harness trap: dev Dock helpers run copies of the dev app with the same executable name, so the app
+must be matched by `Dock Tile Dev\.app/Contents/MacOS/…`, never by the executable alone — the
+first race attached to a helper and every run was (correctly) rejected as NO SIDEBAR.
