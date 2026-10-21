@@ -122,7 +122,7 @@ struct PopoverAppearanceView: View {
         // PaneTitleBand in DockTileConfigurationView.swift).
         .paneScrollEdgeEffect()
         .paneTitleBand(AppStrings.Settings.popover) {
-            ToolbarItemGroup(placement: .primaryAction) {
+            ToolbarItem(placement: .primaryAction) {
                 Button(action: resetToDefaults) {
                     Label(AppStrings.Button.resetToDefaults, systemImage: "arrow.counterclockwise")
                 }
@@ -130,32 +130,24 @@ struct PopoverAppearanceView: View {
                 .labelStyle(.iconOnly)
                 .help(AppStrings.Button.resetToDefaults)
                 .disabled(isActiveAtDefaults || isApplying)
+            }
+            ToolbarItem(placement: .primaryAction) {
 
-                Button(action: save) {
-                    if isApplying {
-                        // Loading state while rebuilding the tiles: spinner + "Applying…".
-                        HStack(spacing: 6) {
-                            ProgressView().controlSize(.small)
-                            Text(AppStrings.Button.saving)
-                        }
-                    } else {
-                        Text(AppStrings.Button.save)
-                    }
-                }
-                .buttonStyle(.borderedProminent)
-                .tint(.accentColor)
-                // A prominent (accent-filled) button uses a white "on-accent" label so it stays legible
-                // on the fill in BOTH light and dark mode (the Tahoe toolbar otherwise tints the label
-                // itself the accent colour → unreadable blue-on-blue).
-                .foregroundStyle(.white)
-                // HIG button states: a disabled control reduces prominence by dimming the WHOLE
-                // control. In this toolbar `.disabled()` dims only the label, leaving a bright-blue
-                // fill with faded text (uneven). Fading the whole button fades fill + label together,
-                // so it reads as one uniformly-dimmed "disabled blue" button. Stays full while there's
-                // something to do (dirty) or while applying (busy + spinner).
-                .opacity((isDirty || isApplying) ? 1.0 : 0.45)
-                .keyboardShortcut("s", modifiers: .command)
-                .disabled(isApplying || !isDirty)
+                // Accent only while Save can act. The Tahoe toolbar tints a DISABLED prominent
+                // button's label the TINT colour whatever `.foregroundStyle` says — with the accent
+                // tint that was blue text on a blue fill (owner report 2026-10-21; fading the whole
+                // button didn't fix it). Like a disabled default button in a macOS dialog, a
+                // disabled (or busy) Save drops the accent: same button, neutral grey tint, so the
+                // label goes grey too. Values only, never structure: swapping the button style, or
+                // swapping two toolbar items, left the toolbar showing the first-built look (an
+                // enabled Save stayed grey — measured 2026-10-21); changing modifier values does
+                // update it.
+                saveButton
+                    .buttonStyle(.borderedProminent)
+                    .tint(canSave ? Color.accentColor : Color(nsColor: .tertiaryLabelColor))
+                    // White on-accent label: the toolbar otherwise tints it the accent colour.
+                    .foregroundStyle(canSave ? AnyShapeStyle(Color.white) : AnyShapeStyle(.secondary))
+                    .disabled(!canSave)
             }
         }
         .alert(AppStrings.Alert.applyPopoverTitle, isPresented: $showApplyRestartPrompt) {
@@ -169,6 +161,25 @@ struct PopoverAppearanceView: View {
         }
     }
 
+    /// Save can act: there are unsaved edits and no apply is running.
+    private var canSave: Bool { isDirty && !isApplying }
+
+    /// Save's label and shortcut; its tint (accent vs neutral) is chosen in the toolbar.
+    private var saveButton: some View {
+        Button(action: save) {
+            if isApplying {
+                // Loading state while rebuilding the tiles: spinner + "Applying…".
+                HStack(spacing: 6) {
+                    ProgressView().controlSize(.small)
+                    Text(AppStrings.Button.saving)
+                }
+            } else {
+                Text(AppStrings.Button.save)
+            }
+        }
+        .keyboardShortcut("s", modifiers: .command)
+    }
+
     // MARK: - Live preview hero
 
     /// The real popover panels embedded in the shared `PopoverPreviewCanvas`, zoomed to a fixed
@@ -179,9 +190,8 @@ struct PopoverAppearanceView: View {
                              layout: previewLayout,
                              settings: activeDraft.wrappedValue,
                              fit: .worstCase(height: 300),
-                             signature: previewSignature)
-            .padding(.horizontal, 20)
-            .padding(.top, 8)
+                             signature: previewSignature,
+                             fullBleed: true)
             .animation(.easeInOut(duration: max(0.18, motionDuration)), value: previewSignature)
     }
 
@@ -486,6 +496,9 @@ struct PopoverPreviewCanvas: View {
     /// When set, the embedded panel becomes the tile's app editor (Tile Detail). nil in Settings,
     /// which shows the panel exactly as it ships.
     var editing: PopoverEditing? = nil
+    /// Edge-to-edge canvas (the Popover pane's hero): no rounded card or outline, a hairline along
+    /// the bottom edge instead. Tile Detail keeps the rounded card (false).
+    var fullBleed: Bool = false
 
     private let cornerRadius: CGFloat = 14
 
@@ -503,7 +516,7 @@ struct PopoverPreviewCanvas: View {
     }
 
     var body: some View {
-        Group {
+        let canvas = Group {
             switch fit {
             case .natural:
                 naturalFit
@@ -520,9 +533,19 @@ struct PopoverPreviewCanvas: View {
             }
         }
         .background(StudioCanvasBackgroundView())
-        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous)
-            .strokeBorder(Color(nsColor: .separatorColor).opacity(0.6), lineWidth: 0.5))
+
+        if fullBleed {
+            canvas
+                .clipped()
+                .overlay(alignment: .bottom) {
+                    Rectangle().fill(Color(nsColor: .separatorColor)).frame(height: 0.5)
+                }
+        } else {
+            canvas
+                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous)
+                    .strokeBorder(Color(nsColor: .separatorColor).opacity(0.6), lineWidth: 0.5))
+        }
     }
 
     /// The `.natural` fit: the real panel at 1:1 when it fits, scaled DOWN to fit when it doesn't.

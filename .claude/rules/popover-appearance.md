@@ -42,11 +42,14 @@ architecture.md "Sidebar Selection & Empty State" for the title-band chrome). Pe
   button (`arrow.counterclockwise`, `.bordered`, `.labelStyle(.iconOnly)`) with a `.help("Reset to
   Defaults")` tooltip + accessibility label; Save is the trailing primary (`.borderedProminent`, ⌘S).
   Save disables when not dirty, Reset when already at defaults. Save styling (Tahoe toolbar quirks):
-  the label is forced `.foregroundStyle(.white)` because the toolbar otherwise tints a
-  `.borderedProminent` label the accent colour (blue-on-blue, unreadable in light mode); and the
-  disabled look is a uniform `.opacity(0.45)` on the whole button — `.disabled()` alone dims only the
-  label there (bright fill + faded text), and `.tint(_.opacity())` is ignored by the prominent fill,
-  so fading the rendered button is the only way to get one evenly-dimmed "disabled blue". The live preview renders the **draft** (not the shared suite) via a new
+  Save is ONE `.borderedProminent` button whose tint is the accent only while it can act
+  (`canSave` = dirty and not applying), with a forced white label then; disabled or busy it takes a
+  neutral `tertiaryLabelColor` tint and a secondary label. The toolbar tints a DISABLED prominent
+  button's label the tint colour whatever `.foregroundStyle` says, so an accent tint read blue text on
+  a blue fill (owner report 2026-10-21); fading the whole button to 0.45 did not fix it. Change
+  modifier VALUES only, never the structure: swapping the button style or swapping two toolbar items
+  left the toolbar showing the first-built look. **Open (2026-10-21):** after a draft edit Save was
+  still seen grey in one hands-on check; unconfirmed whether the toolbar refreshes, re-check by eye. The live preview renders the **draft** (not the shared suite) via a new
   `settingsOverride: PopoverSettings?` param on `StackPopoverView`/`ListPopoverView` (nil in the real
   popover, which always loads saved values), so unsaved edits preview without persisting.
 - **Apply-on-Save (push to running helpers)**: persisting alone only affects the *next* popover open.
@@ -93,7 +96,10 @@ architecture.md "Sidebar Selection & Empty State" for the title-band chrome). Pe
   material `withinWindow` + ~14pt continuous corner + shadow); `isPreview:true` keeps the panel
   interactive for hover yet neutralises every action (clicks never launch apps / open the
   configurator). The preview hero sits on the shared `StudioCanvasBackgroundView` (same
-  `underWindowBackground` treatment as the About pane).
+  `underWindowBackground` treatment as the About pane). It is **full-bleed**
+  (`PopoverPreviewCanvas(fullBleed: true)`, owner 2026-10-21): flush with the detail column's sides
+  and the title band, no rounded card or outline, a 0.5 pt separator along its bottom edge. Tile
+  Detail's editor keeps the rounded card (`fullBleed` defaults to false).
 - **Hover highlight**: mouse hover uses the subtle Liquid-Glass `.quaternary` fill (the Tahoe
   treatment), NOT the bold accent — the accent is reserved for keyboard-focus selection. Applies to
   the real popover too. The preview scales with `.scaleEffect` (a *fixed* per-layout fit, not a
