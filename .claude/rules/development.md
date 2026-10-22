@@ -51,7 +51,11 @@ The app product name is **"Dock Tile"** (with space), not "DockTile". File syste
 ## Key Patterns
 
 - **Debounce**: Use monotonic `@State` counter as `.task(id:)` identity, not full struct equality (avoids O(n x icon_data_size) comparisons)
-- **View identity**: Add `.id(selectedConfig.id)` when switching configs to force view recreation and avoid stale `@State`
+- **View identity**: Add `.id(selectedConfig.id)` when switching configs to force view recreation and avoid stale `@State`.
+  It is not free: the rebuild is roughly half of what a heavy pane costs per switch (the Customise
+  inspector: view creation +0.52 s per 12 switches, SwiftUI template, 2026-10-22). Removing it means
+  owning every reset and every delayed write by hand — see the Tile Detail risks in
+  `docs/superpowers/specs/2026-10-22-stable-tile-identity-design.md` before trying.
 - **State updates**: Wrap `configManager.markSelectedConfigAsEdited()` in `DispatchQueue.main.async` inside `.onChange` to avoid "Publishing changes from within view updates" warnings
 - **Platform APIs**: Use `@available(macOS 26.0, *)` with separate computed properties and `@ViewBuilder` runtime checks; always provide fallback
 - **`.help` (tooltips) never fires on a `.disabled` control** — `.disabled` turns off

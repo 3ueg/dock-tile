@@ -145,3 +145,20 @@ peaks at 292–298 MB too; all builds settle within 10 s.
 Harness trap: dev Dock helpers run copies of the dev app with the same executable name, so the app
 must be matched by `Dock Tile Dev\.app/Contents/MacOS/…`, never by the executable alone — the
 first race attached to a helper and every run was (correctly) rejected as NO SIDEBAR.
+
+### Where the open inspector's cost goes (SwiftUI template, 2026-10-22)
+
+`xctrace record --template SwiftUI` over the 12-switch `tiles` sequence, optimised HEAD, inspector
+open vs closed; `swiftui-updates` table summed per description (exports run to ~6 GB of XML — stream
+them, never load them). Summed SwiftUI update time: closed 1.51 s, open 2.59 s (+1.08 s, ~90 ms
+per switch). Of the extra: view CREATION +0.52 s (the per-tile `.id` rebuild — the spike above
+removes it) and updates +0.55 s. Largest named piece of the rest: the symbol/emoji picker grid
+(`LazySubviewPlacements<LazyVGridLayout>` +127 ms, ~7,000 extra `Image Content` updates +86 ms,
+`Text Content` +31 ms). The inspector's own bodies (`CustomiseTileView`, pickers, style cards)
+cost under 10 ms combined; the rest is spread over many small controls (< 20 ms each) plus
+~330 ms SwiftUI leaves unattributed. ~20% of the freeze delta sits outside SwiftUI (AppKit layout
+and render), which this template does not split.
+**Consequences:** `@Observable` would not help switching (every field changes between tiles; it
+helps edits only). Removing the rebuild plus a cheaper picker grid is the one targeted fix, and
+even together they are not expected to reach v2.4.0 — the remainder is the cost of a full
+Customise panel updating per tile.

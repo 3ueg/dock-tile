@@ -50,6 +50,15 @@ Useful reads (all read-only, no clicking needed):
 `set selected of row N of outline 1 of scroll area 1 of group 1 of splitter group 1 of group 1 of
 window 1 to true` (selects a sidebar row — `click at {x,y}` frequently does nothing here).
 
+## Find the dev app's PID by its .app path
+
+Every dev Dock tile's helper is a copy of the dev app with the same executable name (`Dock Tile
+Dev`), so `pgrep -f "/MacOS/Dock Tile Dev"` can return a helper — a process with no window. Match
+`pgrep -f "Dock Tile Dev\.app/Contents/MacOS/Dock Tile Dev( |$)"` (launch arguments follow the
+path). On 2026-10-22 a whole benchmark race drove a helper and every run came back NO SIDEBAR. A
+background `open -g` can also restore no window; `tell application id "com.docktile.dev.app" to
+reopen` creates one.
+
 ## The test host is the dev app
 
 `xcodebuild test` launches the real Debug app against the user's **live dev** config and Dock.
