@@ -21,6 +21,9 @@ struct GeneralSettingsView: View {
     @State private var loginRequiresApproval = false
     /// Bumped per `refreshLoginState`; a reply from an older refresh is dropped.
     @State private var loginRefreshGeneration = 0
+    /// What the system last said (or, before the first read, the stored intent). The toggle's
+    /// `onChange` compares against this instead of re-reading `SMAppService.status` on the main thread.
+    @State private var loginSystemOn = false
     @State private var loginRegistrationError: String?
 
     /// Drives the manual "Scan…" results dialog. `scanFoundMissing` picks the found vs all-clear
@@ -61,7 +64,14 @@ struct GeneralSettingsView: View {
         .formStyle(.grouped)
         .paneScrollEdgeEffect()
         .paneTitleBand(AppStrings.Settings.general)
-        .onAppear(perform: refreshLoginState)
+        .onAppear {
+            // Start from the stored intent (no XPC) so the switch does not draw OFF for a frame and
+            // animate ON on every visit; the background read then confirms or corrects it.
+            let intent = LoginItemManager.shared.shouldBeEnabled
+            loginSystemOn = intent
+            startAtLoginOn = intent
+            refreshLoginState()
+        }
         .alert(
             scanFoundMissing ? AppStrings.Alert.missingAppsTitle : AppStrings.Alert.missingAppsNoneTitle,
             isPresented: $showScanResult
@@ -93,9 +103,7 @@ struct GeneralSettingsView: View {
             .onChange(of: startAtLoginOn) { _, enabled in
                 // `refreshLoginState` writes this @State to mirror the system; ignore those
                 // syncs and act only on a genuine user toggle, so we never re-register in a loop.
-                let manager = LoginItemManager.shared
-                let systemOn = manager.isEnabled || manager.requiresApproval
-                guard enabled != systemOn else { return }
+                guard enabled != loginSystemOn else { return }
                 applyLoginSetting(enabled)
             }
 
@@ -211,7 +219,8 @@ struct GeneralSettingsView: View {
             // the agent for approval (common right after a Sparkle update). Rendering it OFF there
             // would look like the setting silently reset itself.
             let requiresApproval = status == .requiresApproval
-            startAtLoginOn = status == .enabled || requiresApproval
+            loginSystemOn = status == .enabled || requiresApproval
+            startAtLoginOn = loginSystemOn
             loginRequiresApproval = requiresApproval
             loginRegistrationError = LoginItemManager.shared.lastRegistrationError
         }
@@ -220,6 +229,9 @@ struct GeneralSettingsView: View {
     /// Register/unregister the launcher agent to match the toggle. On failure, revert the
     /// toggle to the real system state so the UI never lies.
     private func applyLoginSetting(_ enabled: Bool) {
+        // Until the re-read below lands, treat the user's choice as the system state, so a quick
+        // second toggle is not mistaken for a sync and ignored.
+        loginSystemOn = enabled
         AnalyticsService.shared.log(.settingChanged, ["setting": "start_at_login", "enabled": enabled])
         DiagnosticsLog.shared.log("settings", "Start at login toggled \(enabled ? "ON" : "OFF")")
         do {

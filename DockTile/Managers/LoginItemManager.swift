@@ -30,8 +30,10 @@ final class LoginItemManager {
     /// The bundled launcher agent for this environment. `plistName` matches the file in
     /// Contents/Library/LaunchAgents/ — derived from the bundle ID so dev/release each
     /// pick their own plist (com.docktile.app… vs com.docktile.dev.app…).
+    nonisolated static let launcherPlistName = "\(AppEnvironment.mainAppBundleId).tilelauncher.plist"
+
     private var service: SMAppService {
-        SMAppService.agent(plistName: "\(AppEnvironment.mainAppBundleId).tilelauncher.plist")
+        SMAppService.agent(plistName: Self.launcherPlistName)
     }
 
     // MARK: - State (read from the system, never from local storage)
@@ -42,7 +44,7 @@ final class LoginItemManager {
     /// the service-management daemon (~20 ms per read on an M3 Max, 2026-10-21), and the General
     /// pane used to read it three times inside its `onAppear`, freezing every switch to General.
     nonisolated static func readStatus() async -> SMAppService.Status {
-        let plistName = "\(AppEnvironment.mainAppBundleId).tilelauncher.plist"
+        let plistName = launcherPlistName
         return await Task.detached(priority: .userInitiated) {
             SMAppService.agent(plistName: plistName).status
         }.value

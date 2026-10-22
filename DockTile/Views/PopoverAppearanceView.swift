@@ -122,6 +122,9 @@ struct PopoverAppearanceView: View {
         // PaneTitleBand in DockTileConfigurationView.swift).
         .paneScrollEdgeEffect()
         .paneTitleBand(AppStrings.Settings.popover) {
+            // Separate items, not one group: on macOS 26+ a group merges bordered buttons into one
+            // glass capsule unless a prominent one breaks the run (architecture.md, Tile Detail band),
+            // and a disabled Save is not prominent-looking.
             ToolbarItem(placement: .primaryAction) {
                 Button(action: resetToDefaults) {
                     Label(AppStrings.Button.resetToDefaults, systemImage: "arrow.counterclockwise")
@@ -132,7 +135,6 @@ struct PopoverAppearanceView: View {
                 .disabled(isActiveAtDefaults || isApplying)
             }
             ToolbarItem(placement: .primaryAction) {
-
                 // Accent only while Save can act. The Tahoe toolbar tints a DISABLED prominent
                 // button's label the TINT colour whatever `.foregroundStyle` says — with the accent
                 // tint that was blue text on a blue fill (owner report 2026-10-21; fading the whole

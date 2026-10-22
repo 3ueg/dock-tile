@@ -403,9 +403,9 @@ final class TileEditSessionStore: ObservableObject {
 /// items out of the main band while closed.
 ///
 /// Built in the SAME frame as Tile Detail, deliberately. A skeleton-then-content deferral was tried
-/// (2026-10-21, 32 ms settle): a tile switch costs the same with the inspector open or closed
-/// (674 vs 671 ms main-thread busy, Debug), so the placeholder had nothing to hide and only added a
-/// second layout pass — 20 hangs over 12 switches against 13–15 without it (optimised build).
+/// (2026-10-21, 32 ms settle) and measured worse — 19–20 hangs over 12 switches against 13–15
+/// without it (optimised build) — so it was removed. What the open inspector does cost per switch is
+/// in `docs/perf/customise-inspector-cost-2026-10.md`.
 private struct CustomiseInspectorColumn: View {
     @ObservedObject var session: TileEditSession
     let isPresented: Bool

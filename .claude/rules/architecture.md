@@ -336,7 +336,7 @@ Popover, Dock Lock) · Dock Tile (About)** — the old accordion `@AppStorage` e
     ~115 ms longer and a Settings switch ~70 ms longer than v2.4.0 (optimised hang traces,
     2026-10-22); closed, it matches the release. A skeleton-then-content deferral (32 ms settle) was
     built and measured WORSE (more hangs), and stable `ToolbarItem(id:)`s changed nothing, so both
-    were removed — see performance-measurement.md "Main-window navigation" and "Against the release".
+    were removed — see performance-measurement.md "Main-window navigation" and `docs/perf/customise-inspector-cost-2026-10.md`.
   Design handoff (superseded where it describes a screen): `docs/design_handoff_customise_tile/README.md`.
 - **Two defaults for the tile face (critical)**: a NEW tile starts on App Grid
   (`ConfigurationDefaults.iconFace = .apps`), while a stored config missing the `iconFace` key loads as

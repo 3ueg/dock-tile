@@ -33,6 +33,12 @@ case $MODE in
 esac
 
 quitapp
+PREV_FLAG=$(defaults read com.docktile.dev.app inspectorShown 2>/dev/null)
+restore_flag() {
+  if [[ -n "$PREV_FLAG" ]]; then defaults write com.docktile.dev.app inspectorShown -bool "$PREV_FLAG"
+  else defaults delete com.docktile.dev.app inspectorShown 2>/dev/null; fi
+}
+trap restore_flag EXIT
 defaults write com.docktile.dev.app inspectorShown -bool "$FLAG"
 open -g "$APP" --args -ApplePersistenceIgnoreState YES
 sleep 8
