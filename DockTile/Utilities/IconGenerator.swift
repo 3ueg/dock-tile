@@ -1240,9 +1240,9 @@ extension IconGenerator {
     ///
     /// No squircle, stroke or sheen: the system draws the tile shape and the glass, and flat
     /// minis are what iOS folders show. Each mini does carry a soft CONTACT shadow, because a
-    /// light icon would otherwise vanish on near-white glass. An empty `minis` yields a fully
-    /// transparent layer (the caller falls back to the glyph face).
-    static func generateAppsLayerPNG(minis: [AppsFaceMini], canvas: Int = 1024) throws -> Data {
+    /// light icon would otherwise vanish on near-white glass. An empty `minis` draws the empty
+    /// 2x2's slots, toned for `onDarkGlass` (the appearance slot this layer is for).
+    static func generateAppsLayerPNG(minis: [AppsFaceMini], canvas: Int = 1024, onDarkGlass: Bool = false) throws -> Data {
         let side = CGFloat(canvas)
         let size = CGSize(width: side, height: side)
 
@@ -1272,7 +1272,7 @@ extension IconGenerator {
         // (`appsIcon`) still inset — a flat icon carries its own margin.
         let shape = CGRect(origin: .zero, size: size)
         drawAppsGrid(minis: minis, shape: shape, nominalSize: side, desaturate: false,
-                     in: graphicsContext.cgContext)
+                     onDarkGlass: onDarkGlass, in: graphicsContext.cgContext)
 
         NSGraphicsContext.restoreGraphicsState()
 
@@ -1283,14 +1283,26 @@ extension IconGenerator {
     }
 
     /// Draws up to `AppsFaceGrid.maxItems` minis into their cells. `desaturate` greys each mini
-    /// first (Clear/Tinted keep the legacy path's grayscale promise).
+    /// first (Clear/Tinted keep the legacy path's grayscale promise). No minis: the empty 2x2's
+    /// slots (`AppsFaceGrid.emptySlotFill`), toned for `onDarkGlass`.
     private static func drawAppsGrid(
         minis: [AppsFaceMini],
         shape: CGRect,
         nominalSize: CGFloat,
         desaturate: Bool,
+        onDarkGlass: Bool,
         in context: CGContext
     ) {
+        if minis.isEmpty {
+            let fill = AppsFaceGrid.emptySlotFill(onDarkGlass: onDarkGlass)
+            context.setFillColor(NSColor(white: fill.white, alpha: fill.alpha).cgColor)
+            for cell in AppsFaceGrid.cells(count: AppsFaceGrid.emptySlotCount) {
+                let box = AppsFaceGrid.rect(cell, in: shape, yUp: true)
+                context.addPath(createSquirclePath(in: box, cornerRadius: box.width * AppsFaceGrid.slotCornerRatio))
+                context.fillPath()
+            }
+            return
+        }
         let shown = Array(minis.prefix(AppsFaceGrid.maxItems))
         let cells = AppsFaceGrid.cells(count: shown.count)
         let shadow = AppsFaceGrid.miniShadow(nominalSize: nominalSize)
@@ -1358,7 +1370,8 @@ extension IconGenerator {
             rect: shape
         )
         drawAppsGrid(minis: minis, shape: shape, nominalSize: size.width,
-                     desaturate: AppsFaceGrid.desaturatesMinis(style: iconStyle), in: context)
+                     desaturate: AppsFaceGrid.desaturatesMinis(style: iconStyle),
+                     onDarkGlass: grays.top < 0.5, in: context)
         NSGraphicsContext.restoreGraphicsState()
 
         let image = NSImage(size: size)

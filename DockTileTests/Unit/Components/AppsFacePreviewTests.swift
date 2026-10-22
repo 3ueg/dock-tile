@@ -13,18 +13,18 @@ struct AppsFacePreviewTests {
                                         lastKnownPath: "/System/Library/CoreServices/Finder.app")
     private static let ghost = AppItem(bundleIdentifier: "com.example.not-installed", name: "Nope")
 
-    private func preview(items: [AppItem], style: IconStyle) -> DockTileIconPreview {
+    private func preview(items: [AppItem]?, style: IconStyle) -> DockTileIconPreview {
         DockTileIconPreview(
             tintColor: .blue, iconType: .sfSymbol, iconValue: "star.fill", iconScale: 14,
             iconWeight: .medium, background: .colour, size: Self.side, appsFaceItems: items
         ).forcing(style)
     }
-    private func renderWithImageRenderer(items: [AppItem], style: IconStyle) throws -> NSBitmapImageRep {
+    private func renderWithImageRenderer(items: [AppItem]?, style: IconStyle) throws -> NSBitmapImageRep {
         let renderer = ImageRenderer(content: preview(items: items, style: style))
         renderer.scale = 1
         return NSBitmapImageRep(cgImage: try #require(renderer.cgImage))
     }
-    private func render(items: [AppItem], style: IconStyle) throws -> NSBitmapImageRep {
+    private func render(items: [AppItem]?, style: IconStyle) throws -> NSBitmapImageRep {
         let view = preview(items: items, style: style)
         // NSHostingView + cacheDisplay (an 8-bit sRGB bitmap), NOT ImageRenderer: a mini's bitmap
         // from IconServices is 16-bit extended sRGB, which makes ImageRenderer emit its whole
@@ -102,17 +102,32 @@ struct AppsFacePreviewTests {
         }
     }
 
-    @Test("unresolvableItemsFallBackToGlyph: every item missing renders the glyph face byte-for-byte")
-    func unresolvableItemsFallBackToGlyph() throws {
-        let apps = try png(try render(items: [Self.ghost, Self.ghost], style: .defaultStyle))
-        let glyph = try png(try render(items: [], style: .defaultStyle))
-        #expect(apps == glyph)
+    @Test("allMissingShowsTheEmptyGrid: every item missing renders the empty App Grid, never the glyph")
+    func allMissingShowsTheEmptyGrid() throws {
+        let missing = try png(try render(items: [Self.ghost, Self.ghost], style: .defaultStyle))
+        let empty = try png(try render(items: [], style: .defaultStyle))
+        let glyph = try png(try render(items: nil, style: .defaultStyle))
+        #expect(missing == empty)
+        #expect(empty != glyph)
+    }
+
+    @Test("An App Grid with no apps: light glass with four faint darker slots in the 2×2 cells, gaps glass")
+    func emptyGridShowsFourSlots() throws {
+        let rep = try render(items: [], style: .defaultStyle)
+        let glass = try srgb(rep, 128, 128)                 // the centre is the gap between the four cells
+        #expect(glass.redComponent > 0.93 && glass.saturationComponent < 0.03, "centre is not glass: \(glass)")
+        for i in 0..<4 {
+            let cell = Self.cell(i, count: 4)
+            let slot = try srgb(rep, Int(cell.midX), Int(cell.midY))
+            let darker = glass.redComponent - slot.redComponent
+            #expect(darker > 0.03 && darker < 0.12, "slot \(i) is not a faint well: \(slot)")
+        }
     }
 
     @Test("fromConfig routes the items only for an Apps-face tile")
     func fromConfigRoutesByFace() {
         var config = DockTileConfiguration(name: "Work", iconFace: .glyph, appItems: [Self.finder])
-        #expect(DockTileIconPreview.fromConfig(config, size: 44).appsFaceItems.isEmpty)
+        #expect(DockTileIconPreview.fromConfig(config, size: 44).appsFaceItems == nil)
         config.iconFace = .apps
         #expect(DockTileIconPreview.fromConfig(config, size: 44).appsFaceItems == [Self.finder])
     }

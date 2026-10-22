@@ -868,59 +868,58 @@ final class HelperBundleManager {
     private func installTileIcons(for config: DockTileConfiguration, at helperPath: URL) async throws {
         let resourcesPath = helperPath.appendingPathComponent("Contents/Resources")
 
-        // Apps face: bake the tile's installed apps instead of its symbol/emoji. An empty set
-        // falls through to the glyph path below, which is otherwise untouched.
+        // Apps face: bake the tile's installed apps instead of its symbol/emoji. With none, the
+        // empty 2x2's slots — an App Grid never falls back to the tile's symbol (owner, 2026-10-22).
         if config.iconFace == .apps {
             let face = appsFaceEntries(for: config)
             if face.entries.isEmpty {
-                DiagnosticsLog.shared.log("tile", "Apps face for \(config.diagnosticName): no installed items — baking the glyph face")
-            } else {
-                if face.skipped > 0 {
-                    DiagnosticsLog.shared.log("tile", "Apps face for \(config.diagnosticName): skipped \(face.skipped) missing item(s)")
-                }
-                if IconPipeline.isDeclarative {
-                    // One grid per appearance slot, each app rendered in that slot's style — NOT the
-                    // style the system happens to be in during this Update. The fallback `.icns` (the
-                    // light composition) takes the Default renders for the same reason.
-                    var layerPNGs: [String: Data] = [:]
-                    var standardMinis: [IconGenerator.AppsFaceMini] = []
-                    var fallbacks = 0
-                    for style in AppIconRenderStyle.allCases {
-                        let styled = Self.styledAppsFaceMinis(face.entries, style: style)
-                        fallbacks += styled.fallbacks
-                        if style == .standard { standardMinis = styled.minis }
-                        layerPNGs[IconDocumentBuilder.appsFaceImageName(for: style)] =
-                            try IconGenerator.generateAppsLayerPNG(minis: styled.minis)
-                    }
-                    if fallbacks > 0 {
-                        DiagnosticsLog.shared.log("tile", "Apps face for \(config.diagnosticName): \(fallbacks) styled render(s) unavailable — used the current-style icon")
-                    }
-                    try await installCompiledIcon(
-                        json: IconDocumentBuilder.appsFaceIconJSON(), layerPNGs: layerPNGs, resourcesPath: resourcesPath)
-                    try IconGenerator.generateAppsFallbackIcns(
-                        minis: standardMinis,
-                        outputURL: resourcesPath.appendingPathComponent("AppIcon.icns")
-                    )
-                    print("   ✓ Compiled Apps-face icon (Assets.car + fallback AppIcon.icns)")
-                } else {
-                    let minis = face.entries.map { IconGenerator.AppsFaceMini(image: $0.image, isFolder: $0.item.isFolder) }
-                    for style in IconStyle.allCases {
-                        try IconGenerator.generateAppsIcns(
-                            minis: minis,
-                            outputURL: iconPath(for: style, in: resourcesPath),
-                            iconStyle: style
-                        )
-                        print("   ✓ Generated \(style.rawValue) style Apps-face icon")
-                    }
-                    let currentStyle = IconStyle.current
-                    let sourceIconPath = iconPath(for: currentStyle, in: resourcesPath)
-                    let iconDestPath = resourcesPath.appendingPathComponent("AppIcon.icns")
-                    try? FileManager.default.removeItem(at: iconDestPath)
-                    try FileManager.default.copyItem(at: sourceIconPath, to: iconDestPath)
-                    print("   ✓ Set active icon (style: \(currentStyle.rawValue))")
-                }
-                return
+                DiagnosticsLog.shared.log("tile", "Apps face for \(config.diagnosticName): no installed items — baking the empty grid")
             }
+            if face.skipped > 0 {
+                DiagnosticsLog.shared.log("tile", "Apps face for \(config.diagnosticName): skipped \(face.skipped) missing item(s)")
+            }
+            if IconPipeline.isDeclarative {
+                // One grid per appearance slot, each app rendered in that slot's style — NOT the
+                // style the system happens to be in during this Update. The fallback `.icns` (the
+                // light composition) takes the Default renders for the same reason.
+                var layerPNGs: [String: Data] = [:]
+                var standardMinis: [IconGenerator.AppsFaceMini] = []
+                var fallbacks = 0
+                for style in AppIconRenderStyle.allCases {
+                    let styled = Self.styledAppsFaceMinis(face.entries, style: style)
+                    fallbacks += styled.fallbacks
+                    if style == .standard { standardMinis = styled.minis }
+                    layerPNGs[IconDocumentBuilder.appsFaceImageName(for: style)] =
+                        try IconGenerator.generateAppsLayerPNG(minis: styled.minis, onDarkGlass: style != .standard)
+                }
+                if fallbacks > 0 {
+                    DiagnosticsLog.shared.log("tile", "Apps face for \(config.diagnosticName): \(fallbacks) styled render(s) unavailable — used the current-style icon")
+                }
+                try await installCompiledIcon(
+                    json: IconDocumentBuilder.appsFaceIconJSON(), layerPNGs: layerPNGs, resourcesPath: resourcesPath)
+                try IconGenerator.generateAppsFallbackIcns(
+                    minis: standardMinis,
+                    outputURL: resourcesPath.appendingPathComponent("AppIcon.icns")
+                )
+                print("   ✓ Compiled Apps-face icon (Assets.car + fallback AppIcon.icns)")
+            } else {
+                let minis = face.entries.map { IconGenerator.AppsFaceMini(image: $0.image, isFolder: $0.item.isFolder) }
+                for style in IconStyle.allCases {
+                    try IconGenerator.generateAppsIcns(
+                        minis: minis,
+                        outputURL: iconPath(for: style, in: resourcesPath),
+                        iconStyle: style
+                    )
+                    print("   ✓ Generated \(style.rawValue) style Apps-face icon")
+                }
+                let currentStyle = IconStyle.current
+                let sourceIconPath = iconPath(for: currentStyle, in: resourcesPath)
+                let iconDestPath = resourcesPath.appendingPathComponent("AppIcon.icns")
+                try? FileManager.default.removeItem(at: iconDestPath)
+                try FileManager.default.copyItem(at: sourceIconPath, to: iconDestPath)
+                print("   ✓ Set active icon (style: \(currentStyle.rawValue))")
+            }
+            return
         }
 
         guard IconPipeline.isDeclarative else {

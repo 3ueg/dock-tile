@@ -146,4 +146,12 @@ struct AppsFaceGridTests {
         #expect(out.selected.isEmpty && out.skipped == 2)
         #expect(AppsFaceGrid.select(items: [], isInstalled: { _ in true }).selected.isEmpty)
     }
+
+    @Test("The empty App Grid: four slots in the 2×2 cells, a faint dark well on light glass and a faint light one on dark")
+    func emptySlots() {
+        #expect(AppsFaceGrid.emptySlotCount == 4)
+        #expect(AppsFaceGrid.emptySlotFill(onDarkGlass: false) == (0, 0.07))
+        #expect(AppsFaceGrid.emptySlotFill(onDarkGlass: true) == (1, 0.10))
+        close(AppsFaceGrid.slotCornerRatio, 0.225)
+    }
 }

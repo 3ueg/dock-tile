@@ -378,6 +378,16 @@ enum AppsFaceGrid {
         style == .dark ? darkGrays : lightGrays
     }
 
+    /// An App Grid with no (installed) apps shows the empty 2x2: four quiet slots in the 2x2 cells,
+    /// the app-icon shape (continuous corners, 22.5% of the cell), a faint darker well on light glass
+    /// and a faint lighter one on dark glass — no stroke, no shadow, no text (owner, 2026-10-22: an
+    /// App Grid never shows the tile's symbol). They disappear once an app is added.
+    static let emptySlotCount = 4
+    static let slotCornerRatio: CGFloat = 0.225
+    static func emptySlotFill(onDarkGlass: Bool) -> (white: CGFloat, alpha: CGFloat) {
+        onDarkGlass ? (1, 0.10) : (0, 0.07)
+    }
+
     /// Clear and Tinted are grayscale styles, so the minis lose their colour too.
     static func desaturatesMinis(style: IconStyle) -> Bool {
         style == .clear || style == .tinted

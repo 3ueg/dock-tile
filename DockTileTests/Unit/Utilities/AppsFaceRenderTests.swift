@@ -145,11 +145,6 @@ struct AppsFaceRenderTests {
         #expect(shadowColour.brightnessComponent < 0.2)       // black, not a smeared mini
     }
 
-    @Test("No minis → an entirely transparent layer (the caller must have fallen back to the glyph face)")
-    func emptyLayerIsTransparent() throws {
-        let rep = try Self.bitmap(try IconGenerator.generateAppsLayerPNG(minis: []))
-        #expect(Self.alpha(rep, 512, 512) == 0 && Self.alpha(rep, 298, 298) == 0)
-    }
     // MARK: - Fallback .icns and the legacy bake (same renderer, four styles)
 
     static func gray(_ rep: NSBitmapImageRep, _ x: Int, _ y: Int) throws -> CGFloat {
@@ -282,5 +277,19 @@ struct AppsFaceRenderTests {
             previousDark = dark
         }
         #expect(flips >= 30, "stripes smeared: only \(flips) edges across 300 px")
+    }
+
+    @Test("emptyGridLayerDrawsFourSlots: no minis bake the empty 2×2 — faint slots in the cells, nothing elsewhere")
+    func emptyGridLayerDrawsFourSlots() throws {
+        for dark in [false, true] {
+            let rep = try Self.bitmap(try IconGenerator.generateAppsLayerPNG(minis: [], onDarkGlass: dark))
+            #expect(Self.alpha(rep, 512, 512) == 0, "the gap between the cells is painted")
+            #expect(Self.alpha(rep, 2, 2) == 0)
+            for i in 0..<4 {
+                let c = Self.centre(i, count: 4, in: Self.layerShape)
+                let a = Self.alpha(rep, c.x, c.y)
+                #expect(abs(a - (dark ? 0.10 : 0.07)) < 0.02, "slot \(i) alpha \(a) (dark: \(dark))")
+            }
+        }
     }
 }

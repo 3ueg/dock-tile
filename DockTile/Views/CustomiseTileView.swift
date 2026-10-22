@@ -302,7 +302,7 @@ struct CustomiseTileView: View {
                     iconWeight: styled.iconWeight,
                     background: styled.background,
                     size: 32,
-                    appsFaceItems: style == .apps ? editedConfig.appItems : []
+                    appsFaceItems: style == .apps ? editedConfig.appItems : nil
                 )
                 .iconLift(size: 32)
                 Text(style.label)

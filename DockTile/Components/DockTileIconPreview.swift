@@ -38,9 +38,9 @@ struct DockTileIconPreview: View {
     /// Pins the style (Customise's canonical Light/Dark previews); `nil` follows the live style.
     var forcedStyle: IconStyle? = nil
 
-    /// Apps-face items (`[]` = glyph face). Only installed ones draw; none installed falls back
-    /// to the glyph face.
-    let appsFaceItems: [AppItem]
+    /// The App Grid face's items; nil draws the glyph face, an empty array the empty App Grid.
+    /// Only installed ones draw; none installed shows the empty grid too.
+    let appsFaceItems: [AppItem]?
 
     @Environment(\.displayScale) private var displayScale
 
@@ -84,7 +84,7 @@ struct DockTileIconPreview: View {
         self.iconWeight = ConfigurationDefaults.iconWeight
         self.tileBackground = .colour
         self.size = size
-        self.appsFaceItems = []
+        self.appsFaceItems = nil
     }
 
     // New initializer with explicit icon type (legacy without scale)
@@ -96,7 +96,7 @@ struct DockTileIconPreview: View {
         self.iconWeight = ConfigurationDefaults.iconWeight
         self.tileBackground = .colour
         self.size = size
-        self.appsFaceItems = []
+        self.appsFaceItems = nil
     }
 
     // Full initializer with icon scale and weight
@@ -108,7 +108,7 @@ struct DockTileIconPreview: View {
         iconWeight: IconWeight = ConfigurationDefaults.iconWeight,
         background: TileBackground,
         size: CGFloat,
-        appsFaceItems: [AppItem] = []
+        appsFaceItems: [AppItem]? = nil
     ) {
         self.tintColor = tintColor
         self.iconType = iconType
@@ -190,16 +190,15 @@ struct DockTileIconPreview: View {
         return AnyShapeStyle(styleColors.foreground)
     }
 
-    /// Installed Apps-face items in tile order; empty means the glyph face draws.
+    /// Installed Apps-face items in tile order (empty: the App Grid shows its empty slots).
     private var appsFaceMinis: [AppItem] {
-        AppsFaceGrid.select(items: appsFaceItems) { AppInstallChecker.isInstalled($0) }.selected
+        AppsFaceGrid.select(items: appsFaceItems ?? []) { AppInstallChecker.isInstalled($0) }.selected
     }
 
     @ViewBuilder
     var body: some View {
-        let minis = appsFaceMinis
-        if !minis.isEmpty {
-            appsFaceBody(minis)
+        if appsFaceItems != nil {
+            appsFaceBody(appsFaceMinis)
         } else {
             glyphFaceBody
         }
@@ -221,6 +220,16 @@ struct DockTileIconPreview: View {
                 .fill(LinearGradient(
                     colors: [Color(white: grays.top), Color(white: grays.bottom)],
                     startPoint: .top, endPoint: .bottom))
+            if minis.isEmpty {
+                let slot = AppsFaceGrid.emptySlotFill(onDarkGlass: grays.top < 0.5)
+                ForEach(Array(AppsFaceGrid.cells(count: AppsFaceGrid.emptySlotCount).enumerated()), id: \.offset) { _, cell in
+                    let box = AppsFaceGrid.rect(cell, in: frame, yUp: false)
+                    RoundedRectangle(cornerRadius: box.width * AppsFaceGrid.slotCornerRatio, style: .continuous)
+                        .fill(Color(white: slot.white, opacity: slot.alpha))
+                        .frame(width: box.width, height: box.height)
+                        .position(x: box.midX, y: box.midY)
+                }
+            }
             ForEach(Array(minis.enumerated()), id: \.offset) { index, item in
                 let box = AppsFaceGrid.rect(
                     AppsFaceGrid.drawBox(for: cells[index], isFolder: item.isFolder),
@@ -427,7 +436,7 @@ extension DockTileIconPreview {
             iconWeight: config.iconWeight,
             background: config.background,
             size: size,
-            appsFaceItems: config.iconFace == .apps ? config.appItems : []
+            appsFaceItems: config.iconFace == .apps ? config.appItems : nil
         )
     }
 }

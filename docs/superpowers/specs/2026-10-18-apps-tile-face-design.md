@@ -22,7 +22,7 @@ Decisions taken with Karthik (2026-10-18):
 | Material | Apple's `system-light` / `system-dark` icon fills — the same named gradients the `Apps` launcher icon uses. Not the tile's colour. |
 | Mini icons | **Flat**, like iOS folder minis — no Liquid Glass lift, no translucency. (Apple's launcher lifts its chiclets with specular + shadow; we deliberately don't: translucency washes out real app icons, and the lift needs compiler work.) |
 | Layers | One composite raster layer visible in every appearance (the emoji model). Per-app layers were measured and add nothing. |
-| Fewer / more apps | Fewer: empty cells. More than nine: the first nine in tile order. Zero: the face falls back to the tile's symbol face so a new tile never shows a blank glass square. |
+| Fewer / more apps | Fewer: empty cells. More than nine: the first nine in tile order. Zero: ~~the face falls back to the tile's symbol face~~ — amended 2026-10-22 (owner): the empty 2×2, four faint slots on the glass, everywhere including the Dock; an App Grid never shows the symbol. |
 | Which apps | Tile order. The editor's drag-reorder already controls it; no per-slot picker. |
 | Missing apps | Skipped — the next installed item takes the cell. A baked "not installed" marker would outlive the uninstall. |
 | Folder items | **Included, in tile order** (my call, builder-check question 2 — Karthik may overturn). Drawn with the system folder icon `AppIconLoader` already returns, **fitted to the cell**, not through the ÷0.805 app-icon box (a Finder folder glyph carries no squircle margin). Presence judged by path, as `AppInstallChecker` already does for folders. |

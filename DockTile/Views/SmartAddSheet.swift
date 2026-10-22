@@ -168,7 +168,7 @@ private struct SuggestionCard: View {
                 iconWeight: ConfigurationDefaults.iconWeight,
                 background: .colour,
                 size: 58,
-                appsFaceItems: suggestion.style == .appGrid ? suggestion.appItems : []
+                appsFaceItems: suggestion.style == .appGrid ? suggestion.appItems : nil
             )
             .iconLift(size: 58)
 

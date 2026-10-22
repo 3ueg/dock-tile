@@ -160,8 +160,11 @@ it is the Style picker in Customise (App Grid / Symbol / Emoji).
 - **Selection is installed-only, one predicate**: `AppInstallChecker.isInstalled` feeds the bake, the
   preview AND the Customise Apps card (Shown "N of N"), so the card, the hero and the Dock icon cannot
   disagree. Items in tile order via `AppsFaceGrid.select`; a missing item is skipped and the next
-  installed one takes its cell; zero installed -> the tile bakes the glyph face (and the card reads
-  "0 of 0" / "-"). The bake logs skipped items on the non-verbose `tile` category.
+  installed one takes its cell; zero installed -> the **empty 2x2**: four quiet slots in the cells
+  (`AppsFaceGrid.emptySlotFill`, black 7% on light glass / white 10% on dark, continuous 22.5% corners,
+  no stroke or shadow) in the preview, the cards and every Dock bake — an App Grid never shows the
+  tile's symbol (owner, 2026-10-22; it used to bake the glyph face). The card reads "0 of 0" / "-".
+  `DockTileIconPreview.appsFaceItems` is optional: nil draws the glyph face, `[]` the empty grid. The bake logs skipped items on the non-verbose `tile` category.
 - **Mini icons**: `AppIconLoader.iconFromAppURL` resolves symlinks first (a symlinked app, e.g. Safari
   on macOS 27, otherwise draws the alias badge). The desaturated minis are rasterised at the draw-box
   PIXEL size (rendering at the image's point size picked a low-res rep and blurred them).
