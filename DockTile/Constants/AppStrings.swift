@@ -415,11 +415,6 @@ enum AppStrings {
             value: "Arrangement",
             comment: "Customise Tile: Apps card row — the grid the face uses"
         )
-        static let appsArrangementFills = NSLocalizedString(
-            "label.apps.arrangement.fills",
-            value: "Fills the Tile",
-            comment: "Customise Tile: Arrangement value for one app"
-        )
         static let appsArrangementTwoByTwo = NSLocalizedString(
             "label.apps.arrangement.twoByTwo",
             value: "2 × 2",

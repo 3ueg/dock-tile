@@ -61,19 +61,20 @@ struct AppsFacePreviewTests {
         }.max() ?? 0
     }
 
-    @Test("One installed app: light glass fills the frame, the single mini is centred, the other cells are glass")
+    @Test("One installed app: light glass fills the frame, the mini sits in the 2×2's top-left cell, the other cells are glass")
     func oneAppOnLightGlass() throws {
         let rep = try render(items: [Self.finder], style: .defaultStyle)
         let top = try srgb(rep, 128, 4)                      // full-frame shape, no icon-grid margin
         #expect(top.redComponent > 0.97 && abs(top.redComponent - top.blueComponent) < 0.02)
         let bottom = try srgb(rep, 128, 251)
         #expect(abs(bottom.redComponent - 0.925) < 0.03)
-        let cell0 = Self.cell(0, count: 1)                 // the single centred 0.60 cell (51…205 px)
-        #expect(abs(cell0.midX - 128) < 1)
-        #expect(try maxSaturation(rep, in: cell0) > 0.3, "the centred cell shows no Finder colour")
-        // Inside the shape, left of the mini's draw box (33…223 px): empty glass.
-        let glass = try srgb(rep, 20, 128)
-        #expect(glass.saturationComponent < 0.03 && glass.redComponent > 0.9, "beside the mini is not empty glass: \(glass)")
+        let cell0 = Self.cell(0, count: 1)                 // the 2×2's top-left cell (25.6…123.5 px)
+        #expect(abs(cell0.midX - 74.6) < 1 && abs(cell0.midY - 74.6) < 1)
+        #expect(try maxSaturation(rep, in: cell0) > 0.3, "the top-left cell shows no Finder colour")
+        // The empty bottom-right cell of the 2×2: glass.
+        let empty = Self.cell(3, count: 4)
+        let glass = try srgb(rep, Int(empty.midX), Int(empty.midY))
+        #expect(glass.saturationComponent < 0.03 && glass.redComponent > 0.9, "the empty cell is not glass: \(glass)")
     }
 
     @Test("Forced Dark draws the dark pair")

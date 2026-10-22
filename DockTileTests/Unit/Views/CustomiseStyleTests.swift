@@ -114,7 +114,7 @@ struct CustomiseStyleTests {
     @Test("appsSummary: Shown, Arrangement and the note for 0, 1, 4, 9 and 12 apps")
     func appsSummary() {
         typealias S = CustomiseTileView.AppsSummary
-        #expect(CustomiseTileView.appsSummary(count: 1) == S(shown: "1 of 1", arrangement: "Fills the Tile", note: "Shows the only app in this tile."))
+        #expect(CustomiseTileView.appsSummary(count: 1) == S(shown: "1 of 1", arrangement: "2 × 2", note: "Shows the only app in this tile."))
         #expect(CustomiseTileView.appsSummary(count: 4) == S(shown: "4 of 4", arrangement: "2 × 2", note: "Shows all 4 apps, in tile order."))
         #expect(CustomiseTileView.appsSummary(count: 9) == S(shown: "9 of 9", arrangement: "3 × 3", note: "Shows all 9 apps, in tile order."))
         #expect(CustomiseTileView.appsSummary(count: 12) == S(shown: "9 of 12", arrangement: "3 × 3", note: "Shows the first 9 of 12 apps, in tile order."))

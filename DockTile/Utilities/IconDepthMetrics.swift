@@ -307,7 +307,8 @@ enum IconDepthMetrics {
 /// live preview and the legacy bake) draw this face, so every number they share lives here and
 /// they cannot drift. Block 0.80 and gap 0.035 (was 0.70 / 0.047, from the iOS 26 screenshot):
 /// widened 2026-10-19 because the 3×3 minis read small and crowded to the centre in the Dock.
-/// A single item fills the tile with one 0.60 icon (the handoff's "Fills the Tile"). `TilePalette`
+/// One to four items draw in a 2x2 grid (one item sits in the top-left cell, like an iOS folder —
+/// owner, 2026-10-22; it was one centred 0.60 icon until then), five or more in a 3x3. `TilePalette`
 /// is deliberately not involved: the face uses system grays, not the tile's tint. Only Foundation/CoreGraphics, so it is unit-testable.
 enum AppsFaceGrid {
     /// Side of the mini-icon block, as a fraction of the shape.
@@ -317,30 +318,19 @@ enum AppsFaceGrid {
     static let maxItems = 9
     /// Fraction of an app icon's canvas that its visible shape occupies (the icon-grid margin).
     static let appIconContentRatio: CGFloat = 1 - 2 * IconDepthMetrics.contentInsetRatio
-    /// Side of the one centred icon when there is a single item.
-    static let singleRatio: CGFloat = 0.60
-
+    /// Two grids only: 2x2 for up to four items (one item included), 3x3 from five.
     static func columns(count: Int) -> Int {
-        switch count {
-        case ...1: return 1
-        case 2...4: return 2
-        default: return 3
-        }
+        count <= 4 ? 2 : 3
     }
 
     static func cellRatio(columns: Int) -> CGFloat {
-        guard columns > 1 else { return singleRatio }
-        return (blockRatio - CGFloat(columns - 1) * gapRatio) / CGFloat(columns)
+        (blockRatio - CGFloat(columns - 1) * gapRatio) / CGFloat(columns)
     }
 
     /// Cell rects in the unit space of the SHAPE: origin top-left, y-down.
     static func cells(count: Int) -> [CGRect] {
         let n = min(max(count, 0), maxItems)
         guard n > 0 else { return [] }
-        if n == 1 {
-            let origin = (1 - singleRatio) / 2
-            return [CGRect(x: origin, y: origin, width: singleRatio, height: singleRatio)]
-        }
         let cols = columns(count: n)
         let cell = cellRatio(columns: cols)
         let origin = (1 - blockRatio) / 2

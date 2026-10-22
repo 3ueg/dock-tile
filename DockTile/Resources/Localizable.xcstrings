@@ -3781,60 +3781,6 @@
         }
       }
     },
-    "label.apps.arrangement.fills": {
-      "comment": "Customise Tile: Arrangement value for one app",
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Füllt die Kachel"
-          }
-        },
-        "en-GB": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Fills the Tile"
-          }
-        },
-        "en-AU": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Fills the Tile"
-          }
-        },
-        "en-US": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Fills the Tile"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Remplit la tuile"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "タイル全体"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "На всю плитку"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "填满磁贴"
-          }
-        }
-      }
-    },
     "label.apps.arrangement.threeByThree": {
       "comment": "Customise Tile: Arrangement value for 5 or more apps",
       "extractionState": "manual",

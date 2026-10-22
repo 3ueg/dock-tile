@@ -9,18 +9,17 @@ struct AppsFaceGridTests {
         #expect(abs(a - b) < tolerance, "expected \(b), got \(a)", sourceLocation: sourceLocation)
     }
 
-    @Test("Columns: 1 for a single item, 2 for two to four, 3 from five — both flips pinned")
+    @Test("Columns: 2 for one to four items (one included), 3 from five — the flip pinned")
     func columnFlip() {
-        #expect(AppsFaceGrid.columns(count: 1) == 1)
-        #expect(AppsFaceGrid.columns(count: 2) == 2)                       // 1 → 2 flip
+        #expect(AppsFaceGrid.columns(count: 1) == 2)                       // one app: a 2×2 too (owner, 2026-10-22)
+        #expect(AppsFaceGrid.columns(count: 2) == 2)
         for n in 2...4 { #expect(AppsFaceGrid.columns(count: n) == 2, "\(n)") }
         #expect(AppsFaceGrid.columns(count: 5) == 3)                       // 4 → 5 flip
         for n in 5...12 { #expect(AppsFaceGrid.columns(count: n) == 3, "\(n)") }
     }
 
-    @Test("Cell sizes: 0.60 single, then the iOS folder / App Library minis")
+    @Test("Cell sizes: the iOS folder / App Library minis")
     func cellSizes() {
-        close(AppsFaceGrid.cellRatio(columns: 1), 0.60)
         close(AppsFaceGrid.cellRatio(columns: 2), 0.3825, 1e-4)   // (0.80 − 0.035) / 2
         close(AppsFaceGrid.cellRatio(columns: 3), 0.2433, 1e-4)   // (0.80 − 2 × 0.035) / 3
         close(AppsFaceGrid.appIconContentRatio, 206.0 / 256.0)
@@ -28,9 +27,11 @@ struct AppsFaceGridTests {
 
     @Test("Cell counts and layout for 1, 2, 3, 4, 5, 9 and 10 items")
     func cellLayouts() {
+        // One item is the top-left cell of a 2×2 (owner, 2026-10-22) — independent pins: the block
+        // starts at 0.10 and a 2×2 cell is (0.80 − 0.035) / 2 = 0.3825.
         let one = AppsFaceGrid.cells(count: 1)
         #expect(one.count == 1)
-        close(one[0].minX, 0.20); close(one[0].minY, 0.20); close(one[0].width, 0.60); close(one[0].midX, 0.5)
+        close(one[0].minX, 0.10); close(one[0].minY, 0.10); close(one[0].width, 0.3825, 1e-4)
 
         let two = AppsFaceGrid.cells(count: 2)
         #expect(two.count == 2)
@@ -81,7 +82,7 @@ struct AppsFaceGridTests {
         #expect(AppsFaceGrid.drawBox(for: cell, isFolder: true) == cell)
     }
 
-    @Test("folderBoxIsTheCell: a 2×2 app box is 392 px on the 824 px shape, the folder box 315 px; single: 614 vs 494")
+    @Test("folderBoxIsTheCell: a 2×2 app box is 392 px on the 824 px shape, the folder box 315 px; one item uses that same cell")
     func folderBoxIsTheCell() {
         let shape = CGRect(x: 100, y: 100, width: 824, height: 824)
         let cell = AppsFaceGrid.cells(count: 2)[0]
@@ -89,14 +90,10 @@ struct AppsFaceGridTests {
         let folderBox = AppsFaceGrid.rect(AppsFaceGrid.drawBox(for: cell, isFolder: true), in: shape, yUp: false)
         close(appBox.width, 391.7, 1.0)
         close(folderBox.width, 315.2, 1.0)
-        // Independent pins, not derived from the seam: the first cell of a 2×2, and the single
-        // centred cell, on a 1024 canvas.
+        // Independent pins, not derived from the seam: the first cell of a 2×2 on a 1024 canvas.
         close(folderBox.minX, 182.4, 0.5); close(folderBox.minY, 182.4, 0.5)
-        let single = AppsFaceGrid.cells(count: 1)[0]
-        let singleFolder = AppsFaceGrid.rect(AppsFaceGrid.drawBox(for: single, isFolder: true), in: shape, yUp: false)
-        let singleApp = AppsFaceGrid.rect(AppsFaceGrid.drawBox(for: single, isFolder: false), in: shape, yUp: false)
-        close(singleFolder.minX, 264.8, 0.5); close(singleFolder.width, 494.4, 0.5)
-        close(singleApp.width, 614.4, 1.0); close(singleApp.midX, 512, 0.5)
+        // One item draws in exactly that cell.
+        #expect(AppsFaceGrid.cells(count: 1)[0] == cell)
     }
 
     @Test("rect(in:yUp:) flips the vertical axis for AppKit bitmaps")

@@ -156,7 +156,6 @@ struct CustomiseTileView: View {
         }
         let arrangement: String
         switch AppsFaceGrid.columns(count: count) {
-        case 1: arrangement = AppStrings.Label.appsArrangementFills
         case 2: arrangement = AppStrings.Label.appsArrangementTwoByTwo
         default: arrangement = AppStrings.Label.appsArrangementThreeByThree
         }

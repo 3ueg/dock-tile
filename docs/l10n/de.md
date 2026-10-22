@@ -77,7 +77,6 @@ Keep `%@`-style placeholders exactly as they are. `\n` means a line break, `\|` 
 | `iconWeight.regular` | Regular | Regular | machine | Customise: icon weight picker option |
 | `iconWeight.semibold` | Semibold | Halbfett | machine | Customise: icon weight picker option |
 | `label.apps.arrangement` | Arrangement | Anordnung | machine | Customise Tile: Apps card row — the grid the face uses |
-| `label.apps.arrangement.fills` | Fills the Tile | Füllt die Kachel | machine | Customise Tile: Arrangement value for one app |
 | `label.apps.arrangement.threeByThree` | 3 × 3 | 3 × 3 | machine | Customise Tile: Arrangement value for 5 or more apps |
 | `label.apps.arrangement.twoByTwo` | 2 × 2 | 2 × 2 | machine | Customise Tile: Arrangement value for 2–4 apps |
 | `label.apps.glass` | A glass folder that follows Light and Dark Mode. | Ein Glasordner, der sich an „Hell“ und „Dunkel“ anpasst. | machine | Customise Tile: fixed sentence after the Apps caption (decided 2026-10-19: the dark appearance is system-dark) |

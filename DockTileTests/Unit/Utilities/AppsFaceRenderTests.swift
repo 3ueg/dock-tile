@@ -57,22 +57,24 @@ struct AppsFaceRenderTests {
         return x - start
     }
 
-    @Test("oneAppIsCentredAtSixtyPercent: one app is one centred icon at 0.60 of the WHOLE layer canvas (the canvas is the tile)")
-    func oneAppIsCentredAtSixtyPercent() throws {
+    @Test("oneAppSitsTopLeftInATwoByTwo: one app paints the 2×2's top-left cell of the WHOLE layer canvas; the other three cells stay glass")
+    func oneAppSitsTopLeftInATwoByTwo() throws {
         let rep = try Self.bitmap(try IconGenerator.generateAppsLayerPNG(
             minis: [.init(image: Self.mini(.systemBlue), isFolder: false)]))
         #expect(rep.pixelsWide == Self.canvas && rep.pixelsHigh == Self.canvas)
-        for (x, y) in [(2, 2), (1021, 2), (2, 1021), (1021, 1021), (512, 104), (104, 512)] {
+        for (x, y) in [(2, 2), (1021, 2), (2, 1021), (1021, 1021), (512, 512)] {
             #expect(Self.alpha(rep, x, y) == 0, "(\(x),\(y)) painted")
         }
-        #expect(Self.alpha(rep, 512, 512) == 1)
-        // Independent pin of the regression: x 215 is inside a 0.60 × 1024 squircle (205…819) but
-        // outside the old, doubly-inset one (265…759).
-        #expect(Self.alpha(rep, 215, 512) == 1, "the mini is still drawn inside the icon-grid margin")
+        // Independent pins: the top-left 2×2 cell spans 102…494 on 1024 (0.10 + 0.3825), centre 298.
         let c0 = Self.centre(0, count: 1, in: Self.layerShape)
-        #expect(c0.x == 512 && c0.y == 512)                     // independent pin: centred
-        let run = Self.opaqueRun(rep, y: 512, fromX: 0)
-        #expect(abs(run - 614) <= 4, "visible squircle is \(run) px, 0.60 of 1024 is 614")
+        #expect(abs(c0.x - 298) <= 1 && abs(c0.y - 298) <= 1, "one app is not in the top-left cell: \(c0)")
+        #expect(Self.alpha(rep, c0.x, c0.y) == 1)
+        for i in 1...3 {
+            let c = Self.centre(i, count: 4, in: Self.layerShape)
+            #expect(Self.alpha(rep, c.x, c.y) == 0, "cell \(i) is not empty glass")
+        }
+        let run = Self.opaqueRun(rep, y: c0.y, fromX: 0)
+        #expect(abs(run - 392) <= 4, "visible squircle is \(run) px, a 2×2 cell of 1024 is 392")
     }
 
     @Test("Two apps paint the top row of a 2×2 and leave the bottom row glass")
@@ -100,8 +102,9 @@ struct AppsFaceRenderTests {
     func folderMiniFitsItsCell() throws {
         let rep = try Self.bitmap(try IconGenerator.generateAppsLayerPNG(
             minis: [.init(image: Self.mini(.systemOrange, fullBleed: true), isFolder: true)]))
-        let run = Self.opaqueRun(rep, y: 512, fromX: 0)
-        #expect(abs(run - 614) <= 4, "folder drew \(run) px; fitted to the 614 px cell, not the 763 px app box")
+        // One item sits in the 2×2's top-left cell: 392 px (0.3825 × 1024), centre row y ≈ 298.
+        let run = Self.opaqueRun(rep, y: 298, fromX: 0)
+        #expect(abs(run - 392) <= 4, "folder drew \(run) px; fitted to the 392 px cell, not the 487 px app box")
     }
 
     @Test("Nine apps fill a 3×3; a tenth is dropped; adjacent minis do not touch")

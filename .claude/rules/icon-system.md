@@ -134,7 +134,8 @@ it is the Style picker in Customise (App Grid / Symbol / Emoji).
   tile appends the face plus the first nine item identities (`AppsFaceGrid.maxItems`). Guarded by
   `IconFaceTests`.
 - **Seam `AppsFaceGrid`** ([IconDepthMetrics.swift](../../DockTile/Utilities/IconDepthMetrics.swift)):
-  one item = one centred icon at 0.60; 2-4 items = 2x2; 5+ = 3x3 (nine max). Block 0.80, gap 0.035 of
+  two grids only: 1-4 items = 2x2 (a single item sits in the top-left cell, the rest empty glass —
+  owner, 2026-10-22; it was one centred 0.60 icon, "Fills the Tile"), 5+ = 3x3 (nine max). Block 0.80, gap 0.035 of
   the shape (cells 0.3825 / 0.243; was 0.70 / 0.047 until 2026-10-19, when the 3x3 read small and
   crowded to the centre in the Dock). App icons carry the icon-grid margin, so their draw box is the cell divided by 0.805
   (`appIconContentRatio`); folders are fitted to the cell. Contact shadow 0.35 black, offset 6 and blur
