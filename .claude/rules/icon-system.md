@@ -164,6 +164,9 @@ it is the Style picker in Customise (App Grid / Symbol / Emoji).
   (`AppsFaceGrid.emptySlotFill`, black 7% on light glass / white 10% on dark, continuous 22.5% corners,
   no stroke or shadow) in the preview, the cards and every Dock bake — an App Grid never shows the
   tile's symbol (owner, 2026-10-22; it used to bake the glyph face). The card reads "0 of 0" / "-".
+  **The Dock look is unverified by eye**: the tinted slot (Clear and Tinted styles) bakes the
+  dark-glass tone (white 10%) on a `system-light` fill the system then remaps, so check an empty and
+  a one-app App Grid in the Dock under Default, Dark and Clear Dark before claiming it.
   `DockTileIconPreview.appsFaceItems` is optional: nil draws the glyph face, `[]` the empty grid. The bake logs skipped items on the non-verbose `tile` category.
 - **Mini icons**: `AppIconLoader.iconFromAppURL` resolves symlinks first (a symlinked app, e.g. Safari
   on macOS 27, otherwise draws the alias badge). The desaturated minis are rasterised at the draw-box

@@ -85,6 +85,9 @@ Seeds a `DockTileConfiguration` from a `TileSuggestion` (name via `uniqueName`, 
 **in the card's design**: App Grid → `iconFace .apps` (the identity symbol kept as the glyph behind
 it); Symbol → `.glyph` + the identity symbol; Emoji → `.glyph` + `iconType .emoji` + the identity
 emoji. Selects it, marks it edited, logs `.tileCreated` with `source: "smart_add"`.
+The style the card did NOT show keeps the identity's other glyph in `savedSymbol` / `savedEmoji`, so
+switching styles in Customise lands on 🌐/globe, never the generic `plus` / ⭐ fallback (a review
+finding, 2026-10-22; pinned in `tileMatchesTheCardsDesign`).
 
 - **`isVisibleInDock = true`** — matches a blank new tile's default so the **Show Tile** switch
   reads on while reviewing. This does **not** pin anything: with no helper bundle on disk the action

@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.5.0] - 2026-10-22
+
+Customise Tile now opens beside Tile Detail instead of replacing it, so every change shows on the
+tile as you make it.
+
+### Added
+
+- **customise:** Open Customise Tile as an inspector beside Tile Detail, on the same glass as the sidebar, as in Xcode. Toggle it from the toolbar, by clicking the tile's icon, or with View › Show Inspector (⌥⌘I) ([afb06dc](https://github.com/k97/dock-tile/commit/afb06dc), [8c8e624](https://github.com/k97/dock-tile/commit/8c8e624), [216f3f0](https://github.com/k97/dock-tile/commit/216f3f0), [0625114](https://github.com/k97/dock-tile/commit/0625114))
+- **smart-add:** Offer one App Grid, one Symbol and one Emoji tile among the Add a Tile suggestions, in a random order each time ([69dda28](https://github.com/k97/dock-tile/commit/69dda28))
+- **tiles:** Start each new blank tile on a random symbol and a random emoji instead of the same ones every time ([f1755a1](https://github.com/k97/dock-tile/commit/f1755a1))
+
+### Changed
+
+- **app-grid:** Place a single app in the top-left cell of a 2 × 2 grid, like two to four apps, instead of filling the tile ([fdbacdd](https://github.com/k97/dock-tile/commit/fdbacdd))
+- **app-grid:** Show an empty 2 × 2 grid on an App Grid tile with no apps, in the app and in the Dock, instead of the tile's symbol ([0204d55](https://github.com/k97/dock-tile/commit/0204d55))
+- **tile-detail:** Highlight Update only while the Dock icon is behind your edits ([076dba0](https://github.com/k97/dock-tile/commit/076dba0))
+- **ui:** Give tile icons throughout the app a subtle App Store-style edge and shadow ([001d3ab](https://github.com/k97/dock-tile/commit/001d3ab), [f9c5f02](https://github.com/k97/dock-tile/commit/f9c5f02))
+- **customise:** Use the system search field for symbols and emoji, and remove the Icon Weight info button ([0625114](https://github.com/k97/dock-tile/commit/0625114), [8dcf7ca](https://github.com/k97/dock-tile/commit/8dcf7ca))
+- **popover:** Run the Popover settings preview edge to edge, and show Save in grey while there is nothing to save ([65fc1eb](https://github.com/k97/dock-tile/commit/65fc1eb))
+- **window:** Let the main window narrow to 700 points, or 960 with Customise Tile open ([b1140c5](https://github.com/k97/dock-tile/commit/b1140c5))
+- **performance:** Switch between tiles and Settings panes without the inspector animating closed and open, and read the login item status off the main thread ([d514d27](https://github.com/k97/dock-tile/commit/d514d27))
+
 ## [2.4.0] - 2026-10-19
 
 Existing tiles keep their symbol or emoji. App Grid is the starting look for new tiles, and any
@@ -81,7 +103,8 @@ so every fix below reaches them without any action from you.
 - **customise:** Fix Customise overwriting a tile's Dock visibility with the value from when the editor was opened ([eaa93c6](https://github.com/k97/dock-tile/commit/eaa93c6))
 - **diagnostics:** Fix multi-line entries in Copy Diagnostics surviving the one-hour trim forever ([1e5a6a9](https://github.com/k97/dock-tile/commit/1e5a6a9))
 
-[Unreleased]: https://github.com/k97/dock-tile/compare/v2.4.0...HEAD
+[Unreleased]: https://github.com/k97/dock-tile/compare/v2.5.0...HEAD
+[2.5.0]: https://github.com/k97/dock-tile/compare/v2.4.0...v2.5.0
 [2.4.0]: https://github.com/k97/dock-tile/compare/v2.3.1...v2.4.0
 [2.3.1]: https://github.com/k97/dock-tile/compare/v2.3.0...v2.3.1
 [2.3.0]: https://github.com/k97/dock-tile/compare/v2.2.2...v2.3.0

@@ -324,6 +324,9 @@ struct SmartAddCreateConfigurationTests {
         #expect(grid.iconFace == .apps && grid.iconType == .sfSymbol && grid.iconValue == "globe")
         #expect(symbol.iconFace == .glyph && symbol.iconType == .sfSymbol && symbol.iconValue == "globe")
         #expect(emoji.iconFace == .glyph && emoji.iconType == .emoji && emoji.iconValue == "🌐")
+        // The other style keeps the identity's glyph, never the generic fallback.
+        #expect(grid.savedEmoji?.value == "🌐" && symbol.savedEmoji?.value == "🌐")
+        #expect(emoji.savedSymbol?.value == "globe" && emoji.savedEmoji == nil)
     }
 
     @Test("Seeds name, tint, symbol and apps; Show Tile reads on but nothing is docked yet")

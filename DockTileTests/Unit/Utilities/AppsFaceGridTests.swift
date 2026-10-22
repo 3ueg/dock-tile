@@ -139,7 +139,7 @@ struct AppsFaceGridTests {
         #expect(out.skipped == 2)
     }
 
-    @Test("allMissingSelectsNothing: zero installed → empty selection (the caller falls back to the glyph face)")
+    @Test("allMissingSelectsNothing: zero installed → empty selection (the caller draws the empty 2×2)")
     func allMissingSelectsNothing() {
         let items = [AppItem(bundleIdentifier: "a", name: "A"), AppItem(bundleIdentifier: "b", name: "B")]
         let out = AppsFaceGrid.select(items: items) { _ in false }
