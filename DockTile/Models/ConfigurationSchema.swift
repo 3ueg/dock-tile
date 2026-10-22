@@ -22,9 +22,26 @@ enum ConfigurationDefaults {
 
     // v3: Icon type and value
     static let iconType: IconType = .sfSymbol
-    // A draft reads as "not designed yet" — the grey plus placeholder from the v2 design. Existing
-    // configs are untouched (this is only the seed for createConfiguration()).
+    // The decode / style-restore fallback glyph. A NEW blank tile no longer starts on it: it draws a
+    // random starter symbol and emoji instead (`starterGlyphs`, owner 2026-10-22).
     static let iconValue = "plus"
+
+    /// The pools a new blank tile draws its symbol and emoji from, so every new tile starts
+    /// different. Symbols must exist on the macOS 15 floor (`StarterGlyphTests` resolves each one).
+    static let starterSymbols = [
+        "star.fill", "heart.fill", "bolt.fill", "leaf.fill", "flame.fill", "moon.fill",
+        "sun.max.fill", "cloud.fill", "sparkles", "paperplane.fill", "music.note",
+        "gamecontroller.fill", "book.fill", "camera.fill", "cup.and.saucer.fill", "briefcase.fill"
+    ]
+    static let starterEmoji = [
+        "🚀", "🎯", "🌈", "🍀", "🔥", "🎨", "📚", "🎧", "☕️", "🌙", "⚡️", "🧩", "🎮", "🌿", "💡", "🪐"
+    ]
+
+    /// One symbol and one emoji at random from the pools. Pure — the generator is injected.
+    static func starterGlyphs<G: RandomNumberGenerator>(using generator: inout G) -> (symbol: String, emoji: String) {
+        (starterSymbols.randomElement(using: &generator) ?? iconValue,
+         starterEmoji.randomElement(using: &generator) ?? symbolEmoji)
+    }
 
     // v4: Icon scale (10-20 range, affects symbol/emoji size relative to icon bounds)
     static let iconScale = 14

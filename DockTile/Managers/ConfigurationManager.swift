@@ -142,12 +142,17 @@ final class ConfigurationManager: ObservableObject {
     /// Create a new configuration with default values
     @discardableResult
     func createConfiguration() -> DockTileConfiguration {
+        // A random starter symbol (the glyph, shown while App Grid has no apps and on the Symbol
+        // card) and emoji (the Emoji card's saved glyph), so every new tile starts different.
+        var generator = SystemRandomNumberGenerator()
+        let starter = ConfigurationDefaults.starterGlyphs(using: &generator)
         let config = DockTileConfiguration(
             name: generateUniqueName(base: ConfigurationDefaults.name),
             tintColor: ConfigurationDefaults.tintColor,
             symbolEmoji: ConfigurationDefaults.symbolEmoji,
             iconType: ConfigurationDefaults.iconType,
-            iconValue: ConfigurationDefaults.iconValue
+            iconValue: starter.symbol,
+            savedEmoji: SavedGlyph(value: starter.emoji, scale: ConfigurationDefaults.iconScale)
         )
 
         configurations.append(config)

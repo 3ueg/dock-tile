@@ -27,7 +27,9 @@ struct IconFaceTests {
         let blank = manager.createConfiguration()
         defer { manager.deleteConfiguration(blank.id) }
         #expect(blank.iconFace == .apps)
-        #expect(blank.iconType == .sfSymbol && blank.iconValue == ConfigurationDefaults.iconValue)   // the glyph behind it is still the draft placeholder
+        // The glyph behind it is a random starter symbol, and its Emoji card a random starter emoji.
+        #expect(blank.iconType == .sfSymbol && ConfigurationDefaults.starterSymbols.contains(blank.iconValue))
+        #expect(ConfigurationDefaults.starterEmoji.contains(blank.savedEmoji?.value ?? ""))
     }
 
     @Test("Apps round-trips through JSON under the key iconFace")
