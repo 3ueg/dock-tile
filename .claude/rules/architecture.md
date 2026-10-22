@@ -340,8 +340,8 @@ Popover, Dock Lock) · Dock Tile (About)** — the old accordion `@AppStorage` e
   Design handoff (superseded where it describes a screen): `docs/design_handoff_customise_tile/README.md`.
 - **Two defaults for the tile face (critical)**: a NEW tile starts on App Grid
   (`ConfigurationDefaults.iconFace = .apps`), while a stored config missing the `iconFace` key loads as
-  `.glyph` (decoder literal) so no existing tile changes look on upgrade. Smart Add-created tiles also
-  open on App Grid; the suggestion cards keep their category identity. See icon-system.md "Apps
+  `.glyph` (decoder literal) so no existing tile changes look on upgrade. Smart Add-created tiles open
+  in the design their card showed (App Grid, Symbol or Emoji — one of each per dialog, smart-add.md). See icon-system.md "Apps
   tile face".
 - **`.tilesPlaceholder` (critical)**: the "No Tiles" row is a **selectable** placeholder that routes
   to the empty-state detail. Without it, once the user opened a Settings pane at zero tiles there was

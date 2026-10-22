@@ -48,8 +48,9 @@ architecture.md "Sidebar Selection & Empty State" for the title-band chrome). Pe
   button's label the tint colour whatever `.foregroundStyle` says, so an accent tint read blue text on
   a blue fill (owner report 2026-10-21); fading the whole button to 0.45 did not fix it. Change
   modifier VALUES only, never the structure: swapping the button style or swapping two toolbar items
-  left the toolbar showing the first-built look. **Open (2026-10-21):** after a draft edit Save was
-  still seen grey in one hands-on check; unconfirmed whether the toolbar refreshes, re-check by eye. The live preview renders the **draft** (not the shared suite) via a new
+  left the toolbar showing the first-built look. Confirmed by eye (owner, 2026-10-22): Save turns accent
+  after a draft edit and grey otherwise. A capture of the window in the BACKGROUND always shows it grey —
+  macOS draws prominent buttons grey in an inactive window — so judge it with the window in front. The live preview renders the **draft** (not the shared suite) via a new
   `settingsOverride: PopoverSettings?` param on `StackPopoverView`/`ListPopoverView` (nil in the real
   popover, which always loads saved values), so unsaved edits preview without persisting.
 - **Apply-on-Save (push to running helpers)**: persisting alone only affects the *next* popover open.

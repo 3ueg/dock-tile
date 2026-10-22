@@ -183,8 +183,10 @@ final class ConfigurationManager: ObservableObject {
             name: generateUniqueName(base: suggestion.name),
             tintColor: suggestion.tint,
             symbolEmoji: ConfigurationDefaults.symbolEmoji,  // legacy field kept in sync
-            iconType: .sfSymbol,
-            iconValue: suggestion.symbol,
+            // The tile looks like the card that offered it: App Grid, Symbol or Emoji.
+            iconType: suggestion.style == .emoji ? .emoji : .sfSymbol,
+            iconValue: suggestion.style == .emoji ? suggestion.emoji : suggestion.symbol,
+            iconFace: suggestion.style == .appGrid ? .apps : .glyph,
             appItems: suggestion.appItems,
             isVisibleInDock: true
         )

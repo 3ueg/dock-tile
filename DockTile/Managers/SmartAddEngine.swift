@@ -40,8 +40,20 @@ struct TileSuggestion: Identifiable {
     let tint: TintColor
     /// White SF Symbol drawn on the tile face, from the category identity.
     let symbol: String
+    /// The identity's emoji, drawn when the card's `style` is `.emoji`.
+    let emoji: String
+    /// Which tile design this card shows — and the tile `createConfiguration(from:)` builds.
+    let style: Style
     /// The apps this tile would contain (best-scored first). Icons resolve live via `AppIconLoader`.
     let appItems: [AppItem]
+
+    /// The three tile designs (Customise's Style cards). The Add a Tile dialog shows one of each, in a
+    /// random order, so the suggestions show what a tile can look like (owner, 2026-10-22).
+    enum Style: CaseIterable, Equatable {
+        case appGrid
+        case symbol
+        case emoji
+    }
 
     enum Strategy: String {
         case category    // grouped by LSApplicationCategoryType
@@ -91,6 +103,7 @@ enum SmartAddCategory: String, CaseIterable {
     struct Identity: Equatable {
         let name: String
         let symbol: String
+        let emoji: String
         let tint: TintColor
 
         /// Backstop identity for a co-launch ("Opened together") cluster that cannot borrow a
@@ -98,24 +111,25 @@ enum SmartAddCategory: String, CaseIterable {
         /// `LSApplicationCategoryType`; Figma is `graphics-design`, which we don't cluster on), or
         /// that category's identity already belongs to another card. Deliberately distinct from
         /// every category identity in name, symbol AND tint so two cards can never look alike.
-        static let coLaunch = Identity(name: AppStrings.SmartAdd.identityTogether, symbol: "link", tint: .orange)
+        static let coLaunch = Identity(name: AppStrings.SmartAdd.identityTogether, symbol: "link", emoji: "🔗", tint: .orange)
     }
 
     /// The tile identity for this category. Indigo has no preset, so it uses the system-indigo hex.
     var identity: Identity {
         switch self {
         case .browsers:
-            return Identity(name: AppStrings.SmartAdd.identityBrowse, symbol: "globe", tint: .blue)
+            return Identity(name: AppStrings.SmartAdd.identityBrowse, symbol: "globe", emoji: "🌐", tint: .blue)
         case .video:
-            return Identity(name: AppStrings.SmartAdd.identityWatch, symbol: "play.fill", tint: .pink)
+            return Identity(name: AppStrings.SmartAdd.identityWatch, symbol: "play.fill", emoji: "🍿", tint: .pink)
         case .developerTools:
             return Identity(name: AppStrings.SmartAdd.identityShip,
                             symbol: "chevron.left.forwardslash.chevron.right",
+                            emoji: "🚀",
                             tint: .custom("#5E5CE6"))
         case .social:
-            return Identity(name: AppStrings.SmartAdd.identityChat, symbol: "bubble.left.and.bubble.right", tint: .green)
+            return Identity(name: AppStrings.SmartAdd.identityChat, symbol: "bubble.left.and.bubble.right", emoji: "💬", tint: .green)
         case .productivity:
-            return Identity(name: AppStrings.SmartAdd.identityWork, symbol: "folder", tint: .blue)
+            return Identity(name: AppStrings.SmartAdd.identityWork, symbol: "folder", emoji: "💼", tint: .blue)
         }
     }
 }
@@ -259,7 +273,9 @@ final class SmartAddEngine: ObservableObject {
             limit: limit
         )
 
-        return ranked.map { group in
+        var generator = SystemRandomNumberGenerator()
+        let styles = Self.cardStyles(count: ranked.count, using: &generator)
+        return zip(ranked, styles).map { group, style in
             let identity = group.identity
             let appItems = group.records.map { record in
                 AppItem(bundleIdentifier: record.bundleId,
@@ -272,9 +288,23 @@ final class SmartAddEngine: ObservableObject {
                 reason: group.strategy.reason,
                 tint: identity.tint,
                 symbol: identity.symbol,
+                emoji: identity.emoji,
+                style: style,
                 appItems: appItems
             )
         }
+    }
+
+    /// One of each tile design per dialog, in a random order: a permutation of all three styles,
+    /// repeated (each repeat freshly shuffled) when there are more cards than styles, cut to
+    /// `count`. Fewer than three cards still get distinct styles. Pure — the generator is injected.
+    nonisolated static func cardStyles<G: RandomNumberGenerator>(count: Int, using generator: inout G) -> [TileSuggestion.Style] {
+        guard count > 0 else { return [] }
+        var styles: [TileSuggestion.Style] = []
+        while styles.count < count {
+            styles += TileSuggestion.Style.allCases.shuffled(using: &generator)
+        }
+        return Array(styles.prefix(count))
     }
 
     /// Add-flow filter: what the Add a Tile dialog shows when it opens. Since 2026-09-02 the

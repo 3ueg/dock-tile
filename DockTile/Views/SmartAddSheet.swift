@@ -162,12 +162,13 @@ private struct SuggestionCard: View {
         VStack(spacing: 9) {
             DockTileIconPreview(
                 tintColor: suggestion.tint,
-                iconType: .sfSymbol,
-                iconValue: suggestion.symbol,
+                iconType: suggestion.style == .emoji ? .emoji : .sfSymbol,
+                iconValue: suggestion.style == .emoji ? suggestion.emoji : suggestion.symbol,
                 iconScale: ConfigurationDefaults.iconScale,
                 iconWeight: ConfigurationDefaults.iconWeight,
                 background: .colour,
-                size: 58
+                size: 58,
+                appsFaceItems: suggestion.style == .appGrid ? suggestion.appItems : []
             )
             .iconLift(size: 58)
 
@@ -270,21 +271,21 @@ private struct SuggestionCard: View {
     SmartAddSheet(
         suggestions: [
             TileSuggestion(name: "Watch", strategy: .recency, reason: "Most used this week",
-                           tint: .pink, symbol: "play.fill",
+                           tint: .pink, symbol: "play.fill", emoji: "🍿", style: .emoji,
                            appItems: [
                                AppItem(bundleIdentifier: "com.apple.TV", name: "TV"),
                                AppItem(bundleIdentifier: "com.netflix.Netflix", name: "Netflix"),
                                AppItem(bundleIdentifier: "com.spotify.client", name: "Spotify")
                            ]),
             TileSuggestion(name: "Browse", strategy: .category, reason: "By category",
-                           tint: .blue, symbol: "globe",
+                           tint: .blue, symbol: "globe", emoji: "🌐", style: .appGrid,
                            appItems: [
                                AppItem(bundleIdentifier: "com.apple.Safari", name: "Safari"),
                                AppItem(bundleIdentifier: "com.google.Chrome", name: "Chrome"),
                                AppItem(bundleIdentifier: "org.mozilla.firefox", name: "Firefox")
                            ]),
             TileSuggestion(name: "Chat", strategy: .coLaunch, reason: "Opened together",
-                           tint: .green, symbol: "bubble.left.and.bubble.right",
+                           tint: .green, symbol: "bubble.left.and.bubble.right", emoji: "💬", style: .symbol,
                            appItems: [
                                AppItem(bundleIdentifier: "com.tinyspeck.slackmacgap", name: "Slack"),
                                AppItem(bundleIdentifier: "com.hnc.Discord", name: "Discord"),

@@ -296,19 +296,34 @@ struct SmartAddScoringTests {
 @MainActor
 struct SmartAddCreateConfigurationTests {
 
-    private func suggestion() -> TileSuggestion {
+    private func suggestion(style: TileSuggestion.Style = .symbol) -> TileSuggestion {
         TileSuggestion(
             name: "Browse",
             strategy: .category,
             reason: "By category",
             tint: .blue,
             symbol: "globe",
+            emoji: "🌐",
+            style: style,
             appItems: [
                 AppItem(bundleIdentifier: "com.apple.Safari", name: "Safari", lastKnownPath: "/Applications/Safari.app"),
                 AppItem(bundleIdentifier: "com.google.Chrome", name: "Chrome"),
                 AppItem(bundleIdentifier: "org.mozilla.firefox", name: "Firefox")
             ]
         )
+    }
+
+    @Test("The tile is built in the card's design: App Grid, Symbol or Emoji")
+    func tileMatchesTheCardsDesign() {
+        let manager = ConfigurationManager()
+        let grid = manager.createConfiguration(from: suggestion(style: .appGrid))
+        let symbol = manager.createConfiguration(from: suggestion(style: .symbol))
+        let emoji = manager.createConfiguration(from: suggestion(style: .emoji))
+        defer { [grid, symbol, emoji].forEach { manager.deleteConfiguration($0.id) } }
+
+        #expect(grid.iconFace == .apps && grid.iconType == .sfSymbol && grid.iconValue == "globe")
+        #expect(symbol.iconFace == .glyph && symbol.iconType == .sfSymbol && symbol.iconValue == "globe")
+        #expect(emoji.iconFace == .glyph && emoji.iconType == .emoji && emoji.iconValue == "🌐")
     }
 
     @Test("Seeds name, tint, symbol and apps; Show Tile reads on but nothing is docked yet")
@@ -398,7 +413,7 @@ struct SmartAddIdentityTests {
     @Test("The co-launch backstop identity is Together / link / orange — distinct from every category")
     func coLaunchBackstopIdentity() {
         let backstop = SmartAddCategory.Identity.coLaunch
-        #expect(backstop == SmartAddCategory.Identity(name: "Together", symbol: "link", tint: .orange))
+        #expect(backstop == SmartAddCategory.Identity(name: "Together", symbol: "link", emoji: "🔗", tint: .orange))
         for category in SmartAddCategory.allCases {
             #expect(category.identity.name != backstop.name)
             #expect(category.identity.symbol != backstop.symbol)
@@ -513,9 +528,70 @@ struct SmartAddAddFlowTests {
     @Test("The Add dialog always opens; Smart Add off just empties the suggestions")
     func addFlowAlwaysOpens() {
         let one = TileSuggestion(name: "Work", strategy: .category, reason: "By category", tint: .blue,
-                                 symbol: "folder.fill", appItems: [AppItem(bundleIdentifier: "a", name: "A")])
+                                 symbol: "folder.fill", emoji: "💼", style: .symbol,
+                                 appItems: [AppItem(bundleIdentifier: "a", name: "A")])
         #expect(SmartAddEngine.suggestionsForAddFlow(enabled: false, computed: [one]).isEmpty)
         #expect(SmartAddEngine.suggestionsForAddFlow(enabled: true, computed: [one]).count == 1)
         #expect(SmartAddEngine.suggestionsForAddFlow(enabled: true, computed: []).isEmpty)
+    }
+}
+
+// MARK: - Card styles (one of each design per dialog, random order)
+
+/// Deterministic generator so the shuffle is testable (SplitMix64).
+private struct SeededGenerator: RandomNumberGenerator {
+    var state: UInt64
+    mutating func next() -> UInt64 {
+        state &+= 0x9E37_79B9_7F4A_7C15
+        var z = state
+        z = (z ^ (z >> 30)) &* 0xBF58_476D_1CE5_E9B9
+        z = (z ^ (z >> 27)) &* 0x94D0_49BB_1331_11EB
+        return z ^ (z >> 31)
+    }
+}
+
+@Suite("Smart Add Engine — card styles")
+struct SmartAddCardStyleTests {
+
+    @Test("Three cards always show one App Grid, one Symbol and one Emoji", arguments: [UInt64(1), 2, 3, 42, 1234])
+    func threeCardsShowEachDesignOnce(seed: UInt64) {
+        var g = SeededGenerator(state: seed)
+        let styles = SmartAddEngine.cardStyles(count: 3, using: &g)
+        #expect(styles.count == 3)
+        #expect(Set(styles) == Set(TileSuggestion.Style.allCases))
+    }
+
+    @Test("Fewer cards still get distinct designs; none gives none")
+    func fewerCardsAreDistinct() {
+        var g = SeededGenerator(state: 7)
+        let two = SmartAddEngine.cardStyles(count: 2, using: &g)
+        #expect(two.count == 2 && Set(two).count == 2)
+        #expect(SmartAddEngine.cardStyles(count: 1, using: &g).count == 1)
+        #expect(SmartAddEngine.cardStyles(count: 0, using: &g).isEmpty)
+    }
+
+    @Test("More cards than designs: every design shows before any repeats")
+    func moreCardsCycleAllDesigns() {
+        var g = SeededGenerator(state: 99)
+        let five = SmartAddEngine.cardStyles(count: 5, using: &g)
+        #expect(five.count == 5)
+        #expect(Set(five.prefix(3)) == Set(TileSuggestion.Style.allCases))
+    }
+
+    @Test("The order is shuffled, not fixed")
+    func orderVaries() {
+        var orders = Set<[TileSuggestion.Style]>()
+        for seed in UInt64(1)...40 {
+            var g = SeededGenerator(state: seed)
+            orders.insert(SmartAddEngine.cardStyles(count: 3, using: &g))
+        }
+        #expect(orders.count > 1)
+    }
+
+    @Test("Every identity has its own emoji")
+    func identityEmojiAreDistinct() {
+        let identities = SmartAddCategory.allCases.map(\.identity) + [SmartAddCategory.Identity.coLaunch]
+        #expect(identities.allSatisfy { !$0.emoji.isEmpty })
+        #expect(Set(identities.map(\.emoji)).count == identities.count)
     }
 }

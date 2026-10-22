@@ -28,11 +28,16 @@ bundles so it never suggests itself.
 The regression-prone decisions are `nonisolated static` functions taking plain values (mirrors
 `resolveDockVisibility`), unit-tested without NSWorkspace/Spotlight/FileManager:
 
-- `SmartAddCategory(lsCategory:)` + `.identity` — category → tile identity (name / SF Symbol / tint)
-  per the design handoff (browsers→Browse/globe/blue · video→Watch/play.fill/pink ·
-  developer-tools→Ship/chevron.../indigo · social→Chat/bubble.../green · productivity→Work/folder/blue).
-  `Identity.coLaunch` (Together/link/orange) is the backstop for a co-launch cluster that can't borrow
-  a category identity — distinct from every category in name, symbol AND tint.
+- `SmartAddCategory(lsCategory:)` + `.identity` — category → tile identity (name / SF Symbol / emoji /
+  tint) per the design handoff (browsers→Browse/globe/🌐/blue · video→Watch/play.fill/🍿/pink ·
+  developer-tools→Ship/chevron.../🚀/indigo · social→Chat/bubble.../💬/green ·
+  productivity→Work/folder/💼/blue). `Identity.coLaunch` (Together/link/🔗/orange) is the backstop for a
+  co-launch cluster that can't borrow a category identity — distinct from every category in name,
+  symbol, emoji AND tint.
+- `cardStyles(count:using:)` — **one of each tile design per dialog, in a random order** (owner,
+  2026-10-22): a fresh shuffle of App Grid / Symbol / Emoji per open, repeated if there are more cards
+  than designs, cut to the card count; fewer than three cards still get distinct designs. The
+  generator is injected so `SmartAddCardStyleTests` can pin it.
 - `score(for:now:)` — recency × frequency, with a floor for undated apps.
 - `rankGroups(...)` — group by category (+ cross-category co-launch clusters), require **≥3 apps**,
   score, sort best-first, **greedy de-dup** (no app in two suggestions), relabel the top surviving
@@ -76,8 +81,10 @@ Tile* still creates a blank tile directly. Nothing in the dialog docks a tile.
 
 ## `createConfiguration(from:)`
 
-Seeds a `DockTileConfiguration` from a `TileSuggestion` (name via `uniqueName`, tint, SF Symbol
-icon, `appItems`), selects it, marks it edited, logs `.tileCreated` with `source: "smart_add"`.
+Seeds a `DockTileConfiguration` from a `TileSuggestion` (name via `uniqueName`, tint, `appItems`)
+**in the card's design**: App Grid → `iconFace .apps` (the identity symbol kept as the glyph behind
+it); Symbol → `.glyph` + the identity symbol; Emoji → `.glyph` + `iconType .emoji` + the identity
+emoji. Selects it, marks it edited, logs `.tileCreated` with `source: "smart_add"`.
 
 - **`isVisibleInDock = true`** — matches a blank new tile's default so the **Show Tile** switch
   reads on while reviewing. This does **not** pin anything: with no helper bundle on disk the action
