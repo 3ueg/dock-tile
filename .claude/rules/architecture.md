@@ -277,7 +277,9 @@ Popover, Dock Lock) · Dock Tile (About)** — the old accordion `@AppStorage` e
     with window width (measured 2026-10-20).
   - **One edit session**: the edited config lives in `TileEditSession` (an `ObservableObject` holding
     `config`). `DockTileDetailView` observes it and owns the ONLY save path: 300 ms debounce,
-    `onDisappear` flush, `preservingStoredVisibility`, `performDockAction`. The inspector edits
+    `onDisappear` flush, `willTerminate` flush (⌘Q delivers neither the debounce nor `onDisappear`;
+    #30; no unit test reaches it — re-check by stretching the debounce to 5 s, editing, ⌘Q, and
+    reading the config), `preservingStoredVisibility`, `performDockAction`. The inspector edits
     `$session.config` and never saves. `TileEditSessionStore` hands out a fresh session per tile and
     clears it when the selection leaves the tiles.
   - **Presentation** comes from the seam `inspectorIsPresented(stored:selection:)` (stored flag AND a

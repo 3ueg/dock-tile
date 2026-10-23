@@ -55,8 +55,8 @@ struct DockTileDetailView: View {
     /// instead of the full `editedConfig` struct, which avoids O(n * icon_data_size) deep equality
     /// checks on every keystroke. The task cancels/restarts on each increment, providing debounce.
     @State private var saveGeneration: Int = 0
-    /// True from an edit until it is persisted — lets `onDisappear` flush an edit whose debounce
-    /// was cancelled because the view is going away.
+    /// True from an edit until it is persisted — lets `onDisappear` and the quit flush save an edit
+    /// whose debounce was cancelled because the view or the app is going away.
     @State private var hasPendingSave = false
 
     /// Fingerprint of the config content as of the last completed toolbar action (or view load).
@@ -246,13 +246,18 @@ struct DockTileDetailView: View {
         .task(id: saveGeneration) {
             guard hasAppearedOnce, saveGeneration > 0 else { return }
             // A superseded debounce must not save — see SaveDebounce. A view that is going away
-            // flushes through onDisappear instead.
+            // flushes through onDisappear instead, and a quitting app through willTerminate.
             guard await SaveDebounce.waitedFullInterval(nanoseconds: 300_000_000) else { return }
             persistEdits()
         }
         .onDisappear {
             // Leaving within the debounce window (tile switch, a Settings pane) cancels
             // the task above; without this flush the last edit would be lost.
+            if hasPendingSave { persistEdits() }
+        }
+        // Quitting cancels the debounce and delivers no onDisappear, so an edit made in the last
+        // 300 ms was lost (#30). The notification arrives synchronously inside terminate.
+        .onReceive(NotificationCenter.default.publisher(for: NSApplication.willTerminateNotification)) { _ in
             if hasPendingSave { persistEdits() }
         }
         .onAppear {
