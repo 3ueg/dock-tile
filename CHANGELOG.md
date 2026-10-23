@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.5.1] - 2026-10-23
+
+### Changed
+
+- **configure:** Open Customise Tile when you press a tile's Configure button in its Dock popover or choose Configure… from its Dock menu, so you land ready to edit that tile ([0e7d61d](https://github.com/k97/dock-tile/commit/0e7d61d))
+
+### Fixed
+
+- **configure:** Fix a tile's Configure button leaving Dock Tile on a Settings pane instead of showing that tile ([#31](https://github.com/k97/dock-tile/issues/31), [0e7d61d](https://github.com/k97/dock-tile/commit/0e7d61d))
+- **tiles:** Fix the last change to a tile being lost when you quit Dock Tile straight after making it ([#30](https://github.com/k97/dock-tile/issues/30), [9913e3b](https://github.com/k97/dock-tile/commit/9913e3b))
+
 ## [2.5.0] - 2026-10-22
 
 Customise Tile now opens beside Tile Detail instead of replacing it, so every change shows on the
@@ -103,7 +114,8 @@ so every fix below reaches them without any action from you.
 - **customise:** Fix Customise overwriting a tile's Dock visibility with the value from when the editor was opened ([eaa93c6](https://github.com/k97/dock-tile/commit/eaa93c6))
 - **diagnostics:** Fix multi-line entries in Copy Diagnostics surviving the one-hour trim forever ([1e5a6a9](https://github.com/k97/dock-tile/commit/1e5a6a9))
 
-[Unreleased]: https://github.com/k97/dock-tile/compare/v2.5.0...HEAD
+[Unreleased]: https://github.com/k97/dock-tile/compare/v2.5.1...HEAD
+[2.5.1]: https://github.com/k97/dock-tile/compare/v2.5.0...v2.5.1
 [2.5.0]: https://github.com/k97/dock-tile/compare/v2.4.0...v2.5.0
 [2.4.0]: https://github.com/k97/dock-tile/compare/v2.3.1...v2.4.0
 [2.3.1]: https://github.com/k97/dock-tile/compare/v2.3.0...v2.3.1
