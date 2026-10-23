@@ -393,6 +393,14 @@ shipped address (`hello@happymachines.company`) and the exact mailto the button 
 
 Both `StackPopoverView` (grid) and `ListPopoverView` (list) have a gear icon that opens the main app to configure that tile. Posts `.openConfigurator` notification → `HelperAppDelegate` handles routing via `docktile://configure?bundleId=...` deep link. Routes to correct build: DerivedData for dev, `/Applications/` for release.
 
+**The link reveals the tile with Customise open (issue #31)**: `AppDelegate.handleDeepLink` selects
+the tile, then posts `.revealTile`, and `DockTileConfigurationView` sets `selection = .tile(id)` and
+opens the inspector (the stored flag, so it stays open, Xcode-style). Never rely on
+`selectedConfigId`'s `onChange` alone: a Settings pane keeps it on the last tile, so configuring that
+tile wrote an equal value, nothing fired, and the pane stayed up. A URL that arrives before
+`configManager` is set (cold launch) is held in `pendingDeepLink` and replayed by its `didSet`. The
+helper's Dock-menu Configure… uses the same link.
+
 Helper bundles have `CFBundleURLTypes` stripped from Info.plist (prevents helpers from claiming the URL scheme).
 
 ## Popover Item Context Menu (issue #17)

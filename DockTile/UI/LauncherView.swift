@@ -19,6 +19,9 @@ extension Notification.Name {
     /// Posted by the ⌘, menu command to select an inline Settings pane in the main window.
     /// `object` is an optional `SettingsPane` (defaults to `.general`).
     static let openSettingsPane = Notification.Name("openSettingsPane")
+    /// Posted by the `docktile://configure` deep link (a tile's Configure gear) to select that tile
+    /// with Customise open in the main window. `object` is the tile's `UUID`.
+    static let revealTile = Notification.Name("revealTile")
 }
 
 // MARK: - Launcher View (Layout Mode Router)

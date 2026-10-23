@@ -14,7 +14,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     private var floatingPanel: FloatingPanel?
 
     // Configuration manager (set by DockTileApp on launch)
-    var configManager: ConfigurationManager?
+    var configManager: ConfigurationManager? {
+        didSet {
+            guard let url = pendingDeepLink else { return }
+            pendingDeepLink = nil
+            handleDeepLink(url)
+        }
+    }
+
+    /// A deep link that arrived before `configManager` existed: a cold launch can deliver the URL
+    /// before the window's `onAppear` hands the manager over. Replayed when it is set.
+    private var pendingDeepLink: URL?
 
     /// Scene identifier for the single main configuration `Window` (shared with `DockTileApp`
     /// and stamped onto the `NSWindow` by `WindowAccessor` so we can find it again).
@@ -313,24 +323,36 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             return
         }
 
+        guard let configManager else {
+            // The launching window presents itself; the link replays once the manager arrives.
+            pendingDeepLink = url
+            return
+        }
+
+        let selected: Bool
         // Try bundleId first (from helper context menu)
         if let bundleId = queryItems.first(where: { $0.name == "bundleId" })?.value {
             print("   📦 Selecting config by bundle ID: \(bundleId)")
-            configManager?.selectConfiguration(bundleId: bundleId)
-            showConfigurationWindow()
-            return
-        }
-
-        // Try config ID (UUID)
-        if let idString = queryItems.first(where: { $0.name == "id" })?.value,
-           let id = UUID(uuidString: idString) {
+            selected = configManager.selectConfiguration(bundleId: bundleId)
+        } else if let idString = queryItems.first(where: { $0.name == "id" })?.value,
+                  let id = UUID(uuidString: idString) {
+            // Try config ID (UUID)
             print("   🆔 Selecting config by ID: \(idString)")
-            configManager?.selectConfiguration(id: id)
-            showConfigurationWindow()
+            selected = configManager.selectConfiguration(id: id)
+        } else {
+            print("   ⚠️ No valid config identifier in URL")
             return
         }
 
-        print("   ⚠️ No valid config identifier in URL")
+        showConfigurationWindow()
+        // Selecting alone is not enough: a Settings pane keeps `selectedConfigId` on the last tile,
+        // so configuring that tile changed nothing and the pane stayed up (issue #31). Post on the
+        // next turn so a just-recreated window's view is subscribed (as `openSettingsPane` does).
+        if selected, let id = configManager.selectedConfigId {
+            DispatchQueue.main.async {
+                NotificationCenter.default.post(name: .revealTile, object: id)
+            }
+        }
     }
 
     /// Keep helper apps running even when all windows are closed

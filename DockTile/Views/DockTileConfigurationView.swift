@@ -201,6 +201,12 @@ struct DockTileConfigurationView: View {
         .onReceive(NotificationCenter.default.publisher(for: .openSettingsPane)) { note in
             selection = .settings((note.object as? SettingsPane) ?? .general)
         }
+        // A tile's Configure gear lands on that tile with Customise open, from any pane (#31).
+        .onReceive(NotificationCenter.default.publisher(for: .revealTile)) { note in
+            guard let id = note.object as? UUID else { return }
+            selection = .tile(id)
+            if !Self.storedInspectorShown { setInspectorShown(true) }
+        }
         // Non-destructive prompt raised by the launch scan when tiles reference uninstalled apps.
         // "Keep" just dismisses — the rows stay flagged inline so the user can act later.
         .alert(
