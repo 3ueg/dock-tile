@@ -87,6 +87,12 @@ Keep `%@`-style placeholders exactly as they are. `\n` means a line break, `\|` 
 | `label.apps.note.one` | Shows the only app in this tile. | Affiche la seule app de cette tuile. | machine | Customise Tile: Apps caption, one app |
 | `label.apps.shown` | Shown | Affichées | machine | Customise Tile: Apps card row — how many apps the face shows |
 | `label.apps.shownValue` | %1$lld of %2$lld | %1$lld sur %2$lld | machine | Customise Tile: Apps card Shown value, e.g. 9 of 12; %1$lld = shown, %2$lld = total (positional so a language may reorder them) |
+| `label.appsBackground` | Dock Icon Background | Fond de l’icône du Dock | machine | App Grid inspector section for per-tile plate settings |
+| `label.appsBackground.automatic` | Follow System | Suivre le système | machine | App Grid background follows the macOS icon appearance |
+| `label.appsBackground.charcoal` | Dark Grey | Gris foncé | machine | Fixed dark background for an App Grid icon |
+| `label.appsBackground.custom` | Custom Colour | Couleur personnalisée | machine | Native colour picker for an App Grid icon background |
+| `label.appsBackground.hint` | For this tile only. Preview your colour, then click Update to apply it to the Dock. | Pour cette tuile uniquement. Prévisualisez la couleur puis cliquez sur « Mettre à jour » pour l’appliquer dans le Dock. | machine | Explains how per-tile App Grid background edits reach the Dock |
+| `label.appsBackground.light` | Light | Clair | machine | Fixed light background for an App Grid icon |
 | `label.appsFace.accessibility` | Apps face: showing %lld of this tile's apps | Vue des apps : affiche %lld apps de cette tuile | machine | VoiceOver label for a tile preview showing the Apps face; %lld = number of app icons shown |
 | `label.background` | Background | Arrière-plan | machine | Customise Tile: background row label |
 | `label.background.colour` | Colour | Couleur | machine | Customise Tile: Colour background chip |

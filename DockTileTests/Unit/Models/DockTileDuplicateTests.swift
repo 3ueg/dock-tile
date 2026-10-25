@@ -31,6 +31,8 @@ struct DockTileDuplicateTests {
         iconWeight: .bold,
         background: .mono,
         iconFace: .glyph,
+        appsBackground: .custom,
+        appsBackgroundColor: "#224466",
         savedSymbol: SavedGlyph(value: "bolt", scale: 16),
         savedEmoji: SavedGlyph(value: "🍿", scale: 20),
         layoutMode: .list,

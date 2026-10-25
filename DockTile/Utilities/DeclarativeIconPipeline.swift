@@ -9,6 +9,7 @@
 //
 
 import Foundation
+import AppKit
 
 /// THE one availability branch for the declarative icon pipeline. Consulted at exactly three
 /// activation points: helper bundle generation, `IconStyleManager` activation, and
@@ -93,8 +94,8 @@ enum IconDocumentBuilder {
         }
     }
 
-    /// The `icon.json` for an Apps-face tile: the system's glass fill (light / dark; tinted reuses
-    /// the light fill) behind ONE grid layer per appearance slot — Default renders for light, Dark
+    /// The `icon.json` for an Apps-face tile: the selected plate (system, dark, light or a custom
+    /// colour) behind ONE grid layer per appearance slot — Default renders for light, Dark
     /// renders for dark, Clear Dark renders for tinted — so each mini looks like that app's own
     /// icon in each style, not the system's clear filter run over a colour mini.
     ///
@@ -107,7 +108,28 @@ enum IconDocumentBuilder {
     ///
     /// The three-way hiding is built here, not through `LayerSpec.Exclusive`: that two-case model
     /// shows a glyph's light layer in the tinted slot ON PURPOSE, and glyph documents must not change.
-    nonisolated static func appsFaceIconJSON() -> [String: Any] {
+    nonisolated static func appsFaceIconJSON(
+        background: AppsGridBackground = ConfigurationDefaults.appsBackground,
+        customHex: String = ConfigurationDefaults.appsBackgroundColor
+    ) -> [String: Any] {
+        func fill(_ style: IconStyle) -> Any {
+            switch background {
+            case .automatic: return style == .dark ? systemDarkFill : systemLightFill
+            case .charcoal: return systemDarkFill
+            case .light: return systemLightFill
+            case .custom:
+                let rgb = AppsFaceGrid.fillColors(background: background, customHex: customHex, style: style).top
+                // The vendored compiler renders root gradients in Generic RGB even when
+                // their stops say sRGB. Convert to its working space so IconServices returns
+                // the user's chosen sRGB colour; the compiled-icon pixel test guards this.
+                let color = NSColor(srgbRed: rgb.r, green: rgb.g, blue: rgb.b, alpha: 1)
+                    .usingColorSpace(.genericRGB)!
+                let stop = String(format: "srgb:%.5f,%.5f,%.5f,1.00000",
+                                  color.redComponent, color.greenComponent, color.blueComponent)
+                return ["linear-gradient": [stop, stop],
+                        "orientation": ["start": ["x": 0.5, "y": 0], "stop": ["x": 0.5, "y": 1]]]
+            }
+        }
         func gridLayer(_ style: AppIconRenderStyle, name: String, hidden: [[String: Any]]) -> [String: Any] {
             var layer = layerDict(
                 LayerSpec(name: name, imageName: appsFaceImageName(for: style), exclusiveTo: nil), glass: false)
@@ -130,11 +152,11 @@ enum IconDocumentBuilder {
             "layers": layers
         ]
         return [
-            "fill": systemLightFill,
+            "fill": fill(.defaultStyle),
             "fill-specializations": [
-                ["value": systemLightFill],
-                ["appearance": IconAppearance.dark.rawValue, "value": systemDarkFill],
-                ["appearance": IconAppearance.tinted.rawValue, "value": systemLightFill]
+                ["value": fill(.defaultStyle)],
+                ["appearance": IconAppearance.dark.rawValue, "value": fill(.dark)],
+                ["appearance": IconAppearance.tinted.rawValue, "value": fill(.tinted)]
             ],
             "groups": [group],
             "supported-platforms": ["circles": [], "squares": ["macOS"]]

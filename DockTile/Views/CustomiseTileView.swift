@@ -4,7 +4,7 @@
 //
 //  Customise Tile: the 260 pt inspector beside Tile Detail. It opens with the Style picker
 //  (App Grid · Symbol · Emoji); Symbol and Emoji carry the Background, Colour, Icon Size and
-//  picker controls, App Grid has none. Design: docs/design_handoff_customise_tile/.
+//  picker controls; App Grid has a separate Dock background colour picker. Design: docs/design_handoff_customise_tile/.
 //  Swift 6 - Strict Concurrency
 //
 
@@ -123,14 +123,14 @@ struct CustomiseTileView: View {
     }
 
     enum InspectorSection: Equatable {
-        case stylePicker, apps, background, colour, iconSize, iconWeight, picker
+        case stylePicker, apps, appsBackground, background, colour, iconSize, iconWeight, picker
     }
 
-    /// Which inspector groups show, in order. App Grid has no knobs. Mono + Emoji HIDES the
+    /// Which inspector groups show, in order. App Grid has its own plate controls. Mono + Emoji HIDES the
     /// Colour card (an emoji can't take a colour); `tintColor` is kept, so switching back to a
     /// symbol restores it.
     nonisolated static func inspectorSections(face: IconFace, background: TileBackground, iconType: IconType) -> [InspectorSection] {
-        guard face == .glyph else { return [.stylePicker, .apps] }
+        guard face == .glyph else { return [.stylePicker, .apps, .appsBackground] }
         var sections: [InspectorSection] = [.stylePicker, .background]
         if !colourRowState(background: background, iconType: iconType, fillDeepened: false).isDisabled {
             sections.append(.colour)
@@ -222,6 +222,7 @@ struct CustomiseTileView: View {
         return VStack(alignment: .leading, spacing: 16) {
             if sections.contains(.stylePicker) { stylePicker }
             if sections.contains(.apps) { appsSection }
+            if sections.contains(.appsBackground) { appsBackgroundSection }
             if sections.contains(.background) { backgroundSection }
             if sections.contains(.colour) { colourSection }
             if sections.contains(.iconSize) { iconSizeCard(showsWeight: sections.contains(.iconWeight)) }
@@ -302,7 +303,9 @@ struct CustomiseTileView: View {
                     iconWeight: styled.iconWeight,
                     background: styled.background,
                     size: 32,
-                    appsFaceItems: style == .apps ? editedConfig.appItems : nil
+                    appsFaceItems: style == .apps ? editedConfig.appItems : nil,
+                    appsBackground: editedConfig.appsBackground,
+                    appsBackgroundColor: editedConfig.appsBackgroundColor
                 )
                 .iconLift(size: 32)
                 Text(style.label)
@@ -345,14 +348,62 @@ struct CustomiseTileView: View {
             }
             .padding(.horizontal, Self.cardPadding)
             .modifier(InspectorCard())
-            caption(Self.appsCaption(note: summary.note, followsAppearance: monoFollowsAppearance))
+            caption(Self.appsCaption(note: summary.note, followsAppearance:
+                monoFollowsAppearance && editedConfig.appsBackground == .automatic))
         }
     }
 
-    /// The glass sentence promises Light/Dark, so it is shown only where the compiled icon follows
-    /// the appearance (macOS 15's legacy bake is always the light variant).
+    /// The glass sentence applies only when the plate follows the system appearance.
     nonisolated static func appsCaption(note: String, followsAppearance: Bool) -> String {
         followsAppearance ? note + " " + AppStrings.Label.appsGlass : note
+    }
+
+    // MARK: App Grid background
+
+    private var appsBackgroundSection: some View {
+        VStack(alignment: .leading, spacing: Self.headerToCard) {
+            groupHeader(AppStrings.Label.appsBackground)
+            VStack(spacing: 0) {
+                inspectorRow(AppStrings.Label.background) {
+                    Spacer(minLength: 8)
+                    Picker(AppStrings.Label.appsBackground, selection: $editedConfig.appsBackground) {
+                        ForEach(AppsGridBackground.allCases, id: \.self) { option in
+                            Text(option.label).tag(option)
+                        }
+                    }
+                    .labelsHidden()
+                    .pickerStyle(.menu)
+                    .fixedSize()
+                    .accessibilityIdentifier("appsBackgroundMode")
+                }
+                if editedConfig.appsBackground == .custom {
+                    cardHairline
+                    inspectorRow(AppStrings.Label.appsBackgroundCustom) {
+                        Spacer(minLength: 8)
+                        ColorPicker(AppStrings.Label.appsBackgroundCustom, selection: appsBackgroundColorBinding,
+                                    supportsOpacity: false)
+                            .labelsHidden()
+                            .fixedSize()
+                            .accessibilityIdentifier("appsBackgroundColor")
+                    }
+                }
+            }
+            .padding(.horizontal, Self.cardPadding)
+            .modifier(InspectorCard())
+            caption(AppStrings.Label.appsBackgroundHint)
+        }
+    }
+
+    private var appsBackgroundColorBinding: Binding<Color> {
+        Binding {
+            Color(hex: editedConfig.appsBackgroundColor)
+        } set: { color in
+            guard let rgb = NSColor(color).usingColorSpace(.sRGB) else { return }
+            let channels = [rgb.redComponent, rgb.greenComponent, rgb.blueComponent].map {
+                Int((min(1, max(0, $0)) * 255).rounded())
+            }
+            editedConfig.appsBackgroundColor = String(format: "#%02X%02X%02X", channels[0], channels[1], channels[2])
+        }
     }
 
     private func valueRow(_ title: String, value: String) -> some View {

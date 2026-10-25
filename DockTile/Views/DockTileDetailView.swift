@@ -134,6 +134,8 @@ struct DockTileDetailView: View {
         hasher.combine(config.iconWeight)
         hasher.combine(config.background)
         hasher.combine(config.iconFace)
+        hasher.combine(config.appsBackground)
+        hasher.combine(config.appsBackgroundColor)
         hasher.combine(config.layoutMode)
         hasher.combine(config.showInAppSwitcher)
         for item in config.appItems {

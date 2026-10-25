@@ -24,6 +24,8 @@ struct DockTileConfiguration: Identifiable, Codable, Hashable {
     var iconWeight: IconWeight  // v7: SF Symbol stroke weight (ignored for emojis)
     var background: TileBackground  // v9: Colour fill or Mono (white/near-black)
     var iconFace: IconFace  // v10: glyph (symbol/emoji) or the Apps grid
+    var appsBackground: AppsGridBackground
+    var appsBackgroundColor: String
     var savedSymbol: SavedGlyph?  // v11: last symbol + size, restored when the Symbol style is picked again
     var savedEmoji: SavedGlyph?  // v11: last emoji + size, restored when the Emoji style is picked again
     var layoutMode: LayoutMode
@@ -57,7 +59,11 @@ struct DockTileConfiguration: Identifiable, Codable, Hashable {
         }
         let base = [tint, iconType.rawValue, iconValue, String(iconScale), iconWeight.rawValue, background.rawValue]
             .joined(separator: "|")
-        return iconFace == .glyph ? base : base + "|apps|" + appsFaceIdentities.joined(separator: ",")
+        guard iconFace == .apps else { return base }
+        if appsBackground == .automatic { return base + "|apps|" + appsFaceIdentities.joined(separator: ",") }
+        let plate = ["background-v2", appsBackground.rawValue,
+                     appsBackground == .custom ? appsBackgroundColor : ""].joined(separator: "|")
+        return base + "|apps|" + plate + "|" + appsFaceIdentities.joined(separator: ",")
     }
 
     /// Fingerprint of everything the tile's helper shows — its icon, name, popover layout, app list
@@ -96,6 +102,8 @@ struct DockTileConfiguration: Identifiable, Codable, Hashable {
             iconWeight: iconWeight,
             background: background,
             iconFace: iconFace,
+            appsBackground: appsBackground,
+            appsBackgroundColor: appsBackgroundColor,
             savedSymbol: savedSymbol,
             savedEmoji: savedEmoji,
             layoutMode: layoutMode,
@@ -118,6 +126,8 @@ struct DockTileConfiguration: Identifiable, Codable, Hashable {
         iconWeight: IconWeight = ConfigurationDefaults.iconWeight,
         background: TileBackground = ConfigurationDefaults.background,
         iconFace: IconFace = ConfigurationDefaults.iconFace,
+        appsBackground: AppsGridBackground = ConfigurationDefaults.appsBackground,
+        appsBackgroundColor: String = ConfigurationDefaults.appsBackgroundColor,
         savedSymbol: SavedGlyph? = nil,
         savedEmoji: SavedGlyph? = nil,
         layoutMode: LayoutMode = ConfigurationDefaults.layoutMode,
@@ -138,6 +148,8 @@ struct DockTileConfiguration: Identifiable, Codable, Hashable {
         self.iconWeight = iconWeight
         self.background = background
         self.iconFace = iconFace
+        self.appsBackground = appsBackground
+        self.appsBackgroundColor = appsBackgroundColor
         self.savedSymbol = savedSymbol
         self.savedEmoji = savedEmoji
         self.layoutMode = layoutMode
@@ -195,6 +207,11 @@ struct DockTileConfiguration: Identifiable, Codable, Hashable {
         // ConfigurationDefaults.iconFace (.apps, for NEW tiles): existing tiles must not change on upgrade.
         iconFace = try container.decodeIfPresent(IconFace.self, forKey: .iconFace) ?? .glyph
 
+        appsBackground = try container.decodeIfPresent(AppsGridBackground.self, forKey: .appsBackground)
+            ?? ConfigurationDefaults.appsBackground
+        appsBackgroundColor = try container.decodeIfPresent(String.self, forKey: .appsBackgroundColor)
+            ?? ConfigurationDefaults.appsBackgroundColor
+
         // v11 fields - per-type glyph memory (old configs have none saved)
         savedSymbol = try container.decodeIfPresent(SavedGlyph.self, forKey: .savedSymbol)
         savedEmoji = try container.decodeIfPresent(SavedGlyph.self, forKey: .savedEmoji)
@@ -209,6 +226,7 @@ struct DockTileConfiguration: Identifiable, Codable, Hashable {
     // MARK: - Coding Keys
 
     private enum CodingKeys: String, CodingKey {
+        case appsBackground, appsBackgroundColor
         // v1 fields
         case id, name, tintColor, symbolEmoji, layoutMode, appItems
         case isVisibleInDock, bundleIdentifier
@@ -704,5 +722,25 @@ enum AppListEditor {
         var out = items
         out.move(fromOffsets: IndexSet(integer: from), toOffset: to > from ? to + 1 : to)
         return out
+    }
+}
+
+
+/// App-grid plate settings are independent of the Symbol/Emoji face's tint and background.
+enum AppsGridBackground: String, Codable, CaseIterable, Sendable {
+    case automatic, charcoal, light, custom
+
+    init(from decoder: Decoder) throws {
+        let value = try decoder.singleValueContainer().decode(String.self)
+        self = Self(rawValue: value) ?? .automatic
+    }
+
+    var label: String {
+        switch self {
+        case .automatic: AppStrings.Label.appsBackgroundAutomatic
+        case .charcoal: AppStrings.Label.appsBackgroundCharcoal
+        case .light: AppStrings.Label.appsBackgroundLight
+        case .custom: AppStrings.Label.appsBackgroundCustom
+        }
     }
 }

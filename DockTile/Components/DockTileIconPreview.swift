@@ -41,6 +41,8 @@ struct DockTileIconPreview: View {
     /// The App Grid face's items; nil draws the glyph face, an empty array the empty App Grid.
     /// Only installed ones draw; none installed shows the empty grid too.
     let appsFaceItems: [AppItem]?
+    let appsBackground: AppsGridBackground
+    let appsBackgroundColor: String
 
     @Environment(\.displayScale) private var displayScale
 
@@ -85,6 +87,8 @@ struct DockTileIconPreview: View {
         self.tileBackground = .colour
         self.size = size
         self.appsFaceItems = nil
+        self.appsBackground = ConfigurationDefaults.appsBackground
+        self.appsBackgroundColor = ConfigurationDefaults.appsBackgroundColor
     }
 
     // New initializer with explicit icon type (legacy without scale)
@@ -97,6 +101,8 @@ struct DockTileIconPreview: View {
         self.tileBackground = .colour
         self.size = size
         self.appsFaceItems = nil
+        self.appsBackground = ConfigurationDefaults.appsBackground
+        self.appsBackgroundColor = ConfigurationDefaults.appsBackgroundColor
     }
 
     // Full initializer with icon scale and weight
@@ -108,7 +114,9 @@ struct DockTileIconPreview: View {
         iconWeight: IconWeight = ConfigurationDefaults.iconWeight,
         background: TileBackground,
         size: CGFloat,
-        appsFaceItems: [AppItem]? = nil
+        appsFaceItems: [AppItem]? = nil,
+        appsBackground: AppsGridBackground = ConfigurationDefaults.appsBackground,
+        appsBackgroundColor: String = ConfigurationDefaults.appsBackgroundColor
     ) {
         self.tintColor = tintColor
         self.iconType = iconType
@@ -118,6 +126,8 @@ struct DockTileIconPreview: View {
         self.tileBackground = background
         self.size = size
         self.appsFaceItems = appsFaceItems
+        self.appsBackground = appsBackground
+        self.appsBackgroundColor = appsBackgroundColor
     }
 
     /// Side of the drawn squircle — the FULL canvas, not the icon-grid-margined shape the
@@ -204,12 +214,12 @@ struct DockTileIconPreview: View {
         }
     }
 
-    /// The Apps face: the app grid on the system glass grays. Light/Dark keys on `iconStyle`
-    /// (`IconStyle.forDisplay`, like Mono), never raw `colorScheme`. The full frame is the shape
+    /// The Apps face: a charcoal background for Default/Dark, and light glass for Clear/Tinted.
+    /// Uses `IconStyle.forDisplay`, never raw `colorScheme`. The full frame is the shape
     /// (UI slots apply no icon-grid inset). Minis are `TileIconRasterCache` bitmaps, never the
-    /// IconServices `NSImage`. The gray pair is the compiler's resolution of the system fills.
+    /// IconServices `NSImage`. The gray pairs match the declarative document fills.
     private func appsFaceBody(_ minis: [AppItem]) -> some View {
-        let grays = AppsFaceGrid.fillGrays(style: iconStyle)
+        let colors = AppsFaceGrid.fillColors(background: appsBackground, customHex: appsBackgroundColor, style: iconStyle)
         let desaturate = AppsFaceGrid.desaturatesMinis(style: iconStyle)
         let shadow = AppsFaceGrid.miniShadow(nominalSize: size)
         let frame = CGRect(x: 0, y: 0, width: size, height: size)
@@ -218,10 +228,12 @@ struct DockTileIconPreview: View {
         return ZStack {
             RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
                 .fill(LinearGradient(
-                    colors: [Color(white: grays.top), Color(white: grays.bottom)],
+                    colors: [Color(.sRGB, red: colors.top.r, green: colors.top.g, blue: colors.top.b),
+                             Color(.sRGB, red: colors.bottom.r, green: colors.bottom.g, blue: colors.bottom.b)],
                     startPoint: .top, endPoint: .bottom))
             if minis.isEmpty {
-                let slot = AppsFaceGrid.emptySlotFill(onDarkGlass: grays.top < 0.5)
+                let slot = AppsFaceGrid.emptySlotFill(onDarkGlass: AppsFaceGrid.usesDarkPlate(
+                    background: appsBackground, customHex: appsBackgroundColor, style: iconStyle))
                 ForEach(Array(AppsFaceGrid.cells(count: AppsFaceGrid.emptySlotCount).enumerated()), id: \.offset) { _, cell in
                     let box = AppsFaceGrid.rect(cell, in: frame, yUp: false)
                     RoundedRectangle(cornerRadius: box.width * AppsFaceGrid.slotCornerRatio, style: .continuous)
@@ -436,7 +448,9 @@ extension DockTileIconPreview {
             iconWeight: config.iconWeight,
             background: config.background,
             size: size,
-            appsFaceItems: config.iconFace == .apps ? config.appItems : nil
+            appsFaceItems: config.iconFace == .apps ? config.appItems : nil,
+            appsBackground: config.appsBackground,
+            appsBackgroundColor: config.appsBackgroundColor
         )
     }
 }

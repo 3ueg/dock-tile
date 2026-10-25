@@ -890,16 +890,20 @@ final class HelperBundleManager {
                     fallbacks += styled.fallbacks
                     if style == .standard { standardMinis = styled.minis }
                     layerPNGs[IconDocumentBuilder.appsFaceImageName(for: style)] =
-                        try IconGenerator.generateAppsLayerPNG(minis: styled.minis, onDarkGlass: style != .standard)
+                        try IconGenerator.generateAppsLayerPNG(minis: styled.minis, onDarkGlass: AppsFaceGrid.usesDarkPlate(
+                            background: config.appsBackground, customHex: config.appsBackgroundColor,
+                            style: style == .standard ? .defaultStyle : (style == .dark ? .dark : .tinted)))
                 }
                 if fallbacks > 0 {
                     DiagnosticsLog.shared.log("tile", "Apps face for \(config.diagnosticName): \(fallbacks) styled render(s) unavailable — used the current-style icon")
                 }
                 try await installCompiledIcon(
-                    json: IconDocumentBuilder.appsFaceIconJSON(), layerPNGs: layerPNGs, resourcesPath: resourcesPath)
+                    json: IconDocumentBuilder.appsFaceIconJSON(
+                        background: config.appsBackground, customHex: config.appsBackgroundColor), layerPNGs: layerPNGs, resourcesPath: resourcesPath)
                 try IconGenerator.generateAppsFallbackIcns(
                     minis: standardMinis,
-                    outputURL: resourcesPath.appendingPathComponent("AppIcon.icns")
+                    outputURL: resourcesPath.appendingPathComponent("AppIcon.icns"),
+                    background: config.appsBackground, customHex: config.appsBackgroundColor
                 )
                 print("   ✓ Compiled Apps-face icon (Assets.car + fallback AppIcon.icns)")
             } else {
@@ -908,7 +912,8 @@ final class HelperBundleManager {
                     try IconGenerator.generateAppsIcns(
                         minis: minis,
                         outputURL: iconPath(for: style, in: resourcesPath),
-                        iconStyle: style
+                        iconStyle: style,
+                        background: config.appsBackground, customHex: config.appsBackgroundColor
                     )
                     print("   ✓ Generated \(style.rawValue) style Apps-face icon")
                 }

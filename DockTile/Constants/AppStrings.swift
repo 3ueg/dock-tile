@@ -393,6 +393,36 @@ enum AppStrings {
             value: "App Grid",
             comment: "Customise Tile: Style picker card for the Apps face"
         )
+        static let appsBackground = NSLocalizedString(
+            "label.appsBackground",
+            value: "Dock Icon Background",
+            comment: "App Grid inspector section for per-tile plate settings"
+        )
+        static let appsBackgroundAutomatic = NSLocalizedString(
+            "label.appsBackground.automatic",
+            value: "Follow System",
+            comment: "App Grid background follows the macOS icon appearance"
+        )
+        static let appsBackgroundCharcoal = NSLocalizedString(
+            "label.appsBackground.charcoal",
+            value: "Dark Grey",
+            comment: "Fixed dark background for an App Grid icon"
+        )
+        static let appsBackgroundLight = NSLocalizedString(
+            "label.appsBackground.light",
+            value: "Light",
+            comment: "Fixed light background for an App Grid icon"
+        )
+        static let appsBackgroundCustom = NSLocalizedString(
+            "label.appsBackground.custom",
+            value: "Custom Colour",
+            comment: "Native colour picker for an App Grid icon background"
+        )
+        static let appsBackgroundHint = NSLocalizedString(
+            "label.appsBackground.hint",
+            value: "For this tile only. Preview your colour, then click Update to apply it to the Dock.",
+            comment: "Explains how per-tile App Grid background edits reach the Dock"
+        )
         static let appsHeader = NSLocalizedString(
             "label.apps.header",
             value: "Apps",

@@ -378,6 +378,23 @@ enum AppsFaceGrid {
         style == .dark ? darkGrays : lightGrays
     }
 
+    static func fillColors(background: AppsGridBackground, customHex: String, style: IconStyle)
+        -> (top: SRGB, bottom: SRGB) {
+        if background == .custom {
+            let color = SRGB(hex: customHex) ?? SRGB(hex: ConfigurationDefaults.appsBackgroundColor)!
+            return (color, color)
+        }
+        let grays = background == .charcoal ? darkGrays
+            : background == .light ? lightGrays : fillGrays(style: style)
+        return (SRGB(r: Double(grays.top), g: Double(grays.top), b: Double(grays.top)),
+                SRGB(r: Double(grays.bottom), g: Double(grays.bottom), b: Double(grays.bottom)))
+    }
+
+    static func usesDarkPlate(background: AppsGridBackground, customHex: String, style: IconStyle) -> Bool {
+        let c = fillColors(background: background, customHex: customHex, style: style).top
+        return c.r * 0.2126 + c.g * 0.7152 + c.b * 0.0722 < 0.5
+    }
+
     /// An App Grid with no (installed) apps shows the empty 2x2: four quiet slots in the 2x2 cells,
     /// the app-icon shape (continuous corners, 22.5% of the cell), a faint darker well on light glass
     /// and a faint lighter one on dark glass — no stroke, no shadow, no text (owner, 2026-10-22: an

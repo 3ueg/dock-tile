@@ -1335,7 +1335,9 @@ extension IconGenerator {
     /// compiled icon. The grays are the vendored compiler's resolution of `system-light` /
     /// `system-dark` (`AppsFaceGrid.fillGrays`), so the bake, the preview and the compiled icon
     /// agree. Clear/Tinted minis are desaturated to keep the legacy path's grayscale promise.
-    static func appsIcon(minis: [AppsFaceMini], size: CGSize, iconStyle: IconStyle) -> NSImage {
+    static func appsIcon(minis: [AppsFaceMini], size: CGSize, iconStyle: IconStyle,
+                         background: AppsGridBackground = ConfigurationDefaults.appsBackground,
+                         customHex: String = ConfigurationDefaults.appsBackgroundColor) -> NSImage {
         guard let bitmapRep = NSBitmapImageRep(
             bitmapDataPlanes: nil,
             pixelsWide: Int(size.width),
@@ -1361,17 +1363,17 @@ extension IconGenerator {
         let inset = size.width * IconDepthMetrics.contentInsetRatio
         let shape = rect.insetBy(dx: inset, dy: inset)
         let path = createSquirclePath(in: shape, cornerRadius: shape.width * 0.225)
-        let grays = AppsFaceGrid.fillGrays(style: iconStyle)
+        let colors = AppsFaceGrid.fillColors(background: background, customHex: customHex, style: iconStyle)
         drawGradient(
             context: context,
             path: path,
-            topColor: NSColor(white: grays.top, alpha: 1),
-            bottomColor: NSColor(white: grays.bottom, alpha: 1),
+            topColor: NSColor(srgbRed: colors.top.r, green: colors.top.g, blue: colors.top.b, alpha: 1),
+            bottomColor: NSColor(srgbRed: colors.bottom.r, green: colors.bottom.g, blue: colors.bottom.b, alpha: 1),
             rect: shape
         )
         drawAppsGrid(minis: minis, shape: shape, nominalSize: size.width,
                      desaturate: AppsFaceGrid.desaturatesMinis(style: iconStyle),
-                     onDarkGlass: grays.top < 0.5, in: context)
+                     onDarkGlass: AppsFaceGrid.usesDarkPlate(background: background, customHex: customHex, style: iconStyle), in: context)
         NSGraphicsContext.restoreGraphicsState()
 
         let image = NSImage(size: size)
@@ -1380,13 +1382,17 @@ extension IconGenerator {
     }
 
     /// The Apps face as the macOS 26 fallback `.icns` (light composition).
-    static func generateAppsFallbackIcns(minis: [AppsFaceMini], outputURL: URL) throws {
-        try buildIcns(outputURL: outputURL) { appsIcon(minis: minis, size: $0, iconStyle: .defaultStyle) }
+    static func generateAppsFallbackIcns(minis: [AppsFaceMini], outputURL: URL,
+                                         background: AppsGridBackground = ConfigurationDefaults.appsBackground,
+                                         customHex: String = ConfigurationDefaults.appsBackgroundColor) throws {
+        try buildIcns(outputURL: outputURL) { appsIcon(minis: minis, size: $0, iconStyle: .defaultStyle, background: background, customHex: customHex) }
     }
 
     /// One Apps-face style variant `.icns` for the macOS 15 four-variant bake.
-    static func generateAppsIcns(minis: [AppsFaceMini], outputURL: URL, iconStyle: IconStyle) throws {
-        try buildIcns(outputURL: outputURL) { appsIcon(minis: minis, size: $0, iconStyle: iconStyle) }
+    static func generateAppsIcns(minis: [AppsFaceMini], outputURL: URL, iconStyle: IconStyle,
+                                 background: AppsGridBackground = ConfigurationDefaults.appsBackground,
+                                 customHex: String = ConfigurationDefaults.appsBackgroundColor) throws {
+        try buildIcns(outputURL: outputURL) { appsIcon(minis: minis, size: $0, iconStyle: iconStyle, background: background, customHex: customHex) }
     }
 
     /// Grayscale copy via `CIColorControls` (saturation 0), rendered into an explicit-pixel

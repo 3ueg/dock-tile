@@ -134,11 +134,11 @@ struct CustomiseStyleTests {
                 == S(shown: "0 of 0", arrangement: "—", note: "No apps yet — use Add under In This Tile."))
     }
 
-    @Test("inspectorSections: App Preview has no knobs; Symbol/Emoji re-house today's controls")
+    @Test("inspectorSections: App Grid exposes its background; Symbol/Emoji re-house today's controls")
     func inspectorSections() {
         typealias I = CustomiseTileView.InspectorSection
         for background in TileBackground.allCases { for type in [IconType.sfSymbol, .emoji] {
-            #expect(CustomiseTileView.inspectorSections(face: .apps, background: background, iconType: type) == [.stylePicker, .apps])
+            #expect(CustomiseTileView.inspectorSections(face: .apps, background: background, iconType: type) == [.stylePicker, .apps, .appsBackground])
         } }
         #expect(CustomiseTileView.inspectorSections(face: .glyph, background: .colour, iconType: .sfSymbol)
                 == [I.stylePicker, .background, .colour, .iconSize, .iconWeight, .picker])
